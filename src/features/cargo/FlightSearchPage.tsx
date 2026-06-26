@@ -59,6 +59,17 @@ function CheckboxMark({ checked, mixed = false }: { checked: boolean; mixed?: bo
   );
 }
 
+function FlightRoute({ route, className = "" }: { route: string; className?: string }) {
+  const [from = "", to = ""] = route.split("›").map((part) => part.trim());
+  return (
+    <span className={`flight-route ${className}`.trim()}>
+      <span>{from}</span>
+      <Icon icon="flight" size={18} fill className="route-plane" />
+      <span>{to}</span>
+    </span>
+  );
+}
+
 const flights = [
   { code: "TK2070", route: "IST  ›  AMS", time: "14:30", state: "FO", tone: "green", gate: "32", boardingTime: "17:00", arrivalTime: "20:30", seats: "100", regNo: "GRDE6/ N63", announceTime: "17:30" },
   { code: "TK0706", route: "IST  ›  KBL", time: "15:20/15:55", state: "FO", tone: "green", gate: "18", boardingTime: "16:10", arrivalTime: "22:15", seats: "86", regNo: "TC-LAM / A321", announceTime: "16:40" },
@@ -154,7 +165,7 @@ function FlightList({ selected, onSelect }: { selected: number; onSelect: (index
         {flights.map((flight, index) => (
           <button key={flight.code} className={`flight-item ${selected === index ? "selected" : ""}`} onClick={() => onSelect(index)}>
             <span className="flight-line"><b>{flight.code}</b><em className={flight.tone}>{flight.state}</em></span>
-            <span className="flight-line"><span>{flight.route}</span><time className={index === 1 ? "delayed" : ""}>{flight.time}</time></span>
+            <span className="flight-line"><FlightRoute route={flight.route} /><time className={index === 1 ? "delayed" : ""}>{flight.time}</time></span>
           </button>
         ))}
       </div>
@@ -170,8 +181,7 @@ function FlightOverview({ flight }: { flight: typeof flights[number] }) {
           <Icon icon="flight" size={25} fill />
           <strong>{flight.code}</strong>
           <span>19 FEB <b>{flight.time}</b> /14:45</span>
-          <Icon icon="flight" size={21} fill className="blue" />
-          <strong className="overview-route">{flight.route}</strong>
+          <FlightRoute route={flight.route} className="overview-route blue" />
           <em>Flight Open</em>
         </div>
         <button aria-label="Uçuş seçenekleri"><Icon icon="more_horiz" size={23} /></button>
