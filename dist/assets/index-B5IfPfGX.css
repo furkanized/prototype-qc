@@ -126,7 +126,80 @@ button:focus-visible,input:focus-visible { outline:2px solid #3b82f6; outline-of
 
 @media(prefers-reduced-motion:reduce){.qc-app,.seat-map,.seat-title,.seat-map-content,.seat{transition:none}.pool-processing-icon .qc-icon{animation:none}}
 
-.checkbox{position:relative;width:20px;height:20px;display:grid;place-items:center;border:2px solid var(--border-sub-base,#caced8);border-radius:6px;background:var(--static-light,#fff);color:#fff;box-sizing:border-box}.checkbox.checked,.checkbox.mixed{border-color:var(--states-info-light,#c9dcff);background:var(--static-light,#fff)}.checkbox-core{position:absolute;inset:2px;width:auto;height:auto;display:grid;place-items:center;border:0;border-radius:3px;background:var(--states-info-base,#4587ff);color:#fff;box-sizing:border-box;overflow:hidden}.checkbox-core.mixed{background:var(--static-light,#fff);border:0}.checkbox-core.mixed span{width:8px;height:2px;border-radius:99px;background:var(--states-info-base,#4587ff)}.checkbox .qc-icon{display:block;color:#fff;font-size:12px;line-height:1;transform:none}.check-button{width:44px;height:24px;display:grid;place-items:center;border:0;background:transparent;padding:0 0 0 24px}.header-check{width:20px;height:20px;padding:0}.checkin-card-checkbox .checkbox,.pool-card-checkbox .checkbox,.check-button .checkbox{width:20px;height:20px}.pool-card-checkbox,.checkin-card-checkbox{display:grid;place-items:center}.pool-passenger-card.selectable{cursor:pointer}.pool-passenger-card.selectable:focus-visible{outline:2px solid #3d82ef;outline-offset:2px}.pool-passenger-card.review .pool-avatar-button{pointer-events:none}.pool-passenger-card.review .pool-card-checkbox{pointer-events:none}.overview-title .overview-route{font-size:25px;font-weight:500;letter-spacing:-.01em}.overview-title .blue{color:#3178e8}.pool-payment-sign{flex:0 0 auto}.pool-payment-card{padding:16px}.pool-payment-row{gap:10px}.pool-payment-copy{gap:12px}.pool-payment-copy strong{font-size:14px;line-height:20px}.pool-payment-copy span{font-size:12px;line-height:18px}.pool-pay-button{height:32px;padding:0 16px;font-size:13px}.pool-payment-success{padding:16px}.pool-payment-undo{height:32px}.pool-bag-helper .pool-bag-tooltip{left:50%;transform:translateX(-50%) translateY(-4px)}.pool-bag-tooltip{min-width:189px;max-width:189px}.pool-bag-tooltip-icon{width:20px;height:20px;border-radius:6px}.pool-bag-tooltip strong{font-size:14px;line-height:20px}.pool-bag-tooltip span{font-size:12px;line-height:18px}
+.checkbox{position:relative;width:20px;height:20px;display:grid;place-items:center;border:2px solid var(--border-sub-base,#caced8);border-radius:6px;background:var(--static-light,#fff);color:#fff;box-sizing:border-box}.checkbox.checked,.checkbox.mixed{border-color:var(--states-info-light,#c9dcff);background:var(--static-light,#fff)}.checkbox-core{position:absolute;inset:2px;width:auto;height:auto;display:grid;place-items:center;border:0;border-radius:3px;background:var(--states-info-base,#4587ff);color:#fff;box-sizing:border-box;overflow:hidden}.checkbox-core.mixed{background:var(--static-light,#fff);border:0}.checkbox-core.mixed span{width:8px;height:2px;border-radius:99px;background:var(--states-info-base,#4587ff)}.checkbox .qc-icon{display:block;color:#fff;font-size:12px;line-height:1;transform:none}.check-button{width:44px;height:24px;display:grid;place-items:center;border:0;background:transparent;padding:0 0 0 24px}.header-check{width:20px;height:20px;padding:0}.checkin-card-checkbox .checkbox,.pool-card-checkbox .checkbox,.check-button .checkbox{width:20px;height:20px}.pool-card-checkbox,.checkin-card-checkbox{display:grid;place-items:center}.pool-passenger-card.selectable{cursor:pointer}.pool-passenger-card.selectable:focus-visible{outline:2px solid #3d82ef;outline-offset:2px}.pool-passenger-card.review .pool-avatar-button{pointer-events:none}.pool-passenger-card.review .pool-card-checkbox{pointer-events:none}.overview-title .overview-route{font-size:25px;font-weight:500;letter-spacing:-.01em}.overview-title .blue{color:#3178e8}.flight-route{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;color:#222530}.flight-route.blue{color:#222530;font-weight:500}.route-plane{color:#3178e8;transform:rotate(90deg);transform-origin:center}.pool-payment-sign{flex:0 0 auto}.pool-payment-card{padding:16px}.pool-payment-row{gap:10px}.pool-payment-copy{gap:12px}.pool-payment-copy strong{font-size:14px;line-height:20px}.pool-payment-copy span{font-size:12px;line-height:18px}.pool-pay-button{height:32px;padding:0 16px;font-size:13px}.pool-payment-success{padding:16px}.pool-payment-undo{height:32px}.pool-bag-helper .pool-bag-tooltip{left:50%;transform:translateX(-50%) translateY(-4px)}.pool-bag-tooltip{min-width:189px;max-width:189px}.pool-bag-tooltip-icon{width:20px;height:20px;border-radius:6px}.pool-bag-tooltip strong{font-size:14px;line-height:20px}.pool-bag-tooltip span{font-size:12px;line-height:18px}
+
+
+@media (max-height: 900px), (max-width: 1440px) {
+  html,body{min-width:1180px}
+  .qc-app{grid-template-columns:56px 180px minmax(0,1fr) 360px;grid-template-rows:64px minmax(0,calc(100dvh - 64px));min-height:100dvh;overflow:hidden}
+  .qc-app.seatmap-collapsed{grid-template-columns:56px 180px minmax(0,1fr) 96px}
+  .qc-topbar{height:64px;padding:0 24px;gap:6px}
+  .qc-logo{width:86px}
+  .product-switch{width:164px;height:36px;font-size:12px}
+  .quick-search{width:330px;height:36px}
+  .app-rail{padding-top:28px}
+  .rail-collapse{width:32px;height:32px}
+  .rail-caption{margin-top:12px}
+  .rail-code{margin-top:14px}
+  .rail-tile{margin-top:14px;width:32px;height:32px}
+  .rail-label{margin-top:24px}
+  .plane-button{width:36px;height:38px}
+  .flight-title{height:54px}
+  .flight-title h2{font-size:20px}
+  .date-picker{height:28px}
+  .terminal-select{height:30px}
+  .flight-search{height:34px;margin-bottom:4px}
+  .flight-item{height:51px;font-size:11px}
+  .workspace{padding:12px;overflow:hidden}
+  .flight-overview{height:178px;padding:14px 14px 10px;border-radius:14px}
+  .overview-title{gap:6px}
+  .overview-title>strong,.overview-title .overview-route{font-size:19px}
+  .overview-title>span{font-size:15px}
+  .overview-title em{padding:4px 8px;font-size:11px;white-space:nowrap}
+  .cabin-counts{height:30px;gap:24px;font-size:11px}
+  .passenger-progress{height:28px;font-size:11px}
+  .flight-facts{gap:14px;padding-top:14px}
+  .flight-facts small{font-size:10px}
+  .flight-facts b{font-size:12px}
+  .passenger-panel{height:calc(100% - 210px);min-height:0;margin-top:32px;border-radius:14px 14px 0 0}
+  .passenger-toolbar{height:54px;padding-inline:14px}
+  .passenger-toolbar h2{font-size:17px}
+  .table-tools>button,.passenger-search{height:34px;font-size:12px}
+  .passenger-search{width:118px}
+  .table-shell{margin:10px}
+  .table-head{height:50px;font-size:10px}
+  .table-head>span{padding-left:6px}
+  .passenger-row{height:64px;font-size:10px}
+  .passenger-row>span{padding-left:6px}
+  .avatar{width:24px;height:24px}
+  .quick-actions{gap:3px}
+  .quick-actions button{height:23px;padding:0 5px;font-size:9px}
+  .tier{min-width:50px;padding:3px 6px;font-size:10px}
+  .seat-map{padding:14px 18px 0;overflow:auto}
+  .seat-title{height:38px;min-width:312px}
+  .seat-title h2{font-size:21px}
+  .seat-tools{height:36px;grid-template-columns:142px 74px 78px}
+  .seat-tools button{height:30px;font-size:11px}
+  .seat-row,.seat-row-type1,.seat-row-type2{transform:scale(.86);transform-origin:center top}
+  .checkin-popup,.pool-popup{right:16px;bottom:16px;width:min(518px,calc(100vw - 32px));max-height:calc(100dvh - 32px)}
+  .checkin-popup{height:min(885px,calc(100dvh - 32px))}
+  .checkin-popup-header,.pool-popup-header{height:64px;padding:10px 14px}
+  .checkin-popup-header h2,.pool-popup-header h2{font-size:20px;line-height:26px}
+  .checkin-popup-body,.pool-popup-body{padding:14px;gap:14px;overflow:auto;min-height:0}
+  .checkin-summary div{height:72px}
+  .checkin-summary strong{font-size:20px;line-height:28px}
+  .checkin-summary span{font-size:12px;line-height:16px}
+  .checkin-passenger-card{height:68px;padding:10px}
+  .checkin-popup-footer,.pool-popup-footer{height:60px;padding:10px 14px;flex:0 0 auto}
+  .pool-section h3{font-size:16px;line-height:22px}
+  .pool-passenger-card{min-height:56px;padding:10px}
+  .pool-combined-card{gap:9px;padding:10px}
+  .pool-combined-total span{font-size:26px;line-height:30px}
+  .pool-processing{height:300px}
+  .passenger-selection-bar{left:252px;bottom:16px;width:min(980px,calc(100vw - 292px));height:52px;gap:12px;border-radius:12px}
+  .selection-chip{height:36px}
+  .selection-button{height:36px;font-size:12px}
+}
 
 @font-face{font-family:"Material Symbols Outlined";src:url("/assets/Material-Symbols-Outlined-CmCr2Oi9.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap}
 .material-symbols-outlined{font-family:"Material Symbols Outlined";font-weight:normal;font-style:normal;font-size:24px;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;word-wrap:normal;direction:ltr;-webkit-font-feature-settings:"liga";-webkit-font-smoothing:antialiased}
