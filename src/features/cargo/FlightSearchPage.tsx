@@ -1,9 +1,17 @@
-import { createElement, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createElement, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { defineCustomElement as defineTkIcon } from "@takeoff-ui/core/components/tk-icon.js";
+import { defineCustomElement as defineTkButton } from "@takeoff-ui/core/components/tk-button.js";
+import { defineCustomElement as defineTkInput } from "@takeoff-ui/core/components/tk-input.js";
+import { defineCustomElement as defineTkCheckbox } from "@takeoff-ui/core/components/tk-checkbox.js";
+import { defineCustomElement as defineTkSpinner } from "@takeoff-ui/core/components/tk-spinner.js";
 import qcMark from "../../assets/qc-mark.svg";
 import qcText from "../../assets/qc-text.svg";
 
 defineTkIcon();
+defineTkButton();
+defineTkInput();
+defineTkCheckbox();
+defineTkSpinner();
 
 function Icon({
   icon,
@@ -40,6 +48,89 @@ function Icon({
   }
 
   return createElement("tk-icon", props);
+}
+
+
+type TkButtonProps = {
+  label: string;
+  variant?: "primary" | "secondary" | "neutral" | "info" | "success" | "danger" | "warning" | "white" | "black";
+  type?: "filled" | "filledLight" | "outlined" | "text";
+  size?: "small" | "base" | "large";
+  icon?: string;
+  iconPosition?: "left" | "right";
+  fullWidth?: boolean;
+  disabled?: boolean;
+  className?: string;
+  onClick?: () => void;
+};
+
+function TkButton({ label, variant = "primary", type = "filled", size = "base", icon, iconPosition = "left", fullWidth = false, disabled = false, className = "", onClick }: TkButtonProps) {
+  const buttonRef = useRef<HTMLElement | null>(null);
+  const lastClickAt = useRef(0);
+
+  const triggerClick = () => {
+    const now = Date.now();
+    if (now - lastClickAt.current < 80) return;
+    lastClickAt.current = now;
+    onClick?.();
+  };
+
+  useEffect(() => {
+    const button = buttonRef.current;
+    if (!button || !onClick) return;
+    button.addEventListener("tk-click", triggerClick);
+    return () => button.removeEventListener("tk-click", triggerClick);
+  }, [onClick]);
+
+  return createElement("tk-button", {
+    ref: buttonRef,
+    label,
+    variant,
+    type,
+    size,
+    icon,
+    iconPosition,
+    fullWidth,
+    disabled,
+    className,
+    onClick: triggerClick,
+  });
+}
+
+function TkInput({ label, placeholder, value, readonly = false, icon, iconPosition = "left", showAsterisk = false, className = "", ariaLabel }: { label: string; placeholder?: string; value?: string; readonly?: boolean; icon?: string; iconPosition?: "left" | "right"; showAsterisk?: boolean; className?: string; ariaLabel?: string }) {
+  return createElement("tk-input", {
+    label,
+    placeholder,
+    value,
+    readonly,
+    icon,
+    iconPosition,
+    showAsterisk,
+    size: "base",
+    className,
+    "aria-label": ariaLabel ?? label,
+  });
+}
+
+function TkCheckboxMark({ checked, label }: { checked: boolean; label: string }) {
+  return createElement("tk-checkbox", {
+    checked,
+    label,
+    size: "base",
+    className: "payment-tk-checkbox",
+    "aria-label": label,
+  });
+}
+
+function TkSpinner({ label = "Processing" }: { label?: string }) {
+  return createElement("tk-spinner", {
+    label,
+    size: "large",
+    type: "rounded",
+    variant: "info",
+    orientation: "vertical",
+    className: "payment-tk-spinner",
+  });
 }
 
 function CheckboxMark({ checked, mixed = false }: { checked: boolean; mixed?: boolean }) {
@@ -511,15 +602,11 @@ function ExcessBaggagePaymentPopup({
   const renderCardForm = () => renderDefaultShell(
     <>
       <h3>Payment Informations</h3>
-      <label className="payment-field">
-        <span>Card Holder Name<sup>*</sup></span>
-        <input aria-label="Card Holder Name" placeholder="Name Surname" />
-      </label>
+      <TkInput label="Card Holder Name" placeholder="Name Surname" showAsterisk className="payment-tk-input" />
       <div className="payment-field payment-card-field">
         <span>Card Informations<sup>*</sup></span>
         <div className="payment-input-row payment-card-number">
-          <Icon icon="credit_card" size={24} />
-          <input aria-label="Card Informations" placeholder="1234 1234 1234 1234" inputMode="numeric" />
+          <TkInput label="" placeholder="1234 1234 1234 1234" icon="credit_card" className="payment-tk-input inline" ariaLabel="Card Informations" />
           <div className="payment-card-brands" aria-hidden="true">
             <span className="payment-card-brand visa">VISA</span>
             <span className="payment-card-brand mastercard"><i /><i /></span>
@@ -527,12 +614,12 @@ function ExcessBaggagePaymentPopup({
           </div>
         </div>
         <div className="payment-card-details">
-          <div className="payment-input-row"><input aria-label="Expiration date" placeholder="MM/YY" /></div>
-          <div className="payment-input-row payment-cvc"><input aria-label="CVC" placeholder="CVC" inputMode="numeric" /><Icon icon="credit_card" size={24} /></div>
+          <TkInput label="" placeholder="MM/YY" className="payment-tk-input compact" ariaLabel="Expiration date" />
+          <TkInput label="" placeholder="CVC" icon="credit_card" iconPosition="right" className="payment-tk-input compact" ariaLabel="CVC" />
         </div>
         <p className="payment-support-text"><Icon icon="info" size={14} fill />This is supporting text</p>
       </div>
-      <button type="button" className="payment-submit" onClick={() => setCardStep("processing")}>Pay {amount}</button>
+      <TkButton label={`Pay ${amount}`} variant="danger" fullWidth className="payment-tk-button" onClick={() => setCardStep("processing")} />
     </>
   );
 
@@ -558,7 +645,7 @@ function ExcessBaggagePaymentPopup({
           </button>
         ))}
       </div>
-      <button type="button" className="payment-submit" onClick={() => setPosStep("processing")}>Pay {amount}</button>
+      <TkButton label={`Pay ${amount}`} variant="danger" fullWidth className="payment-tk-button" onClick={() => setPosStep("processing")} />
     </>
   );
 
@@ -569,25 +656,28 @@ function ExcessBaggagePaymentPopup({
         <button type="button" className={`payment-channel-card ${linkChannel === "email" ? "selected" : ""}`} onClick={() => setLinkChannel("email")}>
           <Icon icon="mail" size={20} fill />
           <span>E-mail</span>
-          <CheckboxMark checked={linkChannel === "email"} />
+          <TkCheckboxMark checked={linkChannel === "email"} label="E-mail" />
         </button>
         <button type="button" className={`payment-channel-card ${linkChannel === "sms" ? "selected" : ""}`} onClick={() => setLinkChannel("sms")}>
           <Icon icon="sms" size={20} fill />
           <span>SMS</span>
-          <CheckboxMark checked={linkChannel === "sms"} />
+          <TkCheckboxMark checked={linkChannel === "sms"} label="SMS" />
         </button>
       </div>
-      <label className="payment-field">
-        <span>{linkChannel === "email" ? "e-mail adress" : "Phone Number"}<sup>*</sup></span>
-        <input aria-label={linkChannel === "email" ? "e-mail adress" : "Phone Number"} value={linkChannel === "email" ? "furkanayin@gmail.com" : "+90 555 123 45 67"} readOnly />
-      </label>
-      <button type="button" className="payment-submit" onClick={() => setLinkStep("waiting")}>Send Link</button>
+      <TkInput
+        label={linkChannel === "email" ? "e-mail adress" : "Phone Number"}
+        value={linkChannel === "email" ? "furkanayin@gmail.com" : "+90 555 123 45 67"}
+        readonly
+        showAsterisk
+        className="payment-tk-input"
+      />
+      <TkButton label="Send Link" variant="danger" fullWidth className="payment-tk-button" onClick={() => setLinkStep("waiting")} />
     </>
   );
 
   const renderProcessing = (subtitle: string) => (
     <div className="payment-state-panel compact">
-      <span className="payment-spinner" aria-hidden="true" />
+      <TkSpinner label="Processing" />
       <h3>Processing...</h3>
       <p>{subtitle}</p>
       <small>Do not close this window while processing</small>
@@ -602,8 +692,8 @@ function ExcessBaggagePaymentPopup({
       <strong>{amount}</strong>
       <small>{methodLabel}</small>
       <div className="payment-result-actions">
-        <button type="button" className="payment-secondary" onClick={onBack}><Icon icon="arrow_back" size={20} />Back</button>
-        <button type="button" className="payment-submit" onClick={onClose}>Done</button>
+        <TkButton label="Back" variant="neutral" type="outlined" icon="arrow_back" className="payment-tk-button secondary" onClick={onBack} />
+        <TkButton label="Done" variant="danger" className="payment-tk-button" onClick={onClose} />
       </div>
     </div>
   );
@@ -618,8 +708,8 @@ function ExcessBaggagePaymentPopup({
       <small>{methodLabel}</small>
       <div className="payment-emd-row"><Icon icon="receipt_long" size={24} fill /><span>EMD No</span><b>EBT823192423</b></div>
       <div className="payment-result-actions">
-        <button type="button" className="payment-secondary"><span>Print Reciept</span><Icon icon="print" size={20} fill /></button>
-        <button type="button" className="payment-submit" onClick={onPaymentComplete}>Done</button>
+        <TkButton label="Print Reciept" variant="neutral" type="outlined" icon="print" iconPosition="right" className="payment-tk-button secondary" />
+        <TkButton label="Done" variant="danger" className="payment-tk-button" onClick={onPaymentComplete} />
       </div>
     </div>
   );
@@ -643,7 +733,7 @@ function ExcessBaggagePaymentPopup({
         <div className="payment-link-flow">
           <PaymentProgress current="creating" countdown={0} />
           <div className="payment-state-panel">
-            <span className="payment-spinner" aria-hidden="true" />
+            <TkSpinner label="Processing" />
             <h3>Payment Completed</h3>
             <p>Payment received. EMD is being created.</p>
           </div>
