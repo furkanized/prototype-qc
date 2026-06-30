@@ -215,6 +215,31 @@ function Logo() {
   return <div className="qc-logo" aria-label="QC"><img src={qcMark} alt="" /><img src={qcText} alt="" /></div>;
 }
 
+function NotificationBellIcon() {
+  return (
+    <svg layerName="action-group" viewBox="0 0 36 36" width="36" height="36" xmlns="http://www.w3.org/2000/svg" className="notification-svg" aria-hidden="true">
+      <defs>
+        <filter id="notification-dot-shadow" x="-50%" y="-50%" width="200%" height="200%" colorInterpolationFilters="sRGB">
+          <feDropShadow in="SourceGraphic" dx="0" dy="8" stdDeviation="10" floodColor="#525866" floodOpacity="0.04" result="s0" />
+          <feDropShadow in="s0" dx="0" dy="6" stdDeviation="6" floodColor="#525866" floodOpacity="0.04" result="s1" />
+          <feDropShadow in="s1" dx="0" dy="2" stdDeviation="1" floodColor="#525866" floodOpacity="0.04" result="s2" />
+        </filter>
+      </defs>
+      <g layerName="header-elements">
+        <g transform="matrix(1 0 0 1 8 8)" layerName="add">
+          <path transform="matrix(1 0 0 1 3.678 1.875)" layerName="Vector" d="M12.397 12.325C12.397 12.325 11.322 11.250 11.322 11.250C11.322 11.250 11.322 7.083 11.322 7.083C11.322 4.525 9.955 2.383 7.572 1.817C7.572 1.817 7.572 1.250 7.572 1.250C7.572 0.558 7.014 0.000 6.322 0.000C5.630 0.000 5.072 0.558 5.072 1.250C5.072 1.250 5.072 1.817 5.072 1.817C2.680 2.383 1.322 4.517 1.322 7.083C1.322 7.083 1.322 11.250 1.322 11.250C1.322 11.250 0.247 12.325 0.247 12.325C-0.278 12.850 0.089 13.750 0.830 13.750C0.830 13.750 11.805 13.750 11.805 13.750C12.555 13.750 12.922 12.850 12.397 12.325ZM9.655 12.083C9.655 12.083 2.989 12.083 2.989 12.083C2.989 12.083 2.989 7.083 2.989 7.083C2.989 5.017 4.247 3.333 6.322 3.333C8.397 3.333 9.655 5.017 9.655 7.083C9.655 7.083 9.655 12.083 9.655 12.083ZM6.322 16.250C7.239 16.250 7.989 15.500 7.989 14.583C7.989 14.583 4.655 14.583 4.655 14.583C4.655 15.500 5.397 16.250 6.322 16.250Z" fillRule="nonzero" fill="#222530" />
+        </g>
+        <g transform="matrix(1 0 0 1 22 8)" filter="url(#notification-dot-shadow)" layerName="header-elemets-status">
+          <g layerName="Ellipse 103">
+            <path d="M6.000 3.000C6.000 4.657 4.657 6.000 3.000 6.000C1.343 6.000 0.000 4.657 0.000 3.000C0.000 1.343 1.343 0.000 3.000 0.000C4.657 0.000 6.000 1.343 6.000 3.000Z" fillRule="nonzero" fill="#FF3D32" />
+            <path d="M6.000 3.000C6.000 4.657 4.657 6.000 3.000 6.000C1.343 6.000 0.000 4.657 0.000 3.000C0.000 1.343 1.343 0.000 3.000 0.000C4.657 0.000 6.000 1.343 6.000 3.000Z" vectorEffect="non-scaling-stroke" fill="none" stroke="#FFFFFF" />
+          </g>
+        </g>
+      </g>
+    </svg>
+  );
+}
+
 function TopBar() {
   return (
     <header className="qc-topbar">
@@ -226,7 +251,7 @@ function TopBar() {
         </div>
       </div>
       <label className="quick-search"><input aria-label="Hızlı arama" placeholder="Hızlı Prompt..." /><Icon icon="hotel_class" size={19} /></label>
-      <button className="bare-button notification" aria-label="Bildirimler"><span className="notification-bell" aria-hidden="true" /><i /></button>
+      <button className="bare-button notification" aria-label="Bildirimler"><NotificationBellIcon /></button>
       <button className="profile" aria-label="Profil"><span className="profile-head" /><span className="profile-body" /></button>
     </header>
   );
