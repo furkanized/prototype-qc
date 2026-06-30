@@ -1,4 +1,4 @@
-import { createElement, useEffect, useMemo, useState } from "react";
+import { createElement, useEffect, useMemo, useState, type ReactNode } from "react";
 import { defineCustomElement as defineTkIcon } from "@takeoff-ui/core/components/tk-icon.js";
 import qcMark from "../../assets/qc-mark.svg";
 import qcText from "../../assets/qc-text.svg";
@@ -409,6 +409,323 @@ function PassengerCheckInOverlay({
   );
 }
 
+
+type PaymentMethod = "card" | "pos" | "link";
+type CardPaymentStep = "default" | "processing" | "completed" | "failed";
+type PosPaymentStep = "select" | "processing" | "completed" | "failed";
+type LinkPaymentStep = "default" | "waiting" | "creating" | "completed";
+
+function ExcessBaggagePaymentPopup({
+  amount,
+  responsible,
+  onClose,
+  onPaymentComplete,
+}: {
+  amount: string;
+  responsible: string;
+  onClose: () => void;
+  onPaymentComplete: () => void;
+}) {
+  const [method, setMethod] = useState<PaymentMethod>("card");
+  const [cardStep, setCardStep] = useState<CardPaymentStep>("default");
+  const [posStep, setPosStep] = useState<PosPaymentStep>("select");
+  const [linkStep, setLinkStep] = useState<LinkPaymentStep>("default");
+  const [linkChannel, setLinkChannel] = useState<"email" | "sms">("email");
+  const [selectedPos, setSelectedPos] = useState("POS-04");
+  const [linkCountdown, setLinkCountdown] = useState(10);
+
+  useEffect(() => {
+    if (cardStep !== "processing") return;
+    const timeout = window.setTimeout(() => setCardStep("completed"), 900);
+    return () => window.clearTimeout(timeout);
+  }, [cardStep]);
+
+  useEffect(() => {
+    if (posStep !== "processing") return;
+    const timeout = window.setTimeout(() => setPosStep("completed"), 1100);
+    return () => window.clearTimeout(timeout);
+  }, [posStep]);
+
+  useEffect(() => {
+    if (linkStep !== "waiting") return;
+    setLinkCountdown(10);
+    const interval = window.setInterval(() => {
+      setLinkCountdown((current) => {
+        if (current <= 1) {
+          window.clearInterval(interval);
+          setLinkStep("creating");
+          return 0;
+        }
+        return current - 1;
+      });
+    }, 1000);
+    return () => window.clearInterval(interval);
+  }, [linkStep]);
+
+  useEffect(() => {
+    if (linkStep !== "creating") return;
+    const timeout = window.setTimeout(() => setLinkStep("completed"), 1200);
+    return () => window.clearTimeout(timeout);
+  }, [linkStep]);
+
+  const switchMethod = (nextMethod: PaymentMethod) => {
+    setMethod(nextMethod);
+    setCardStep("default");
+    setPosStep("select");
+    setLinkStep("default");
+    setLinkCountdown(10);
+  };
+  const isLinkProgress = method === "link" && linkStep !== "default";
+  const isTerminal = (method === "card" && cardStep !== "default") || (method === "pos" && posStep !== "select") || isLinkProgress;
+
+  const renderTabs = () => (
+    <div className="payment-method-tabs" role="tablist" aria-label="Payment method">
+      <button type="button" className={`payment-method-tab ${method === "card" ? "active" : ""}`} role="tab" aria-selected={method === "card"} onClick={() => switchMethod("card")}>
+        <Icon icon="credit_card" size={24} fill />
+        <span>Credit Card</span>
+      </button>
+      <button type="button" className={`payment-method-tab ${method === "pos" ? "active" : ""}`} role="tab" aria-selected={method === "pos"} onClick={() => switchMethod("pos")}>
+        <Icon icon="point_of_sale" size={24} fill />
+        <span>Physical Pos</span>
+      </button>
+      <button type="button" className={`payment-method-tab ${method === "link" ? "active" : ""}`} role="tab" aria-selected={method === "link"} onClick={() => switchMethod("link")}>
+        <Icon icon="link" size={24} />
+        <span>Payment Link</span>
+      </button>
+    </div>
+  );
+
+  const renderDefaultShell = (children: ReactNode) => (
+    <>
+      <section className="payment-section payment-method-section">
+        <div className="payment-section-heading">
+          <h3>Payment Method</h3>
+          <p>Responsible: {responsible}</p>
+        </div>
+        {renderTabs()}
+      </section>
+      <section className="payment-section payment-info-section">{children}</section>
+    </>
+  );
+
+  const renderCardForm = () => renderDefaultShell(
+    <>
+      <h3>Payment Informations</h3>
+      <label className="payment-field">
+        <span>Card Holder Name<sup>*</sup></span>
+        <input aria-label="Card Holder Name" placeholder="Name Surname" />
+      </label>
+      <div className="payment-field payment-card-field">
+        <span>Card Informations<sup>*</sup></span>
+        <div className="payment-input-row payment-card-number">
+          <Icon icon="credit_card" size={24} />
+          <input aria-label="Card Informations" placeholder="1234 1234 1234 1234" inputMode="numeric" />
+          <div className="payment-card-brands" aria-hidden="true">
+            <span className="payment-card-brand visa">VISA</span>
+            <span className="payment-card-brand mastercard"><i /><i /></span>
+            <span className="payment-card-brand discover">DISC</span>
+          </div>
+        </div>
+        <div className="payment-card-details">
+          <div className="payment-input-row"><input aria-label="Expiration date" placeholder="MM/YY" /></div>
+          <div className="payment-input-row payment-cvc"><input aria-label="CVC" placeholder="CVC" inputMode="numeric" /><Icon icon="credit_card" size={24} /></div>
+        </div>
+        <p className="payment-support-text"><Icon icon="info" size={14} fill />This is supporting text</p>
+      </div>
+      <button type="button" className="payment-submit" onClick={() => setCardStep("processing")}>Pay {amount}</button>
+    </>
+  );
+
+  const renderPosSelect = () => renderDefaultShell(
+    <>
+      <h3>Select Terminal</h3>
+      <div className="payment-pos-list">
+        {[
+          { id: "POS-04", status: "Online", note: "Enter card detailts on the counter", online: true },
+          { id: "POS-08", status: "Online", note: "Send a secure via SMS or E-mail", online: true },
+          { id: "POS-12", status: "Offline", note: "Charge on a counter card terminal", online: false },
+        ].map((terminal) => (
+          <button
+            key={terminal.id}
+            type="button"
+            className={`payment-pos-card ${selectedPos === terminal.id ? "selected" : ""} ${terminal.online ? "" : "disabled"}`}
+            onClick={() => terminal.online && setSelectedPos(terminal.id)}
+            disabled={!terminal.online}
+          >
+            <Icon icon="point_of_sale" size={24} fill />
+            <span><strong>{terminal.id}</strong><small>{terminal.status}</small><em>{terminal.note}</em></span>
+            <i />
+          </button>
+        ))}
+      </div>
+      <button type="button" className="payment-submit" onClick={() => setPosStep("processing")}>Pay {amount}</button>
+    </>
+  );
+
+  const renderLinkDefault = () => renderDefaultShell(
+    <>
+      <h3>Send Via</h3>
+      <div className="payment-channel-grid">
+        <button type="button" className={`payment-channel-card ${linkChannel === "email" ? "selected" : ""}`} onClick={() => setLinkChannel("email")}>
+          <Icon icon="mail" size={20} fill />
+          <span>E-mail</span>
+          <CheckboxMark checked={linkChannel === "email"} />
+        </button>
+        <button type="button" className={`payment-channel-card ${linkChannel === "sms" ? "selected" : ""}`} onClick={() => setLinkChannel("sms")}>
+          <Icon icon="sms" size={20} fill />
+          <span>SMS</span>
+          <CheckboxMark checked={linkChannel === "sms"} />
+        </button>
+      </div>
+      <label className="payment-field">
+        <span>{linkChannel === "email" ? "e-mail adress" : "Phone Number"}<sup>*</sup></span>
+        <input aria-label={linkChannel === "email" ? "e-mail adress" : "Phone Number"} value={linkChannel === "email" ? "furkanayin@gmail.com" : "+90 555 123 45 67"} readOnly />
+      </label>
+      <button type="button" className="payment-submit" onClick={() => setLinkStep("waiting")}>Send Link</button>
+    </>
+  );
+
+  const renderProcessing = (subtitle: string) => (
+    <div className="payment-state-panel compact">
+      <span className="payment-spinner" aria-hidden="true" />
+      <h3>Processing...</h3>
+      <p>{subtitle}</p>
+      <small>Do not close this window while processing</small>
+    </div>
+  );
+
+  const renderFailed = (methodLabel: string, onBack: () => void) => (
+    <div className="payment-result-panel">
+      <span className="payment-result-icon failed"><Icon icon="close" size={42} fill /></span>
+      <h3>Payment Failed</h3>
+      <p>Failed to charge excess baggage fee.</p>
+      <strong>{amount}</strong>
+      <small>{methodLabel}</small>
+      <div className="payment-result-actions">
+        <button type="button" className="payment-secondary" onClick={onBack}><Icon icon="arrow_back" size={20} />Back</button>
+        <button type="button" className="payment-submit" onClick={onClose}>Done</button>
+      </div>
+    </div>
+  );
+
+  const renderCompleted = (methodLabel: string, wide = false) => (
+    <div className={`payment-result-panel ${wide ? "wide" : ""}`}>
+      {wide && <PaymentProgress current="completed" countdown={0} />}
+      <span className="payment-result-icon success"><Icon icon="check_circle" size={42} fill /></span>
+      <h3>Payment Completed</h3>
+      <p>Excess baggage fee charged.</p>
+      <strong>{amount}</strong>
+      <small>{methodLabel}</small>
+      <div className="payment-emd-row"><Icon icon="receipt_long" size={24} fill /><span>EMD No</span><b>EBT823192423</b></div>
+      <div className="payment-result-actions">
+        <button type="button" className="payment-secondary"><span>Print Reciept</span><Icon icon="print" size={20} fill /></button>
+        <button type="button" className="payment-submit" onClick={onPaymentComplete}>Done</button>
+      </div>
+    </div>
+  );
+
+  const renderLinkProgress = () => {
+    if (linkStep === "waiting") {
+      return (
+        <div className="payment-link-flow">
+          <PaymentProgress current="waiting" countdown={linkCountdown} />
+          <div className="payment-link-message">
+            <h3>{String(linkCountdown).padStart(2, "0")}</h3>
+            <p>Waiting for passenger payment confirmation.</p>
+            <button type="button" className="payment-text-button" onClick={() => { setLinkCountdown(10); setLinkStep("waiting"); }}>Send Payment Link Again</button>
+          </div>
+          <PaymentStatusTable status="waiting" amount={amount} />
+        </div>
+      );
+    }
+    if (linkStep === "creating") {
+      return (
+        <div className="payment-link-flow">
+          <PaymentProgress current="creating" countdown={0} />
+          <div className="payment-state-panel">
+            <span className="payment-spinner" aria-hidden="true" />
+            <h3>Payment Completed</h3>
+            <p>Payment received. EMD is being created.</p>
+          </div>
+          <PaymentStatusTable status="creating" amount={amount} />
+        </div>
+      );
+    }
+    return renderCompleted("E-mail/SMS", true);
+  };
+
+  let body: ReactNode;
+  if (method === "card") {
+    if (cardStep === "processing") body = renderProcessing("Authorising Card...");
+    else if (cardStep === "completed") body = renderCompleted("Credit/Debit Card");
+    else if (cardStep === "failed") body = renderFailed("Credit/Debit Card", () => setCardStep("default"));
+    else body = renderCardForm();
+  } else if (method === "pos") {
+    if (posStep === "processing") body = renderProcessing(`Waiting for ${selectedPos} to response...`);
+    else if (posStep === "completed") body = renderCompleted("Physical Pos");
+    else if (posStep === "failed") body = renderFailed("Physical Pos", () => setPosStep("select"));
+    else body = renderPosSelect();
+  } else if (linkStep === "default") {
+    body = renderLinkDefault();
+  } else {
+    body = renderLinkProgress();
+  }
+
+  return (
+    <div className="payment-overlay" role="dialog" aria-modal="true" aria-labelledby="payment-title">
+      <div className="payment-overlay-scrim" onClick={onClose} />
+      <section className={`payment-popup ${isLinkProgress ? "wide" : ""} ${isTerminal ? "terminal" : ""}`}>
+        <header className="payment-popup-header">
+          {isLinkProgress && (
+            <button type="button" className="payment-back-button" aria-label="Geri" onClick={() => setLinkStep("default")}>
+              <Icon icon="arrow_back" size={20} />
+            </button>
+          )}
+          <div><h2 id="payment-title">Excess Baggage Payment</h2></div>
+          <button type="button" aria-label="Odeme popup kapat" onClick={onClose}><Icon icon="close" size={20} /></button>
+        </header>
+        <div className="payment-popup-body">{body}</div>
+      </section>
+    </div>
+  );
+}
+
+function PaymentProgress({ current, countdown }: { current: "waiting" | "creating" | "completed"; countdown: number }) {
+  const steps = [
+    { key: "sent", title: "E-mail Gönderildi", detail: "Ödeme Bekleniyor" },
+    { key: "waiting", title: "Ödeme Durumu", detail: current === "waiting" ? `${countdown} sn` : "Ödeme Alındı" },
+    { key: "creating", title: "EMD", detail: current === "completed" ? "Emd Oluşturuldu" : "Emd Oluşturuluyor" },
+    { key: "completed", title: "EMD", detail: "Emd Oluşturuldu" },
+  ];
+  const activeIndex = current === "waiting" ? 1 : current === "creating" ? 2 : 3;
+  return (
+    <div className="payment-progress" aria-label="Payment link progress">
+      {steps.map((step, index) => (
+        <div className={`payment-progress-step ${index < activeIndex ? "done" : ""} ${index === activeIndex ? "active" : ""}`} key={step.key}>
+          <span>{index < activeIndex ? <Icon icon="check" size={14} fill /> : null}</span>
+          <strong>{step.title}</strong>
+          <small>{step.detail}</small>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function PaymentStatusTable({ status, amount }: { status: "waiting" | "creating"; amount: string }) {
+  return (
+    <section className="payment-status-box">
+      <h3>Ödeme Durumu</h3>
+      <div className="payment-status-table">
+        <span>Payment Method</span><b>E-mail/SMS</b>
+        <span>Amount</span><b>{amount}</b>
+        <span>Passenger</span><b>Zeynep Demir</b>
+        <span>Status</span><em className={status === "waiting" ? "waiting" : "success"}>{status === "waiting" ? "Ödeme Bekliyor" : "Ödeme Alındı"}</em>
+      </div>
+    </section>
+  );
+}
+
+
 function CreatePoolOverlay({
   selectedPassengers,
   onClose,
@@ -421,6 +738,7 @@ function CreatePoolOverlay({
   const [headPassengerPnr, setHeadPassengerPnr] = useState(selectedPassengers[0]?.pnr ?? "");
   const [step, setStep] = useState<"Head of Pool" | "Creating Pool" | "Overweight" | "Paid" | "Processing Pool">("Head of Pool");
   const [paymentCompleted, setPaymentCompleted] = useState(false);
+  const [paymentPopupOpen, setPaymentPopupOpen] = useState(false);
   const [bagCount, setBagCount] = useState(() => getPoolMetrics(selectedPassengers).pieces);
   const poolMetrics = getPoolMetrics(selectedPassengers);
   const chargeMetrics = getPoolChargeMetrics(selectedPassengers, bagCount, paymentCompleted);
@@ -434,6 +752,7 @@ function CreatePoolOverlay({
 
   useEffect(() => {
     setPaymentCompleted(false);
+    setPaymentPopupOpen(false);
     setBagCount(getPoolMetrics(selectedPassengers).pieces);
   }, [selectedPassengers]);
 
@@ -482,6 +801,7 @@ function CreatePoolOverlay({
   }).join("+");
 
   return (
+    <>
     <div className="pool-overlay" role="dialog" aria-modal="true" aria-labelledby="pool-title">
       <div className="pool-overlay-scrim" />
       <aside className={`pool-popup step-${step.toLowerCase().replaceAll(" ", "-")}`}>
@@ -669,10 +989,7 @@ function CreatePoolOverlay({
                           <span>{chargeMetrics.extraWeightKg}kg Extra Weight - {formatEuro(chargeMetrics.extraWeightPrice)} - Billed to {passengerFullName(headPassenger)}</span>
                         </div>
                       </div>
-                      <button type="button" className="pool-pay-button" onClick={() => {
-                        setPaymentCompleted(true);
-                        setStep("Paid");
-                      }}>Pay Now</button>
+                      <button type="button" className="pool-pay-button" onClick={() => setPaymentPopupOpen(true)}>Pay Now</button>
                     </div>
                   )}
                 </section>
@@ -713,6 +1030,19 @@ function CreatePoolOverlay({
         )}
       </aside>
     </div>
+    {paymentPopupOpen && (
+      <ExcessBaggagePaymentPopup
+        amount={formatEuro(chargeMetrics.extraPiecePrice + chargeMetrics.extraWeightPrice)}
+        responsible={passengerFullName(headPassenger)}
+        onClose={() => setPaymentPopupOpen(false)}
+        onPaymentComplete={() => {
+          setPaymentPopupOpen(false);
+          setPaymentCompleted(true);
+          setStep("Paid");
+        }}
+      />
+    )}
+    </>
   );
 }
 
