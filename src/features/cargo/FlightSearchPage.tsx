@@ -218,11 +218,15 @@ function Logo() {
 function TopBar() {
   return (
     <header className="qc-topbar">
-      <Logo />
-      <button className="product-switch"><span className="status-dot"><Icon icon="check" size={13} /></span>Check-in<Icon icon="keyboard_arrow_down" size={17} /></button>
-      <button className="product-switch printer"><Icon icon="device_hub" size={18} />HP Printer<Icon icon="keyboard_arrow_down" size={17} /></button>
+      <div className="brand-product-container">
+        <Logo />
+        <div className="product-container">
+          <button className="product-switch"><span className="status-dot"><Icon icon="check" size={13} /></span>Check-in<Icon icon="keyboard_arrow_down" size={17} /></button>
+          <button className="product-switch printer"><Icon icon="device_hub" size={18} />HP Printer<Icon icon="keyboard_arrow_down" size={17} /></button>
+        </div>
+      </div>
       <label className="quick-search"><input aria-label="Hızlı arama" placeholder="Hızlı Prompt..." /><Icon icon="hotel_class" size={19} /></label>
-      <button className="bare-button notification" aria-label="Bildirimler"><Icon icon="notifications_none" size={21} /><i /></button>
+      <button className="bare-button notification" aria-label="Bildirimler"><span className="notification-bell" aria-hidden="true" /><i /></button>
       <button className="profile" aria-label="Profil"><span className="profile-head" /><span className="profile-body" /></button>
     </header>
   );
