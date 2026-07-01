@@ -217,7 +217,7 @@ function Logo() {
 
 function NotificationBellIcon() {
   return (
-    <svg layerName="action-group" viewBox="0 0 36 36" width="36" height="36" xmlns="http://www.w3.org/2000/svg" className="notification-svg" aria-hidden="true">
+    <svg viewBox="0 0 36 36" width="36" height="36" xmlns="http://www.w3.org/2000/svg" className="notification-svg" aria-hidden="true">
       <defs>
         <filter id="notification-dot-shadow" x="-50%" y="-50%" width="200%" height="200%" colorInterpolationFilters="sRGB">
           <feDropShadow in="SourceGraphic" dx="0" dy="8" stdDeviation="10" floodColor="#525866" floodOpacity="0.04" result="s0" />
@@ -225,12 +225,12 @@ function NotificationBellIcon() {
           <feDropShadow in="s1" dx="0" dy="2" stdDeviation="1" floodColor="#525866" floodOpacity="0.04" result="s2" />
         </filter>
       </defs>
-      <g layerName="header-elements">
-        <g transform="matrix(1 0 0 1 8 8)" layerName="add">
-          <path transform="matrix(1 0 0 1 3.678 1.875)" layerName="Vector" d="M12.397 12.325C12.397 12.325 11.322 11.250 11.322 11.250C11.322 11.250 11.322 7.083 11.322 7.083C11.322 4.525 9.955 2.383 7.572 1.817C7.572 1.817 7.572 1.250 7.572 1.250C7.572 0.558 7.014 0.000 6.322 0.000C5.630 0.000 5.072 0.558 5.072 1.250C5.072 1.250 5.072 1.817 5.072 1.817C2.680 2.383 1.322 4.517 1.322 7.083C1.322 7.083 1.322 11.250 1.322 11.250C1.322 11.250 0.247 12.325 0.247 12.325C-0.278 12.850 0.089 13.750 0.830 13.750C0.830 13.750 11.805 13.750 11.805 13.750C12.555 13.750 12.922 12.850 12.397 12.325ZM9.655 12.083C9.655 12.083 2.989 12.083 2.989 12.083C2.989 12.083 2.989 7.083 2.989 7.083C2.989 5.017 4.247 3.333 6.322 3.333C8.397 3.333 9.655 5.017 9.655 7.083C9.655 7.083 9.655 12.083 9.655 12.083ZM6.322 16.250C7.239 16.250 7.989 15.500 7.989 14.583C7.989 14.583 4.655 14.583 4.655 14.583C4.655 15.500 5.397 16.250 6.322 16.250Z" fillRule="nonzero" fill="#222530" />
+      <g>
+        <g transform="matrix(1 0 0 1 8 8)">
+          <path transform="matrix(1 0 0 1 3.678 1.875)" d="M12.397 12.325C12.397 12.325 11.322 11.250 11.322 11.250C11.322 11.250 11.322 7.083 11.322 7.083C11.322 4.525 9.955 2.383 7.572 1.817C7.572 1.817 7.572 1.250 7.572 1.250C7.572 0.558 7.014 0.000 6.322 0.000C5.630 0.000 5.072 0.558 5.072 1.250C5.072 1.250 5.072 1.817 5.072 1.817C2.680 2.383 1.322 4.517 1.322 7.083C1.322 7.083 1.322 11.250 1.322 11.250C1.322 11.250 0.247 12.325 0.247 12.325C-0.278 12.850 0.089 13.750 0.830 13.750C0.830 13.750 11.805 13.750 11.805 13.750C12.555 13.750 12.922 12.850 12.397 12.325ZM9.655 12.083C9.655 12.083 2.989 12.083 2.989 12.083C2.989 12.083 2.989 7.083 2.989 7.083C2.989 5.017 4.247 3.333 6.322 3.333C8.397 3.333 9.655 5.017 9.655 7.083C9.655 7.083 9.655 12.083 9.655 12.083ZM6.322 16.250C7.239 16.250 7.989 15.500 7.989 14.583C7.989 14.583 4.655 14.583 4.655 14.583C4.655 15.500 5.397 16.250 6.322 16.250Z" fillRule="nonzero" fill="#222530" />
         </g>
-        <g transform="matrix(1 0 0 1 22 8)" filter="url(#notification-dot-shadow)" layerName="header-elemets-status">
-          <g layerName="Ellipse 103">
+        <g transform="matrix(1 0 0 1 22 8)" filter="url(#notification-dot-shadow)">
+          <g>
             <path d="M6.000 3.000C6.000 4.657 4.657 6.000 3.000 6.000C1.343 6.000 0.000 4.657 0.000 3.000C0.000 1.343 1.343 0.000 3.000 0.000C4.657 0.000 6.000 1.343 6.000 3.000Z" fillRule="nonzero" fill="#FF3D32" />
             <path d="M6.000 3.000C6.000 4.657 4.657 6.000 3.000 6.000C1.343 6.000 0.000 4.657 0.000 3.000C0.000 1.343 1.343 0.000 3.000 0.000C4.657 0.000 6.000 1.343 6.000 3.000Z" vectorEffect="non-scaling-stroke" fill="none" stroke="#FFFFFF" />
           </g>
@@ -293,9 +293,64 @@ function FlightList({ selected, onSelect }: { selected: number; onSelect: (index
   );
 }
 
-function FlightOverview({ flight }: { flight: typeof flights[number] }) {
+const flightInfoTabs = [
+  { id: "flight", label: "Uçuş Bilgileri", tableVariant: "Uçuş Bilgileri" },
+  { id: "inout", label: "Inbound/outbound", tableVariant: "Inbound" },
+  { id: "emd", label: "EMD/EBIT Özet", tableVariant: "EMD" },
+  { id: "baggage", label: "Bagaj Bilgileri", tableVariant: "Bagaj Bilgileri" },
+  { id: "ops", label: "Uçuş Operasyon", tableVariant: "Uçuş Operasyon" },
+  { id: "reg", label: "Flight with Reg ID", tableVariant: "Reg No" },
+] as const;
+
+type FlightInfoTab = typeof flightInfoTabs[number]["id"];
+
+const flightInfoStats = [
+  { label: "Codeshare", value: "Air India" },
+  { label: "Kalkış Zamanı", value: "17:45" },
+  { label: "Ekip Bilgisi", value: "5" },
+  { label: "Uçuş Süresi", value: "5 sa 30 dk" },
+  { label: "Yakıt Süresi", value: "5 sa 30 dk" },
+  { label: "Slot Süresi", value: "5 sa 30 dk" },
+];
+
+const inOutRows = [
+  { type: "Inbound", flight: "TK2069", route: "AMS › IST", sta: "13:45", eta: "13:38", gate: "32", status: "Landed" },
+  { type: "Outbound", flight: "TK2070", route: "IST › AMS", sta: "14:45", eta: "14:45", gate: "32", status: "Flight Open" },
+  { type: "Connection", flight: "TK1953", route: "AMS › OSL", sta: "17:20", eta: "17:25", gate: "D12", status: "On Time" },
+];
+
+const emdRows = [
+  { name: "Accepted", business: 0, economy: 0, businessNo: 2, economyNo: 2 },
+  { name: "No Show", business: 0, economy: 0, businessNo: 6, economyNo: 6 },
+  { name: "No-Emd", business: 16, economy: 16, businessNo: 135, economyNo: 135 },
+  { name: "STA NOK", business: 0, economy: 0, businessNo: 6, economyNo: 6 },
+  { name: "Jumpseat", business: 0, economy: 0, businessNo: 0, economyNo: 0 },
+  { name: "Total EMD", business: 0, economy: 0, businessNo: 2, economyNo: 2 },
+];
+
+const baggageDetailRows = [
+  { className: "Business", count: 0, weight: 0, noEmd: 0, noEmdWeight: 0 },
+  { className: "Economy", count: 16, weight: 139, noEmd: 2, noEmdWeight: 18 },
+  { className: "Exc PC", count: 0, weight: 0, noEmd: 0, noEmdWeight: 0 },
+  { className: "Exc kg", count: 0, weight: 0, noEmd: 0, noEmdWeight: 0 },
+];
+
+const operationRows = [
+  { item: "Boarding", owner: "Gate", time: "17:00", state: "Ready" },
+  { item: "Catering", owner: "Ramp", time: "16:35", state: "Completed" },
+  { item: "Fuel", owner: "Ops", time: "16:42", state: "Completed" },
+  { item: "Load Sheet", owner: "DCS", time: "17:10", state: "Waiting" },
+];
+
+function FlightOverview({ flight, expanded, onExpandedChange }: { flight: typeof flights[number]; expanded: boolean; onExpandedChange: (expanded: boolean) => void }) {
+  const [activeTab, setActiveTab] = useState<FlightInfoTab>("flight");
+
+  useEffect(() => {
+    if (!expanded) setActiveTab("flight");
+  }, [expanded]);
+
   return (
-    <section className="flight-overview">
+    <section className={`flight-overview ${expanded ? "expanded" : ""}`}>
       <div className="overview-head">
         <div className="overview-title">
           <Icon icon="flight" size={25} fill />
@@ -307,7 +362,7 @@ function FlightOverview({ flight }: { flight: typeof flights[number] }) {
         <button aria-label="Uçuş seçenekleri"><Icon icon="more_horiz" size={23} /></button>
       </div>
       <div className="cabin-counts"><span>Economy 150</span><span>Business 50</span><span>Total Passenger 200</span></div>
-      <div className="passenger-progress">
+      <div className="passenger-progress flight-progress-expanded">
         <div className="checked-progress"><span><Icon icon="expand_circle_down" size={18} />Passengers</span><span>100 Checked-In <Icon icon="person" size={17} fill /></span></div>
         <div className="booked-progress"><span>100 Booked <Icon icon="person" size={17} fill /></span></div>
         <span className="remaining">300 Seats Remain</span>
@@ -320,8 +375,255 @@ function FlightOverview({ flight }: { flight: typeof flights[number] }) {
         <div><small>Reg No/ Uçak Tipi <Icon icon="edit" size={14} /></small><b>{flight.regNo}</b></div>
         <div><small>Anons Zamanı</small><b className="danger">{flight.announceTime}</b></div>
       </div>
-      <button className="more-overview">More <Icon icon="keyboard_arrow_down" size={14} /></button>
+      {expanded && (
+        <FlightInfoExpandedContent flight={flight} activeTab={activeTab} onTabChange={setActiveTab} />
+      )}
+      <button type="button" className="more-overview" aria-expanded={expanded} onClick={() => onExpandedChange(!expanded)}>
+        More <Icon icon={expanded ? "expand_less" : "keyboard_arrow_down"} size={14} />
+      </button>
     </section>
+  );
+}
+
+function FlightInfoExpandedContent({ flight, activeTab, onTabChange }: { flight: typeof flights[number]; activeTab: FlightInfoTab; onTabChange: (tab: FlightInfoTab) => void }) {
+  return (
+    <div className="flight-info-expanded-content">
+      <div className="flight-extra-facts">
+        {flightInfoStats.map((item) => (
+          <div key={item.label}>
+            <small>{item.label}</small>
+            <b>{item.value}</b>
+          </div>
+        ))}
+      </div>
+      <div className="flight-info-master-panel">
+        <div className="flight-info-tabs" role="tablist" aria-label="Flight info tabs">
+          {flightInfoTabs.map((tab) => (
+            <button key={tab.id} type="button" role="tab" aria-selected={activeTab === tab.id} className={activeTab === tab.id ? "active" : ""} onClick={() => onTabChange(tab.id)}>
+              <span>{tab.label}</span><em>01</em>
+            </button>
+          ))}
+        </div>
+        <div className="flight-tab-panel" role="tabpanel">
+          {activeTab === "flight" && <FlightInfoGeneralTab />}
+          {activeTab === "inout" && <InboundOutboundTab />}
+          {activeTab === "emd" && <EmdEbitTab />}
+          {activeTab === "baggage" && <BaggageInfoTab />}
+          {activeTab === "ops" && <OperationsTab />}
+          {activeTab === "reg" && <RegNoFlightsTab />}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FlightInfoPanel({ title, icon, actions = true, children, className = "" }: { title: string; icon?: string; actions?: boolean; children: ReactNode; className?: string }) {
+  return (
+    <section className={`fi-paper-panel ${className}`.trim()}>
+      <header className="fi-paper-header">
+        <div className="fi-paper-title">
+          {icon && <Icon icon={icon} size={20} />}
+          <strong>{title}</strong>
+        </div>
+        {actions && (
+          <div className="fi-paper-actions">
+            <button type="button"><span>Refresh</span><Icon icon="refresh" size={18} /></button>
+            <button type="button"><span>Print</span><Icon icon="print" size={18} /></button>
+          </div>
+        )}
+      </header>
+      {children}
+    </section>
+  );
+}
+
+function FiBadge({ children, tone = "neutral" }: { children: ReactNode; tone?: "neutral" | "blue" | "green" | "yellow" | "red" }) {
+  return <em className={`fi-badge ${tone}`}>{children}</em>;
+}
+
+function SourceTable({ columns, rows, widths, compact = false }: { columns: string[]; rows: Array<Array<ReactNode>>; widths?: string; compact?: boolean }) {
+  return (
+    <div className={`fi-source-table ${compact ? "compact" : ""}`.trim()} style={{ ["--fi-source-cols" as string]: widths ?? columns.map(() => "minmax(88px,1fr)").join(" ") }}>
+      <div className="fi-source-row head">
+        {columns.map((column) => <span key={column}>{column}</span>)}
+      </div>
+      {rows.map((row, rowIndex) => (
+        <div className="fi-source-row" key={rowIndex}>
+          {row.map((cell, cellIndex) => <span key={cellIndex}>{cell}</span>)}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function FlightInfoProgress({ label, value, max, right, tone = "blue" }: { label: string; value: number; max: number; right: string; tone?: "blue" | "yellow" | "green" }) {
+  const width = Math.min(100, Math.round((value / max) * 100));
+  return <div className="fi-progress"><div><span>{label}</span><b>{right}</b></div><i><em className={tone} style={{ width: `${width}%` }} /></i></div>;
+}
+
+const baggagePropertyRows = [
+  ["Standart", "4"],
+  ["Kabin El Bagajı", "15"],
+  ["Zemzem", "1"],
+  ["Bebek Arabası", "0"],
+  ["Tekerlekli Sandalye", "0"],
+] as const;
+
+const baggagePassengerRows: Array<Array<ReactNode>> = [
+  [<><FiBadge tone="yellow">HoP</FiBadge> Canan Arslan</>, "Antalya", "583", "2 pc /25 kg", "-10", "15", "BIKE - 8 KG", <button className="fi-pay-action" type="button">Ödeme Yap</button>],
+  ["Ahmet Reha Arslan", "Antalya", "583", "2 pc /25 kg", "10", "15", "BIKE - 8 KG", ""],
+  ["Seher Gül Arslan", "Antalya", "583", "2 pc /25 kg", "10", "15", "BIKE - 8 KG", ""],
+  ["Minüre Kul", "Kilis", "154", "2 pc /25 kg", "10", "15", "0", ""],
+  ["Beril Darbaz", "Muş", "53", "2 pc /25 kg", "10", "15", "0", ""],
+  ["Ballı Mahmudiye", "İzmir", "694", "2 pc /25 kg", "10", "15", "0", ""],
+  ["Bülent Serttaş", "Kastamonu", "346", "1 pc /25 kg", "10", "15", "0", ""],
+];
+
+const outInFlightRows = [
+  ["C", "TK1872", "VCE", "19:30", "0", "1", "0", "BC", "0", "0", "0", "Short Connection"],
+  ["Y", "TK1806", "TLS", "23:45", "0", "2", "0", "BW", "0", "0", "0", "Lorem ipsum dolor sites amadeus mozartus"],
+  ["Y", "TK1126", "AMS", "17:45", "2", "0", "0", "0", "0", "0", "0", ""],
+  ["Y", "TK1952", "CMN", "23:25", "1", "6", "0", "1", "2", "0", "0", ""],
+  ["Y", "TK0618", "SOF", "18:30", "0", "2", "0", "0", "0", "0", "0", ""],
+  ["Y", "TK1032", "ZRH", "23:15", "0", "2", "0", "0", "0", "0", "0", ""],
+];
+
+function FlightInfoGeneralTab() {
+  return (
+    <div className="fi-paper-stack">
+      <FlightInfoPanel title="Boarded Yolcu Sayısı" icon="groups">
+        <div className="fi-paper-body two-col">
+          <div className="fi-boarded-summary paper">
+            <div className="fi-big-metric"><span>Boarded</span><strong>200<small>/259</small></strong><em>59 Kalan</em></div>
+            <FlightInfoProgress label="0%" value={89} max={100} right="89% Tamamlandı" />
+          </div>
+          <SourceTable columns={["Kategori", "Checked-in", "Boarded", "Infant", "Ön Kontrol"]} rows={[["C", "50", "150", "0", "45"], ["Y", "50", "150", "2", "0"]]} compact />
+        </div>
+      </FlightInfoPanel>
+      <div className="fi-paper-grid two">
+        <FlightInfoPanel title="Uçuş Özeti" icon="flight" actions={false}>
+          <SourceTable columns={["Sınıf", "Available", "Booked", "Accepted", "On STB", "Z Bloke"]} rows={[["C", "4", "15", "1", "0", "0"], ["Y", "23", "129", "14", "0", "0"]]} compact />
+        </FlightInfoPanel>
+        <FlightInfoPanel title="Yolcu İstatistikleri" icon="person" actions={false}>
+          <SourceTable columns={["Sınıf", "Male", "Female", "Child", "Infant"]} rows={[["C", "4", "23", "0", "4"], ["Y", "16", "129", "0", "24"]]} compact />
+        </FlightInfoPanel>
+      </div>
+      <div className="fi-paper-grid two">
+        <FlightInfoPanel title="Kapasite Bilgisi" icon="airline_seat_recline_normal" actions={false}>
+          <SourceTable columns={["Sınıf", "Kapasite / Doluluk (182)", "Giden (Transfer From)", "Giden (Transfer To)", "Real Availability"]} rows={[["C", "20", "0", "0", "4"], ["Y", "162", "0", "0", "24"]]} compact />
+        </FlightInfoPanel>
+        <FlightInfoPanel title="Doğrulanmamış Yolcu Sayısı" icon="verified_user" actions={false}>
+          <SourceTable columns={["Sınıf", "Toplam", "Doğrulanmış", "Doğrulanmamış"]} rows={[["C", "16", "129", "0"], ["Y", "2", "18", "21"]]} compact />
+        </FlightInfoPanel>
+      </div>
+      <FlightInfoPanel title="Bagaj İstatistikleri" icon="luggage" actions={false}>
+        <SourceTable columns={["Sınıf", "Piece", "Weight"]} rows={[["C", "4", "23"], ["Y", "16", "129"]]} compact />
+      </FlightInfoPanel>
+    </div>
+  );
+}
+
+function InboundOutboundTab() {
+  return (
+    <div className="fi-paper-stack">
+      <div className="fi-segmented-tabs"><button className="active" type="button">Outbound</button><button type="button">Inbound</button></div>
+      <FlightInfoPanel title="Yolcu Sayısı" icon="groups">
+        <div className="fi-paper-body two-col">
+          <div className="fi-boarded-summary paper"><div className="fi-big-metric"><span>Checked-in</span><strong>58<small>/103</small></strong><em>103 Kalan</em></div></div>
+          <SourceTable columns={["Sınıf", "Beklenen", "Checked-in", "Infant"]} rows={[["Business (C)", "12", "1", "1"], ["Economy (Y)", "91", "11", "2"]]} compact />
+        </div>
+      </FlightInfoPanel>
+      <FlightInfoPanel title="Bagaj Sayısı" icon="luggage" actions={false}>
+        <div className="fi-paper-body two-col">
+          <div className="fi-mini-total"><span>Toplam Bagaj</span><strong>23<small>kg</small></strong><em>Toplam Ağırlık</em></div>
+          <SourceTable columns={["Sınıf", "Adet", "Ağırlık (kg)"]} rows={[["Business (C)", "1", "12"], ["Economy (Y)", "1", "11"]]} compact />
+        </div>
+      </FlightInfoPanel>
+      <FlightInfoPanel title="Outbound Uçuş Listesi" icon="flight_takeoff">
+        <div className="fi-list-toolbar"><button type="button">Ayrıntılı Arama</button></div>
+        <SourceTable columns={["Uçuş Türü", "Uçuş No", "Varış", "Saat", "Beklenen C", "Beklenen Y", "Beklenen INF", "Check-In C", "Check-In Y", "Check-In INF", "Short", "Not"]} rows={outInFlightRows} widths="80px 90px 70px 70px 86px 86px 90px 78px 78px 88px 90px minmax(180px,1fr)" />
+      </FlightInfoPanel>
+    </div>
+  );
+}
+
+function EmdEbitTab({ embedded = false }: { embedded?: boolean }) {
+  return (
+    <div className={`fi-paper-stack ${embedded ? "embedded" : ""}`.trim()}>
+      <FlightInfoPanel title="Ekstra Bagaj" icon="luggage">
+        <div className="fi-paper-body two-col">
+          <div className="fi-mini-total"><span>Ekstra Bagaj</span><strong>4</strong><em>Toplam Bagaj</em><strong className="inline">85<small>kg</small></strong></div>
+          <SourceTable columns={["Sınıf", "Piece", "Ağırlık (kg)"]} rows={[["Business (C)", "1", "12"], ["Economy (Y)", "1", "11"]]} compact />
+        </div>
+      </FlightInfoPanel>
+      <div className="fi-paper-grid two">
+        <FlightInfoPanel title="EMD" icon="receipt_long" actions={false}>
+          <div className="fi-kpi-pair"><div><span>EMD</span><strong>4</strong></div><div><span>Total Business EMD</span><strong>85<small>kg</small></strong></div><div><span>Total Economy EMD</span><strong>85<small>kg</small></strong></div></div>
+        </FlightInfoPanel>
+        <FlightInfoPanel title="No-Emd" icon="receipt" actions={false}>
+          <div className="fi-kpi-pair"><div><span>No-Emd</span><strong>4</strong></div><div><span>Business No- EMD</span><strong>85<small>kg</small></strong></div><div><span>Economy No-EMD</span><strong>85<small>kg</small></strong></div></div>
+        </FlightInfoPanel>
+      </div>
+      <FlightInfoPanel title="EMD Tablosu" icon="table_chart" actions={false}>
+        <SourceTable columns={["Sınıf", "Booked", "Accepted", "No Show", "STA NOK", "Jumpseat"]} rows={[["C", "0", "0", "0", "0", "0"], ["Y", "0", "0", "0", "0", "0"], ["C", "8", "2", "6", "6", "0"], ["Y", "8", "2", "6", "6", "0"]]} compact />
+      </FlightInfoPanel>
+      <FlightInfoPanel title="E-TKT Tablosu" icon="confirmation_number" actions={false}>
+        <SourceTable columns={["Sınıf", "Booked", "Accepted", "No Show", "STA NOK", "Jumpseat"]} rows={[["C", "0", "0", "0", "0", "0"], ["Y", "8", "2", "6", "6", "0"]]} compact />
+      </FlightInfoPanel>
+    </div>
+  );
+}
+
+function BaggageInfoTab() {
+  return (
+    <div className="fi-paper-stack baggage-source">
+      <FlightInfoPanel title="TK0619" icon="flight" className="fi-baggage-feature">
+        <div className="fi-baggage-feature-body">
+          <div className="fi-baggage-property-table">
+            <SourceTable columns={["Bagaj Özelliği", "Adet"]} rows={baggagePropertyRows.map(([name, value]) => [<span className="fi-with-icon"><Icon icon="luggage" size={17} />{name}</span>, value])} widths="minmax(260px,1fr) 92px" compact />
+          </div>
+          <div className="fi-baggage-chart" aria-label="Bagaj özellikleri grafiği">
+            <div className="fi-chart-axis"><span>200</span><span>150</span><span>100</span><span>50</span><span>0</span></div>
+            {[{ label: "Std", value: 145, strong: true }, { label: "Zem.", value: 55 }, { label: "T. San.", value: 50 }, { label: "Bebek.", value: 48 }, { label: "El Bg.", value: 44 }, { label: "Abcd", value: 38 }, { label: "Abcd", value: 34 }, { label: "Abcd", value: 30 }, { label: "Abcd", value: 26 }].map((bar) => (
+              <div className="fi-chart-bar" key={bar.label + bar.value} style={{ ["--bar" as string]: `${bar.value / 2}%` }}>
+                <i className={bar.strong ? "strong" : ""}>{bar.strong ? bar.value : ""}</i><span>{bar.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </FlightInfoPanel>
+      <FlightInfoPanel title="Yolcu Listesi" icon="groups">
+        <div className="fi-passenger-tools">
+          <label><input placeholder="Type name, pool number..." aria-label="Yolcu ara" /><Icon icon="search" size={18} /></label>
+          <div className="fi-segmented-tabs small"><button className="active" type="button">Tümü</button><button type="button">Head of Pool’s</button></div>
+          <button type="button"><Icon icon="filter_list" size={17} />Over Allowence</button>
+        </div>
+        <SourceTable columns={["Yolcu Adı", "Şehir", "Pool ID", "Bagaj Hakkı", "Verilen Ba...", "Fark", "Özellikli B...", "Action"]} rows={baggagePassengerRows} widths="264px 104px 104px 118px 118px 84px minmax(150px,1fr) 116px" />
+      </FlightInfoPanel>
+    </div>
+  );
+}
+
+function OperationsTab() {
+  return (
+    <div className="fi-paper-stack">
+      <FlightInfoPanel title="Uçuş Operasyon" icon="bolt">
+        <SourceTable columns={["Operasyon", "Owner", "Time", "Status"]} rows={operationRows.map((row) => [row.item, row.owner, row.time, <FiBadge tone={row.state === "Waiting" ? "yellow" : "green"}>{row.state}</FiBadge>])} />
+      </FlightInfoPanel>
+    </div>
+  );
+}
+
+function RegNoFlightsTab() {
+  return (
+    <div className="fi-paper-stack">
+      <FlightInfoPanel title="Route Timeline" icon="route" actions={false}>
+        <div className="fi-route-timeline source"><span>TC- ASD</span><b>ADB</b><em>08:10</em><b>IST</b><em>09:20</em><b>CTA</b><em>11:30</em></div>
+      </FlightInfoPanel>
+      <FlightInfoPanel title="Flight Legs" icon="flight">
+        <SourceTable columns={["Flight", "From", "To", "Departure", "Arrival", "Aircraft"]} rows={[["TK0201", "ADB", "IST", "08:10", "09:20", "TC-ASD"], ["TK0872", "IST", "CTA", "10:15", "11:30", "TC-ASD"], ["TK873", "CTA", "IST", "12:30", "14:10", "TC-ASD"]]} />
+      </FlightInfoPanel>
+    </div>
   );
 }
 
@@ -1536,14 +1838,23 @@ function SeatMap({ collapsed, onCollapsedChange }: { collapsed: boolean; onColla
 export function FlightSearchPage() {
   const [selectedFlight, setSelectedFlight] = useState(0);
   const [seatMapCollapsed, setSeatMapCollapsed] = useState(false);
+  const [flightInfoExpanded, setFlightInfoExpanded] = useState(false);
   const flight = flights[selectedFlight];
   const passengers = passengersByFlight[flight.code] ?? [];
+
+  useEffect(() => {
+    setFlightInfoExpanded(false);
+  }, [selectedFlight]);
+
   return (
     <div className={`qc-app ${seatMapCollapsed ? "seatmap-collapsed" : ""}`}>
       <TopBar />
       <AppRail />
       <FlightList selected={selectedFlight} onSelect={setSelectedFlight} />
-      <main className="workspace"><FlightOverview flight={flight} /><PassengerTable passengers={passengers} /></main>
+      <main className={`workspace ${flightInfoExpanded ? "flight-info-expanded" : ""}`}>
+        <FlightOverview flight={flight} expanded={flightInfoExpanded} onExpandedChange={setFlightInfoExpanded} />
+        <PassengerTable passengers={passengers} />
+      </main>
       <SeatMap collapsed={seatMapCollapsed} onCollapsedChange={setSeatMapCollapsed} />
     </div>
   );
