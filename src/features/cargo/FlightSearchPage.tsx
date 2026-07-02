@@ -162,9 +162,9 @@ function FlightRoute({ route, className = "" }: { route: string; className?: str
 }
 
 const flights = [
-  { code: "TK2070", route: "IST  ›  AMS", time: "14:30", state: "FO", tone: "green", gate: "32", boardingTime: "17:00", arrivalTime: "20:30", seats: "100", regNo: "GRDE6/ N63", announceTime: "17:30" },
-  { code: "TK0706", route: "IST  ›  KBL", time: "15:20/15:55", state: "FO", tone: "green", gate: "18", boardingTime: "16:10", arrivalTime: "22:15", seats: "86", regNo: "TC-LAM / A321", announceTime: "16:40" },
-  { code: "TK2911", route: "IST  ›  SFO", time: "16:55", state: "FH", tone: "yellow", gate: "11", boardingTime: "18:25", arrivalTime: "23:50", seats: "74", regNo: "TC-JET / B787", announceTime: "18:05" },
+  { code: "TK2070", route: "IST  ›  AMS", time: "14:30", state: "FO", tone: "green", gate: "32", boardingTime: "17:00", arrivalTime: "20:30", seats: "100", regNo: "GRDE6/ N63", announceTime: "17:30", economy: 150, business: 50, checkedIn: 100, booked: 100 },
+  { code: "TK0706", route: "IST  ›  KBL", time: "15:20/15:55", state: "FO", tone: "green", gate: "18", boardingTime: "16:10", arrivalTime: "22:15", seats: "86", regNo: "TC-LAM / A321", announceTime: "16:40", economy: 180, business: 20, checkedIn: 142, booked: 58 },
+  { code: "TK2911", route: "IST  ›  SFO", time: "16:55", state: "FH", tone: "yellow", gate: "11", boardingTime: "18:25", arrivalTime: "23:50", seats: "74", regNo: "TC-JET / B787", announceTime: "18:05", economy: 234, business: 30, checkedIn: 190, booked: 74 },
 ];
 
 type Tier = "Elite" | "Classic";
@@ -361,12 +361,20 @@ function FlightOverview({ flight, expanded, onExpandedChange }: { flight: typeof
         </div>
         <button aria-label="Uçuş seçenekleri"><Icon icon="more_horiz" size={23} /></button>
       </div>
-      <div className="cabin-counts"><span>Economy 150</span><span>Business 50</span><span>Total Passenger 200</span></div>
-      <div className="passenger-progress flight-progress-expanded">
-        <div className="checked-progress"><span><Icon icon="expand_circle_down" size={18} />Passengers</span><span>100 Checked-In <Icon icon="person" size={17} fill /></span></div>
-        <div className="booked-progress"><span>100 Booked <Icon icon="person" size={17} fill /></span></div>
-        <span className="remaining">300 Seats Remain</span>
-      </div>
+      <div className="cabin-counts"><span>Economy {flight.economy}</span><span>Business {flight.business}</span><span>Total Passenger {flight.economy + flight.business}</span></div>
+      {(() => {
+        const seatsRemain = Number(flight.seats);
+        const total = flight.checkedIn + flight.booked + seatsRemain;
+        const checkedPct = (flight.checkedIn / total) * 100;
+        const bookedPct = (flight.booked / total) * 100;
+        return (
+          <div className="passenger-progress flight-progress-expanded">
+            <div className="checked-progress" style={{ width: `${checkedPct}%` }}><span><Icon icon="expand_circle_down" size={18} />Passengers</span><span>{flight.checkedIn} Checked-In <Icon icon="person" size={17} fill /></span></div>
+            <div className="booked-progress" style={{ left: `${Math.max(checkedPct - 1.6, 0)}%`, width: `${bookedPct}%` }}><span>{flight.booked} Booked <Icon icon="person" size={17} fill /></span></div>
+            <span className="remaining">{seatsRemain} Seats Remain</span>
+          </div>
+        );
+      })()}
       <div className="flight-facts">
         <div><small>Gate <Icon icon="edit" size={14} /></small><b>{flight.gate}</b></div>
         <div><small>Boarding Time <Icon icon="edit" size={14} /></small><b>{flight.boardingTime}</b></div>
