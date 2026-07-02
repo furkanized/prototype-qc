@@ -16,7 +16,7 @@ button:focus-visible,input:focus-visible { outline:2px solid #3b82f6; outline-of
 .brand-product-container { display:flex; align-items:center; gap:12px; min-width:0; flex:0 1 auto; }
 .qc-logo { width:118px; min-width:118px; flex:0 0 118px; display:flex; align-items:center; gap:8px; }
 .qc-logo img { display:block; flex:0 0 auto; }
-.product-container { display:flex; align-items:center; gap:8px; min-width:0; flex:0 1 auto; }
+.product-container { display:flex; align-items:center; gap:8px; min-width:0; flex:0 1 auto; margin-left:24px; }
 .product-switch { height:42px; width:190px; min-width:0; flex:0 1 190px; display:flex; align-items:center; gap:8px; padding:0 12px; border:1px solid #dce2ea; border-radius:8px; background:#fff; color:#8992a5; font-size:14px; white-space:nowrap; }
 .product-switch > .qc-icon:last-child { margin-left:auto; }.product-switch.printer { color:#8d94a5; }.product-switch.printer > .qc-icon:first-child { color:var(--red); }
 .status-dot { width:18px; height:18px; display:grid; place-items:center; border-radius:50%; color:#fff; background:#1ec15b; }
@@ -166,6 +166,8 @@ button:focus-visible,input:focus-visible { outline:2px solid #3b82f6; outline-of
   .flight-facts{gap:14px;padding-top:14px}
   .flight-facts small{font-size:10px}
   .flight-facts b{font-size:12px}
+  .flight-extra-facts small{font-size:10px;line-height:16px}
+  .flight-extra-facts b{font-size:12px;line-height:18px}
   .passenger-panel{height:calc(100% - 210px);min-height:0;margin-top:32px;border-radius:14px 14px 0 0}
   .passenger-toolbar{height:54px;padding-inline:14px}
   .passenger-toolbar h2{font-size:17px}
