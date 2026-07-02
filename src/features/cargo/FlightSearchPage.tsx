@@ -167,6 +167,36 @@ function FlightRoute({ route, className = "" }: { route: string; className?: str
   );
 }
 
+function BaggageNotificationIcon({ tone }: { tone: BaggageTone }) {
+  const color = tone === "muted" ? "#C9DCFA" : "#3B82F6";
+
+  return (
+    <span className={`notification-icon baggage-notification ${tone}`} aria-hidden="true">
+      <svg viewBox="0 0 11.67 16.67" width="11.67" height="16.67" xmlns="http://www.w3.org/2000/svg" className="notification-icon-main">
+        <path d="M10.000 3.333C10.000 3.333 8.333 3.333 8.333 3.333C8.333 3.333 8.333 0.833 8.333 0.833C8.333 0.375 7.958 0.000 7.500 0.000C7.500 0.000 4.167 0.000 4.167 0.000C3.708 0.000 3.333 0.375 3.333 0.833C3.333 0.833 3.333 3.333 3.333 3.333C3.333 3.333 1.667 3.333 1.667 3.333C0.750 3.333 0.000 4.083 0.000 5.000C0.000 5.000 0.000 14.167 0.000 14.167C0.000 15.083 0.750 15.833 1.667 15.833C1.667 16.292 2.042 16.667 2.500 16.667C2.958 16.667 3.333 16.292 3.333 15.833C3.333 15.833 8.333 15.833 8.333 15.833C8.333 16.292 8.708 16.667 9.167 16.667C9.625 16.667 10.000 16.292 10.000 15.833C10.917 15.833 11.667 15.083 11.667 14.167C11.667 14.167 11.667 5.000 11.667 5.000C11.667 4.083 10.917 3.333 10.000 3.333ZM3.125 13.333C2.783 13.333 2.500 13.050 2.500 12.708C2.500 12.708 2.500 6.458 2.500 6.458C2.500 6.117 2.783 5.833 3.125 5.833C3.467 5.833 3.750 6.117 3.750 6.458C3.750 6.458 3.750 12.708 3.750 12.708C3.750 13.050 3.467 13.333 3.125 13.333ZM5.833 13.333C5.492 13.333 5.208 13.050 5.208 12.708C5.208 12.708 5.208 6.458 5.208 6.458C5.208 6.117 5.492 5.833 5.833 5.833C6.175 5.833 6.458 6.117 6.458 6.458C6.458 6.458 6.458 12.708 6.458 12.708C6.458 13.050 6.175 13.333 5.833 13.333ZM7.083 3.333C7.083 3.333 4.583 3.333 4.583 3.333C4.583 3.333 4.583 1.250 4.583 1.250C4.583 1.250 7.083 1.250 7.083 1.250C7.083 1.250 7.083 3.333 7.083 3.333ZM8.542 13.333C8.200 13.333 7.917 13.050 7.917 12.708C7.917 12.708 7.917 6.458 7.917 6.458C7.917 6.117 8.200 5.833 8.542 5.833C8.883 5.833 9.167 6.117 9.167 6.458C9.167 6.458 9.167 12.708 9.167 12.708C9.167 13.050 8.883 13.333 8.542 13.333Z" fillRule="nonzero" fill={color} />
+      </svg>
+      {tone === "alert" && (
+        <span className="notification-badge badge-baggage">
+          <svg viewBox="0 0.126 8.034 8.034" width="8" height="8" xmlns="http://www.w3.org/2000/svg">
+            <path transform="translate(1.33 0.56)" d="M2.307 3.583C2.307 3.583 2.667 3.310 2.667 3.310C2.667 3.310 3.023 3.580 3.023 3.580C3.153 3.677 3.330 3.553 3.283 3.397C3.283 3.397 3.143 2.943 3.143 2.943C3.143 2.943 3.543 2.627 3.543 2.627C3.667 2.533 3.597 2.333 3.437 2.333C3.437 2.333 2.970 2.333 2.970 2.333C2.970 2.333 2.827 1.887 2.827 1.887C2.777 1.733 2.560 1.733 2.510 1.887C2.510 1.887 2.363 2.333 2.363 2.333C2.363 2.333 1.893 2.333 1.893 2.333C1.737 2.333 1.667 2.533 1.790 2.630C1.790 2.630 2.187 2.947 2.187 2.947C2.187 2.947 2.047 3.400 2.047 3.400C2.000 3.557 2.177 3.680 2.307 3.583ZM0.667 6.537C0.667 6.763 0.890 6.923 1.107 6.853C1.107 6.853 2.667 6.333 2.667 6.333C2.667 6.333 4.227 6.853 4.227 6.853C4.443 6.927 4.667 6.767 4.667 6.537C4.667 6.537 4.667 4.427 4.667 4.427C5.080 3.957 5.333 3.343 5.333 2.667C5.333 1.193 4.140 0.000 2.667 0.000C1.193 0.000 0.000 1.193 0.000 2.667C0.000 3.343 0.253 3.957 0.667 4.427C0.667 4.427 0.667 6.537 0.667 6.537ZM2.667 0.667C3.770 0.667 4.667 1.563 4.667 2.667C4.667 3.770 3.770 4.667 2.667 4.667C1.563 4.667 0.667 3.770 0.667 2.667C0.667 1.563 1.563 0.667 2.667 0.667Z" fillRule="nonzero" fill="#FFFFFF" />
+          </svg>
+        </span>
+      )}
+    </span>
+  );
+}
+
+function CommentNotificationIcon({ count }: { count: number }) {
+  return (
+    <span className={`notification-icon comment-notification ${count > 0 ? "active" : ""}`} aria-hidden="true">
+      <svg viewBox="0 0 16.67 16.67" width="16.67" height="16.67" xmlns="http://www.w3.org/2000/svg" className="notification-icon-main">
+        <path d="M15.000 0.000C15.000 0.000 1.667 0.000 1.667 0.000C0.750 0.000 0.008 0.750 0.008 1.667C0.008 1.667 0.000 16.667 0.000 16.667C0.000 16.667 3.333 13.333 3.333 13.333C3.333 13.333 15.000 13.333 15.000 13.333C15.917 13.333 16.667 12.583 16.667 11.667C16.667 11.667 16.667 1.667 16.667 1.667C16.667 0.750 15.917 0.000 15.000 0.000ZM4.167 5.833C4.167 5.833 12.500 5.833 12.500 5.833C12.958 5.833 13.333 6.208 13.333 6.667C13.333 7.125 12.958 7.500 12.500 7.500C12.500 7.500 4.167 7.500 4.167 7.500C3.708 7.500 3.333 7.125 3.333 6.667C3.333 6.208 3.708 5.833 4.167 5.833ZM9.167 10.000C9.167 10.000 4.167 10.000 4.167 10.000C3.708 10.000 3.333 9.625 3.333 9.167C3.333 8.708 3.708 8.333 4.167 8.333C4.167 8.333 9.167 8.333 9.167 8.333C9.625 8.333 10.000 8.708 10.000 9.167C10.000 9.625 9.625 10.000 9.167 10.000ZM12.500 5.000C12.500 5.000 4.167 5.000 4.167 5.000C3.708 5.000 3.333 4.625 3.333 4.167C3.333 3.708 3.708 3.333 4.167 3.333C4.167 3.333 12.500 3.333 12.500 3.333C12.958 3.333 13.333 3.708 13.333 4.167C13.333 4.625 12.958 5.000 12.500 5.000Z" fillRule="nonzero" fill={count > 0 ? "#1DA750" : "#DBE0E7"} />
+      </svg>
+      {count > 0 && <span className="notification-badge badge-comment">{count}</span>}
+    </span>
+  );
+}
+
 const flights = [
   { code: "TK2070", route: "IST  ›  AMS", time: "14:30", state: "FO", tone: "green", gate: "32", boardingTime: "17:00", arrivalTime: "20:30", seats: "100", regNo: "GRDE6/ N63", announceTime: "17:30" },
   { code: "TK0706", route: "IST  ›  KBL", time: "15:20/15:55", state: "FO", tone: "green", gate: "18", boardingTime: "16:10", arrivalTime: "22:15", seats: "86", regNo: "TC-LAM / A321", announceTime: "16:40" },
@@ -2019,12 +2049,10 @@ function PassengerTable({ passengers }: { passengers: Passenger[] }) {
                 <span>{person.pnr}</span>
                 <span className="passenger-name"><Avatar type={person.avatar} />{person.name}</span>
                 <span>{person.surname}</span><span>{person.group}</span><span>{person.seat}</span>
-                <span className={`bag ${person.baggage} baggage-cell`}>
-                  <Icon icon="luggage" size={21} fill />{person.baggage === "alert" && <i>!</i>}
-                </span>
+                <span className={`bag ${person.baggage} baggage-cell`}><BaggageNotificationIcon tone={person.baggage} /></span>
                 <span className={`apis ${person.apis}`}><b>A</b></span>
                 <span><em className={`tier ${person.tier.toLowerCase()}`}>{person.tier}</em></span><span>Y/ EC</span>
-                <span className={`message ${person.message ? "active" : ""}`}><Icon icon="chat" size={19} fill />{person.message > 0 && <i>{person.message}</i>}</span>
+                <span className={`message ${person.message ? "active" : ""}`}><CommentNotificationIcon count={person.message} /></span>
                 <span className="quick-actions"><button>Check-in</button><Icon icon="more_vert" size={21} /></span>
                 <button className="row-expand" aria-label="Satırı genişlet"><Icon icon="keyboard_arrow_down" size={18} /></button>
               </div>
