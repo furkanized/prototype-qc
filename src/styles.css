@@ -37,7 +37,7 @@ button:focus-visible,input:focus-visible { outline:2px solid #3b82f6; outline-of
 .flight-items{position:relative}.flight-items::after{content:"";position:absolute;top:0;right:2px;width:4px;height:181px;border-radius:4px;background:#d8dee7}
 .flight-item{width:100%;height:58px;display:grid;align-content:center;gap:6px;padding:0 16px 0 12px;border:0;border-bottom:1px solid #edf0f4;background:#fff;text-align:left;font-size:12px}.flight-item.selected{background:#f3f7ff;box-shadow:inset 0 0 0 1px #82b0ff}.flight-line{display:flex;align-items:center;justify-content:space-between}.flight-line b{font-weight:500;color:#1e2532}.flight-line em{padding:2px 6px;border-radius:5px;font-style:normal}.flight-line em.green{background:#bfeecf;color:#168343}.flight-line em.yellow{background:#f7e7aa;color:#966d00}.flight-line time{font-size:11px}.flight-line time.delayed{color:#e0353f}
 .workspace { grid-column:3; grid-row:2; min-width:0; padding:16px; background:var(--bg); }
-.flight-overview { position:relative;height:230px;border:1px solid #e6eaf0;border-radius:17px;background:#fff;padding:20px 16px 15px;box-shadow:0 1px 2px rgba(35,45,68,.02) }
+.flight-overview { position:relative;height:230px;border:1px solid #f2f3f5;border-radius:16px;background:#fff;padding:24px 16px;box-shadow:0 1px 2px rgba(35,45,68,.02) }
 .overview-head{display:flex;align-items:center;justify-content:space-between}.overview-head>button{border:0;background:transparent}.overview-title{display:flex;align-items:center;gap:10px;color:#202633}.overview-title>strong{font-size:25px;font-weight:500}.overview-title>span{font-size:21px;color:#5a606b}.overview-title>span b{color:#939aaa}.overview-title>.blue{color:#3178e8}.overview-title .overview-route{font-size:25px;font-weight:500;letter-spacing:-.01em}.overview-title em{margin-left:3px;padding:5px 12px;border-radius:6px;background:#c9f0d8;color:#167c43;font-size:13px;font-style:normal}
 .cabin-counts{height:41px;display:flex;justify-content:flex-end;align-items:center;gap:42px;padding-right:16px;color:#9099ae;font-size:13px}
 .passenger-progress{height:33px;position:relative;border-radius:20px;background:#e6ebf4;overflow:hidden;color:#fff;font-size:14px}.checked-progress,.booked-progress{position:absolute;inset-block:0;display:flex;align-items:center;border-radius:18px}.checked-progress{left:0;width:36.4%;z-index:2;justify-content:space-between;padding:0 12px 0 9px;background:#254e8c}.booked-progress{left:34.8%;width:23.2%;z-index:1;justify-content:flex-end;padding-right:11px;background:#3d7df2;border-radius:0 18px 18px 0}.checked-progress span,.booked-progress span{display:flex;align-items:center;gap:8px;white-space:nowrap}.remaining{position:absolute;right:15px;top:50%;transform:translateY(-50%);color:#2874fa;white-space:nowrap}
@@ -284,7 +284,7 @@ button:focus-visible,input:focus-visible { outline:2px solid #3b82f6; outline-of
 /* Flight Info Flow */
 .workspace.flight-info-expanded{overflow:auto;scrollbar-gutter:stable;padding-bottom:96px}
 .workspace.flight-info-expanded::-webkit-scrollbar{width:8px}.workspace.flight-info-expanded::-webkit-scrollbar-thumb{border-radius:999px;background:#d8dee7}
-.flight-overview.expanded{height:auto;min-height:1323px;overflow:visible;padding-bottom:46px}
+.flight-overview.expanded{height:auto;min-height:0;overflow:visible;padding-bottom:46px}
 .flight-info-expanded-content{margin-top:26px;display:grid;gap:18px}
 .flight-extra-facts{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:28px;padding:0 8px 0}.flight-extra-facts div{display:grid;gap:4px}.flight-extra-facts small{color:#8993a6;font-size:12px;line-height:18px}.flight-extra-facts b{color:#222936;font-size:14px;line-height:20px;font-weight:500}
 .flight-info-master-panel{min-height:960px;border-radius:16px;background:#f9fafc;padding:16px;overflow:hidden}.flight-info-tabs{height:44px;display:flex;align-items:center;gap:4px;border-bottom:1px solid #e1e7ef;overflow:auto;scrollbar-width:none}.flight-info-tabs::-webkit-scrollbar{display:none}.flight-info-tabs button{height:40px;display:flex;align-items:center;gap:8px;flex:0 0 auto;border:0;border-radius:8px 8px 0 0;background:transparent;color:#525866;padding:0 12px;font-size:13px}.flight-info-tabs button em{height:18px;min-width:22px;display:grid;place-items:center;border-radius:999px;background:#eef2f7;color:#717784;font-size:10px;font-style:normal}.flight-info-tabs button.active{background:#fff;color:#222530;box-shadow:inset 0 -2px 0 #3b82f6}.flight-info-tabs button.active em{background:#dbeafe;color:#2563eb}.flight-tab-panel{padding-top:16px}
@@ -292,13 +292,285 @@ button:focus-visible,input:focus-visible { outline:2px solid #3b82f6; outline-of
 .fi-status-stack{display:grid;gap:8px}.fi-status-stack div{display:grid;grid-template-columns:32px minmax(0,1fr);gap:2px 10px;align-items:center;border:1px solid #e8edf4;border-radius:10px;padding:10px}.fi-status-stack span{grid-row:1/3;width:32px;height:32px;display:grid;place-items:center;border-radius:8px;background:#dff7e8;color:#168343;font-size:11px;font-weight:600}.fi-status-stack b{color:#222530;font-size:14px}.fi-status-stack em{color:#717784;font-size:12px;font-style:normal}.fi-progress-list{display:grid;gap:14px}.fi-progress{display:grid;gap:8px}.fi-progress div{display:flex;align-items:center;justify-content:space-between;color:#525866;font-size:13px}.fi-progress b{color:#222530;font-weight:500}.fi-progress i{position:relative;height:9px;border-radius:999px;background:#e4e9f2;overflow:hidden}.fi-progress em{position:absolute;inset-block:0;left:0;border-radius:999px;background:#3b82f6}.fi-progress em.yellow{background:#f2b705}.fi-progress em.green{background:#22c55e}
 .fi-table{display:grid;border:1px solid #e1e4ea;border-radius:10px;overflow:auto}.fi-table-row{display:grid;grid-template-columns:var(--fi-cols);min-width:720px}.fi-table-row span{min-height:44px;display:flex;align-items:center;padding:10px 12px;border-bottom:1px solid #edf1f5;border-right:1px solid #edf1f5;color:#525866;font-size:13px;white-space:nowrap}.fi-table-row span:last-child{border-right:0}.fi-table-row:last-child span{border-bottom:0}.fi-table-row.head span{min-height:40px;background:#f7f9fc;color:#222530;font-weight:500}.fi-badge{height:24px;display:inline-flex;align-items:center;justify-content:center;border-radius:999px;padding:0 8px;font-size:11px;font-style:normal;white-space:nowrap}.fi-badge.blue{background:#dbeafe;color:#2563eb}.fi-badge.green{background:#dff7e8;color:#168343}.fi-badge.yellow{background:#fff4cc;color:#816204}.fi-baggage-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.fi-crew-list{display:grid;gap:8px}.fi-crew-list div{display:grid;grid-template-columns:40px minmax(0,1fr) auto;align-items:center;gap:8px;border:1px solid #e8edf4;border-radius:10px;padding:10px}.fi-crew-list span{grid-row:1/3}.fi-crew-list b{color:#222530;font-size:14px}.fi-crew-list small{color:#717784;font-size:12px}.fi-crew-list em{grid-column:3;grid-row:1/3;border-radius:999px;background:#dff7e8;color:#168343;padding:3px 8px;font-size:11px;font-style:normal}.fi-note-box{display:flex;gap:12px;align-items:flex-start;border:1px solid #d8e6ff;border-radius:10px;background:#f5f9ff;padding:14px;color:#2f5fbc}.fi-note-box p{margin:0;color:#34404f;font-size:13px;line-height:20px}
 @media(min-height:901px) and (min-width:1451px){.workspace.flight-info-expanded{grid-template-rows:auto auto}.workspace.flight-info-expanded .passenger-panel{margin-top:0;height:auto;min-height:520px}.workspace.flight-info-expanded .table-shell{max-height:none}}
-@media(max-height:900px),(max-width:1440px){.flight-overview.expanded{min-height:1120px}.flight-extra-facts{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.flight-info-master-panel{min-height:780px}.fi-grid.two-one,.fi-grid.emd-layout{grid-template-columns:1fr}.fi-grid.emd-layout .fi-card:nth-child(3){grid-column:auto}.fi-stat-grid,.fi-stat-grid.four,.fi-baggage-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.workspace.flight-info-expanded .passenger-panel{height:auto;min-height:420px;flex:0 0 auto}}
+@media(max-height:900px),(max-width:1440px){.flight-overview.expanded{min-height:0}.flight-extra-facts{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.flight-info-master-panel{min-height:780px}.fi-grid.two-one,.fi-grid.emd-layout{grid-template-columns:1fr}.fi-grid.emd-layout .fi-card:nth-child(3){grid-column:auto}.fi-stat-grid,.fi-stat-grid.four,.fi-baggage-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.workspace.flight-info-expanded .passenger-panel{height:auto;min-height:420px;flex:0 0 auto}}
 
 /* Flight info component-data correction */
 .fi-source-layout{display:grid;gap:16px}.fi-source-layout>.fi-grid.embedded{margin-top:0}.fi-grid.emd-layout.embedded{grid-template-columns:1fr 1fr}.fi-grid.emd-layout.embedded .fi-card:nth-child(n){grid-column:auto}.fi-boarded-summary{display:grid;gap:14px}.fi-big-metric{min-height:96px;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:4px 16px;border:1px solid #d8e6ff;border-radius:12px;background:#f5f9ff;padding:16px}.fi-big-metric span{color:#525866;font-size:13px}.fi-big-metric strong{grid-column:1;color:#222530;font-size:34px;line-height:38px;font-weight:500}.fi-big-metric small{color:#717784;font-size:18px;font-weight:400}.fi-big-metric em{grid-column:2;grid-row:1/3;border-radius:999px;background:#fff4cc;color:#816204;padding:4px 10px;font-size:12px;font-style:normal}.fi-route-timeline{min-height:120px;display:grid;grid-template-columns:80px repeat(3,1fr);align-items:center;gap:12px}.fi-route-timeline span{height:32px;display:grid;place-items:center;border-radius:8px;background:#222530;color:#fff;font-size:13px}.fi-route-timeline b{position:relative;height:64px;display:grid;place-items:center;border:1px solid #d8dee7;border-radius:12px;background:#fff;color:#222530;font-size:18px}.fi-route-timeline b:not(:last-of-type)::after{content:"";position:absolute;right:-30px;top:50%;width:48px;height:2px;background:#caced8}.fi-route-timeline em{align-self:start;justify-self:center;color:#717784;font-size:12px;font-style:normal;margin-top:-8px}.fi-table-row span .fi-badge,.fi-table-row span em{max-width:max-content}.flight-info-tabs button:nth-child(n+7){display:none}
 @media(max-height:900px),(max-width:1440px){.fi-grid.emd-layout.embedded{grid-template-columns:1fr}.fi-big-metric{grid-template-columns:1fr}.fi-big-metric em{grid-column:1;grid-row:auto;justify-self:start}.fi-route-timeline{grid-template-columns:1fr}.fi-route-timeline b:not(:last-of-type)::after{display:none}}
 
 /* Paper-derived Flight Info table component */
-.fi-paper-stack{display:grid;gap:16px;align-items:start}.fi-paper-stack.embedded{gap:12px}.fi-paper-grid.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.fi-paper-panel{background:#fff;border-radius:16px;outline:1px solid #f2f3f5;outline-offset:-1px;overflow:hidden;min-width:0}.fi-paper-header{height:64px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:10px 16px;border-bottom:1px solid #f2f3f5;background:#fff}.fi-paper-title{display:flex;align-items:center;gap:6px;min-width:0;color:#222530}.fi-paper-title strong{font-size:20px;line-height:30px;font-weight:500;white-space:nowrap}.fi-paper-actions{display:flex;align-items:center;gap:8px}.fi-paper-actions button,.fi-list-toolbar button,.fi-passenger-tools>button{height:32px;display:inline-flex;align-items:center;justify-content:center;gap:4px;border:1px solid #e1e4ea;border-radius:8px;background:#fff;color:#222530;padding:6px 8px;font:500 12px/18px Geologica,system-ui,sans-serif}.fi-paper-body{padding:16px;display:grid;gap:16px}.fi-paper-body.two-col{grid-template-columns:minmax(260px,.8fr) minmax(0,1.2fr);align-items:stretch}.fi-source-table{display:grid;overflow:auto;background:#fff;min-width:0}.fi-source-row{display:grid;grid-template-columns:var(--fi-source-cols);min-width:max-content}.fi-source-row span{min-height:52px;display:flex;align-items:center;gap:8px;padding:16px 12px;border-top:1px solid #f2f3f5;border-bottom:1px solid #f2f3f5;border-right:1px solid #f2f3f5;color:#525866;font-size:14px;line-height:20px;white-space:nowrap;min-width:0}.fi-source-row span:first-child{border-left:1px solid #f2f3f5}.fi-source-row.head span{background:#f9fafc;color:#222530;font-size:12px;line-height:18px;font-weight:500;border-top-color:#f2f3f5}.fi-source-row.head span:first-child{border-top-left-radius:8px}.fi-source-row.head span:last-child{border-top-right-radius:8px}.fi-source-table.compact .fi-source-row span{min-height:41px;padding:10px 12px}.fi-source-table.compact .fi-source-row.head span{min-height:52px;padding:16px 12px}.fi-with-icon{display:inline-flex!important;align-items:center!important;gap:8px!important;padding:0!important;border:0!important;min-height:auto!important}.fi-badge{height:22px;display:inline-flex!important;align-items:center;justify-content:center;border:0!important;border-radius:6px;padding:2px 7px!important;font-size:11px!important;font-style:normal;font-weight:500;min-height:0!important}.fi-badge.neutral{background:#eef1f5;color:#525866}.fi-badge.yellow{background:#fff1b8;color:#8a6500}.fi-badge.green{background:#dff7e8;color:#168343}.fi-badge.blue{background:#dbeafe;color:#2563eb}.fi-badge.red{background:#ffe1e5;color:#c90019}.fi-pay-action{height:30px;border:0;border-radius:8px;background:#d6001c;color:#fff;padding:0 10px;font:600 12px/18px Geologica,system-ui,sans-serif}.fi-boarded-summary.paper{display:grid;gap:14px}.fi-big-metric{min-height:96px;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:4px 16px;border:1px solid #d8e6ff;border-radius:12px;background:#f5f9ff;padding:16px}.fi-big-metric span{color:#525866;font-size:13px}.fi-big-metric strong{grid-column:1;color:#222530;font-size:34px;line-height:38px;font-weight:500}.fi-big-metric small{color:#717784;font-size:18px;font-weight:400}.fi-big-metric em{grid-column:2;grid-row:1/3;border-radius:999px;background:#fff4cc;color:#816204;padding:4px 10px;font-size:12px;font-style:normal}.fi-progress{display:grid;gap:6px}.fi-progress>div{display:flex;align-items:center;justify-content:space-between;color:#525866;font-size:12px}.fi-progress b{color:#2f78f6;font-weight:500}.fi-progress i{height:8px;border-radius:999px;background:#e1e4ea;overflow:hidden}.fi-progress em{height:100%;display:block;border-radius:999px;background:#3b82f6}.fi-mini-total{border:1px solid #f2f3f5;border-radius:8px;background:#f9fafc;padding:16px;display:grid;align-content:center;gap:4px}.fi-mini-total span,.fi-mini-total em{color:#717784;font-size:12px;font-style:normal}.fi-mini-total strong{color:#222530;font-size:28px;line-height:34px;font-weight:500}.fi-mini-total strong.inline{font-size:20px;line-height:26px;color:#295bac}.fi-mini-total small,.fi-kpi-pair small{font-size:13px;color:#717784;font-weight:400}.fi-kpi-pair{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;border:1px solid #f2f3f5;border-radius:8px;overflow:hidden}.fi-kpi-pair div{min-height:92px;display:grid;align-content:center;gap:6px;padding:14px;background:#fff;border-right:1px solid #f2f3f5}.fi-kpi-pair div:first-child{background:#f9fafc}.fi-kpi-pair div:last-child{border-right:0}.fi-kpi-pair span{color:#717784;font-size:12px}.fi-kpi-pair strong{color:#222530;font-size:22px;line-height:28px;font-weight:500}.fi-segmented-tabs{height:32px;display:inline-flex;width:max-content;align-items:center;gap:4px;border:1px solid #e1e4ea;border-radius:8px;background:#f9fafc;padding:4px}.fi-segmented-tabs button{height:24px;border:0;border-radius:4px;background:transparent;color:#99a0ae;padding:2px 14px;font:500 12px/18px Geologica,system-ui,sans-serif}.fi-segmented-tabs button.active{background:#fff;color:#222530;box-shadow:#52586614 0 2px 2px -1px,#52586614 0 6px 12px -2px,#52586614 0 8px 20px}.fi-segmented-tabs.small{width:261px}.fi-segmented-tabs.small button{flex:1}.fi-list-toolbar{padding:12px 16px 0}.fi-baggage-feature .fi-paper-header{height:64px}.fi-baggage-feature-body{padding:16px;display:grid;grid-template-columns:minmax(360px,472px) minmax(360px,1fr);gap:16px}.fi-baggage-property-table{border-radius:8px;overflow:hidden;outline:1px solid #f2f3f5;outline-offset:-1px}.fi-baggage-chart{height:258px;display:grid;grid-template-columns:44px repeat(9,minmax(30px,1fr));gap:12px;border-radius:8px;outline:1px solid #f2f3f5;outline-offset:-1px;background:#fff;padding:16px 12px 4px 0;overflow:hidden}.fi-chart-axis{display:flex;flex-direction:column;justify-content:space-between;align-items:flex-end;background:#f9fafc;border-right:1px solid #f2f3f5;padding:0 12px;color:#717784;font-size:12px;line-height:18px}.fi-chart-bar{height:238px;display:flex;flex-direction:column;justify-content:flex-end;align-items:stretch;gap:4px;min-width:0}.fi-chart-bar i{height:var(--bar);min-height:8px;border-radius:4px 4px 0 0;background:#3b82f6;color:#fff;font-style:normal;font-size:12px;line-height:18px;display:flex;align-items:center;justify-content:center;overflow:hidden}.fi-chart-bar i.strong{background:#295bac}.fi-chart-bar span{height:22px;text-align:center;color:#525866;font-size:12px;line-height:18px;white-space:nowrap}.fi-passenger-tools{height:64px;display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:16px;border-bottom:0}.fi-passenger-tools label{width:192px;height:32px;display:flex;align-items:center;gap:4px;border:1px solid #e1e4ea;border-radius:8px;padding:6px 8px}.fi-passenger-tools input{width:100%;border:0;outline:0;color:#222530;font:400 12px/18px Geologica,system-ui,sans-serif}.fi-passenger-tools input::placeholder{color:#99a0ae}.fi-route-timeline.source{min-height:132px;padding:16px;display:grid;grid-template-columns:100px repeat(3,1fr);align-items:center;gap:12px}.fi-route-timeline.source span{height:32px;display:grid;place-items:center;border-radius:8px;background:#222530;color:#fff;font-size:13px}.fi-route-timeline.source b{position:relative;height:72px;display:grid;place-items:center;border:1px solid #d8dee7;border-radius:12px;background:#fff;color:#222530;font-size:18px}.fi-route-timeline.source b:not(:last-of-type)::after{content:"";position:absolute;right:-31px;top:50%;width:50px;height:2px;background:#caced8}.fi-route-timeline.source em{align-self:start;justify-self:center;color:#717784;font-size:12px;font-style:normal;margin-top:-12px}
+.fi-paper-stack{display:grid;gap:16px;align-items:start}.fi-paper-stack.embedded{gap:12px}.fi-paper-grid.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.fi-paper-panel{background:#fff;border-radius:16px;outline:1px solid #f2f3f5;outline-offset:-1px;overflow:hidden;min-width:0}.fi-paper-header{height:64px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:10px 16px;border-bottom:1px solid #f2f3f5;background:#fff}.fi-paper-title{display:flex;align-items:center;gap:6px;min-width:0;color:#222530}.fi-paper-title strong{font-size:20px;line-height:30px;font-weight:500;white-space:nowrap}.fi-paper-actions{display:flex;align-items:center;gap:8px}.fi-paper-actions button,.fi-list-toolbar button,.fi-passenger-tools>button{height:32px;display:inline-flex;align-items:center;justify-content:center;gap:4px;border:1px solid #e1e4ea;border-radius:8px;background:#fff;color:#222530;padding:6px 8px;font:500 12px/18px Geologica,system-ui,sans-serif}.fi-paper-body{padding:16px;display:grid;gap:16px}.fi-paper-body.two-col{grid-template-columns:minmax(260px,.8fr) minmax(0,1.2fr);align-items:stretch}.fi-source-table{display:grid;overflow:auto;background:#fff;min-width:0}.fi-source-row{display:grid;grid-template-columns:var(--fi-source-cols);min-width:max-content}.fi-source-row span{min-height:52px;display:flex;align-items:center;gap:8px;padding:16px 12px;border-top:1px solid #f2f3f5;border-bottom:1px solid #f2f3f5;border-right:1px solid #f2f3f5;color:#525866;font-size:14px;line-height:20px;white-space:normal;overflow-wrap:anywhere;min-width:0}.fi-source-row span:first-child{border-left:1px solid #f2f3f5}.fi-source-row.head span{background:#f9fafc;color:#222530;font-size:12px;line-height:18px;font-weight:500;border-top-color:#f2f3f5}.fi-source-row.head span:first-child{border-top-left-radius:8px}.fi-source-row.head span:last-child{border-top-right-radius:8px}.fi-source-table.compact .fi-source-row span{min-height:41px;padding:10px 12px}.fi-source-table.compact .fi-source-row.head span{min-height:52px;padding:16px 12px}.fi-with-icon{display:inline-flex!important;align-items:center!important;gap:8px!important;padding:0!important;border:0!important;min-height:auto!important}.fi-badge{height:22px;display:inline-flex!important;align-items:center;justify-content:center;border:0!important;border-radius:6px;padding:2px 7px!important;font-size:11px!important;font-style:normal;font-weight:500;min-height:0!important}.fi-badge.neutral{background:#eef1f5;color:#525866}.fi-badge.yellow{background:#fff1b8;color:#8a6500}.fi-badge.green{background:#dff7e8;color:#168343}.fi-badge.blue{background:#dbeafe;color:#2563eb}.fi-badge.red{background:#ffe1e5;color:#c90019}.fi-pay-action{height:30px;border:0;border-radius:8px;background:#d6001c;color:#fff;padding:0 10px;font:600 12px/18px Geologica,system-ui,sans-serif}.fi-boarded-summary.paper{display:grid;gap:14px}.fi-big-metric{min-height:96px;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:4px 16px;border:1px solid #d8e6ff;border-radius:12px;background:#f5f9ff;padding:16px}.fi-big-metric span{color:#525866;font-size:13px}.fi-big-metric strong{grid-column:1;color:#222530;font-size:34px;line-height:38px;font-weight:500}.fi-big-metric small{color:#717784;font-size:18px;font-weight:400}.fi-big-metric em{grid-column:2;grid-row:1/3;border-radius:999px;background:#fff4cc;color:#816204;padding:4px 10px;font-size:12px;font-style:normal}.fi-progress{display:grid;gap:6px}.fi-progress>div{display:flex;align-items:center;justify-content:space-between;color:#525866;font-size:12px}.fi-progress b{color:#2f78f6;font-weight:500}.fi-progress i{height:8px;border-radius:999px;background:#e1e4ea;overflow:hidden}.fi-progress em{height:100%;display:block;border-radius:999px;background:#3b82f6}.fi-mini-total{border:1px solid #f2f3f5;border-radius:8px;background:#f9fafc;padding:16px;display:grid;align-content:center;gap:4px}.fi-mini-total span,.fi-mini-total em{color:#717784;font-size:12px;font-style:normal}.fi-mini-total strong{color:#222530;font-size:28px;line-height:34px;font-weight:500}.fi-mini-total strong.inline{font-size:20px;line-height:26px;color:#295bac}.fi-mini-total small,.fi-kpi-pair small{font-size:13px;color:#717784;font-weight:400}.fi-kpi-pair{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;border:1px solid #f2f3f5;border-radius:8px;overflow:hidden}.fi-kpi-pair div{min-height:92px;display:grid;align-content:center;gap:6px;padding:14px;background:#fff;border-right:1px solid #f2f3f5}.fi-kpi-pair div:first-child{background:#f9fafc}.fi-kpi-pair div:last-child{border-right:0}.fi-kpi-pair span{color:#717784;font-size:12px}.fi-kpi-pair strong{color:#222530;font-size:22px;line-height:28px;font-weight:500}.fi-segmented-tabs{height:32px;display:inline-flex;width:max-content;align-items:center;gap:4px;border:1px solid #e1e4ea;border-radius:8px;background:#f9fafc;padding:4px}.fi-segmented-tabs button{height:24px;border:0;border-radius:4px;background:transparent;color:#99a0ae;padding:2px 14px;font:500 12px/18px Geologica,system-ui,sans-serif}.fi-segmented-tabs button.active{background:#fff;color:#222530;box-shadow:#52586614 0 2px 2px -1px,#52586614 0 6px 12px -2px,#52586614 0 8px 20px}.fi-segmented-tabs.small{width:261px}.fi-segmented-tabs.small button{flex:1}.fi-list-toolbar{padding:12px 16px 0}.fi-baggage-feature .fi-paper-header{height:64px}.fi-baggage-feature-body{padding:16px;display:grid;grid-template-columns:minmax(360px,472px) minmax(360px,1fr);gap:16px}.fi-baggage-property-table{border-radius:8px;overflow:hidden;outline:1px solid #f2f3f5;outline-offset:-1px}.fi-baggage-chart{height:258px;display:grid;grid-template-columns:44px repeat(9,minmax(30px,1fr));gap:12px;border-radius:8px;outline:1px solid #f2f3f5;outline-offset:-1px;background:#fff;padding:16px 12px 4px 0;overflow:hidden}.fi-chart-axis{display:flex;flex-direction:column;justify-content:space-between;align-items:flex-end;background:#f9fafc;border-right:1px solid #f2f3f5;padding:0 12px;color:#717784;font-size:12px;line-height:18px}.fi-chart-bar{height:238px;display:flex;flex-direction:column;justify-content:flex-end;align-items:stretch;gap:4px;min-width:0}.fi-chart-bar i{height:var(--bar);min-height:8px;border-radius:4px 4px 0 0;background:#3b82f6;color:#fff;font-style:normal;font-size:12px;line-height:18px;display:flex;align-items:center;justify-content:center;overflow:hidden}.fi-chart-bar i.strong{background:#295bac}.fi-chart-bar span{height:22px;text-align:center;color:#525866;font-size:12px;line-height:18px;white-space:nowrap}.fi-passenger-tools{height:64px;display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:16px;border-bottom:0}.fi-passenger-tools label{width:192px;height:32px;display:flex;align-items:center;gap:4px;border:1px solid #e1e4ea;border-radius:8px;padding:6px 8px}.fi-passenger-tools input{width:100%;border:0;outline:0;color:#222530;font:400 12px/18px Geologica,system-ui,sans-serif}.fi-passenger-tools input::placeholder{color:#99a0ae}.fi-route-timeline.source{min-height:132px;padding:16px;display:grid;grid-template-columns:100px repeat(3,1fr);align-items:center;gap:12px}.fi-route-timeline.source span{height:32px;display:grid;place-items:center;border-radius:8px;background:#222530;color:#fff;font-size:13px}.fi-route-timeline.source b{position:relative;height:72px;display:grid;place-items:center;border:1px solid #d8dee7;border-radius:12px;background:#fff;color:#222530;font-size:18px}.fi-route-timeline.source b:not(:last-of-type)::after{content:"";position:absolute;right:-31px;top:50%;width:50px;height:2px;background:#caced8}.fi-route-timeline.source em{align-self:start;justify-self:center;color:#717784;font-size:12px;font-style:normal;margin-top:-12px}
 @media(max-width:1440px),(max-height:900px){.fi-paper-grid.two,.fi-paper-body.two-col,.fi-baggage-feature-body{grid-template-columns:1fr}.fi-kpi-pair{grid-template-columns:1fr}.fi-kpi-pair div{border-right:0;border-bottom:1px solid #f2f3f5}.fi-kpi-pair div:last-child{border-bottom:0}.fi-passenger-tools{height:auto;flex-wrap:wrap;justify-content:flex-start}.fi-passenger-tools label,.fi-segmented-tabs.small{width:100%;max-width:320px}}
 
+/* Source-aligned flight info refinements */
+.fi-operational-summary{display:grid;grid-template-columns:1fr;gap:16px}
+.fi-segmented-tabs button em{height:18px;min-width:22px;display:grid;place-items:center;border-radius:999px;background:#eef2f7;color:#717784;font-size:10px;font-style:normal}
+.fi-segmented-tabs button.active em{background:#dbeafe;color:#2563eb}
+.flight-info-master-panel{background:#fff;border:1px solid #f2f3f5}
+.fi-paper-header{height:52px}
+.fi-paper-title strong{font-size:20px;line-height:25px;font-weight:400}
+.fi-paper-title .qc-icon{color:#525866}
+.fi-paper-panel{border-radius:16px;outline-color:#f2f3f5}
+.fi-paper-body.two-col{grid-template-columns:minmax(0,1fr)}
+.fi-mini-total{min-height:96px}
+@media(min-width:1451px) and (min-height:901px){.fi-operational-summary{grid-template-columns:repeat(3,minmax(0,1fr))}.fi-paper-body.two-col{grid-template-columns:minmax(260px,.8fr) minmax(0,1.2fr)}}
+
+/* Wide expanded flight-info stability: let the opened card own its real height before the passenger list starts. */
+.workspace.flight-info-expanded{
+  grid-template-rows:auto auto!important;
+  align-content:start;
+  overflow:auto!important;
+  gap:48px;
+}
+.workspace.flight-info-expanded .flight-overview.expanded{
+  grid-row:1;
+  position:relative;
+  z-index:2;
+  height:auto!important;
+  min-height:0!important;
+  overflow:visible!important;
+  align-self:start;
+}
+.workspace.flight-info-expanded .flight-info-expanded-content,
+.workspace.flight-info-expanded .flight-info-master-panel,
+.workspace.flight-info-expanded .flight-tab-panel{
+  position:relative;
+  z-index:2;
+  height:auto!important;
+  min-height:0!important;
+  overflow:visible!important;
+}
+.workspace.flight-info-expanded .passenger-panel{
+  grid-row:2;
+  position:relative;
+  z-index:1;
+  margin-top:0!important;
+  align-self:start;
+}
+.workspace.flight-info-expanded .passenger-panel .table-shell{
+  position:relative;
+  z-index:1;
+}
+@media (min-width:1451px) and (min-height:901px){
+  .workspace.flight-info-expanded{
+    grid-template-rows:auto auto!important;
+    overflow:auto!important;
+    gap:48px;
+  }
+  .workspace.flight-info-expanded .flight-info-master-panel{
+    padding-bottom:16px;
+  }
+  .workspace.flight-info-expanded .table-shell{
+    max-height:560px;
+    overflow:auto;
+  }
+}
+@media (min-width:1800px) and (min-height:901px){
+  .workspace.flight-info-expanded .table-shell{
+    max-height:620px;
+  }
+}
+
+/* Paper Table Component source alignment */
+.fi-source-flow{display:flex;flex-direction:column;gap:16px;min-width:0;color:#222530}
+.fi-source-topbar{display:flex;align-items:center;justify-content:space-between;gap:24px;min-width:0;padding-inline:8px}
+.fi-source-topbar:empty{display:none}
+.fi-source-actions{margin-left:auto;display:flex;align-items:center;justify-content:flex-end;gap:8px}
+.fi-source-actions button{height:32px;display:inline-flex;align-items:center;justify-content:center;gap:4px;border:1px solid #e1e4ea;border-radius:8px;background:#fff;color:#34404f;padding:6px 8px;font:500 12px/18px Geologica,system-ui,sans-serif;box-shadow:none;transition:background-color .16s ease,border-color .16s ease,color .16s ease}
+.fi-source-actions button:hover{background:#f9fafc;border-color:#cacfd8;color:#222530}
+.fi-source-actions button:focus{outline:none}
+.fi-source-actions button:focus-visible{outline:1px solid #cacfd8;outline-offset:2px}
+.fi-reference-grid{display:grid;gap:16px;align-items:start;min-width:0}
+.fi-reference-grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.fi-reference-grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.fi-source-card{display:flex;flex-direction:column;min-width:0;background:#fff;border-radius:16px;outline:1px solid #f2f3f5;outline-offset:-1px;overflow:hidden}
+.fi-source-card-header{height:52px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:10px 16px;border-bottom:1px solid #f2f3f5;background:#fff}
+.fi-source-card-title{display:flex;align-items:center;gap:6px;min-width:0;color:#222530}
+.fi-source-card-title .qc-icon{color:#525866}
+.fi-source-card-title strong{font-size:20px;line-height:30px;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fi-card-menu{width:40px;height:40px;display:grid;place-items:center;flex:0 0 auto;border:0;border-radius:8px;background:#fff;color:#222530;padding:0}
+.fi-card-menu:focus-visible{outline:2px solid #abc9fb;outline-offset:2px}
+.fi-source-card-body{display:flex;flex-direction:column;gap:16px;padding:16px;min-width:0}
+.fi-reference-metric{display:flex;flex-direction:column;gap:4px;min-width:0}
+.fi-reference-metric-row{display:flex;align-items:flex-end;justify-content:space-between;gap:8px;padding-inline:4px;min-width:0}
+.fi-reference-metric-row>div{display:flex;flex-direction:column;justify-content:center;min-width:0}
+.fi-reference-metric-row span{color:#525866;font-size:18px;line-height:27px;font-weight:400}
+.fi-reference-metric-row strong{display:flex;align-items:flex-end;color:#3b82f6;font-size:36px;line-height:54px;font-weight:400;letter-spacing:0}
+.fi-reference-metric-row small{color:#99a0ae;font-size:24px;line-height:36px;font-weight:400}
+.fi-reference-metric-row em{color:#717784;font-size:16px;line-height:24px;font-style:normal;white-space:nowrap;text-decoration:underline;text-underline-offset:2px}
+.fi-reference-metric>i{height:16px;display:block;border-radius:8px;background:#c1c8d1;overflow:hidden;min-width:0}
+.fi-reference-metric>i>b{height:100%;display:block;border-radius:8px;background:#3b82f6}
+.fi-reference-progress-labels{display:flex;align-items:center;justify-content:space-between;padding-inline:4px;color:#6b7280;font-size:12px;line-height:18px}
+.fi-reference-progress-labels b{color:#3b82f6;font-weight:500}
+.fi-source-card .fi-source-table{border:1px solid #f2f3f5;border-radius:8px;overflow:auto;background:#fff}
+.fi-source-card .fi-source-row{min-width:0}
+.fi-source-card .fi-source-row span{min-height:52px;padding:16px 24px 16px 24px;border-color:#f2f3f5;color:#525866;font-size:14px;line-height:20px;white-space:normal;overflow-wrap:normal}
+.fi-source-card .fi-source-row span:first-child{color:#222530}
+.fi-source-card .fi-source-row.head span{min-height:52px;background:#f9fafc;color:#222530;font-size:14px;line-height:20px;font-weight:400;border-bottom-width:2px}
+.fi-source-card .fi-source-table.compact .fi-source-row span{min-height:49px;padding-block:14px}
+.fi-source-card .fi-source-table.compact .fi-source-row.head span{min-height:52px;padding-block:16px}
+.fi-reference-kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;min-width:0}
+.fi-reference-kpis div{display:flex;flex-direction:column;justify-content:center;gap:2px;min-width:0}
+.fi-reference-kpis strong{display:flex;align-items:flex-end;color:#222530;font-size:36px;line-height:44px;font-weight:400;letter-spacing:0}
+.fi-reference-kpis small{color:#99a0ae;font-size:14px;line-height:20px;font-weight:400;margin-left:2px}
+.fi-reference-kpis span{color:#717784;font-size:14px;line-height:20px;white-space:normal}
+.fi-summary-subsection{display:flex;flex-direction:column;gap:12px;min-width:0}.fi-summary-subsection + .fi-summary-subsection{margin-top:auto}.fi-summary-subsection-label{display:flex;align-items:center;gap:2px;color:#525866;font-size:14px;line-height:20px}.fi-summary-subsection-label .qc-icon{color:#525866}.fi-emd-summary-grid .fi-source-card-body{height:100%}.fi-emd-summary-grid .fi-source-card .fi-reference-kpis{gap:64px}.fi-emd-summary-grid .fi-source-card .fi-reference-kpis strong{line-height:32px}.fi-emd-summary-grid .fi-source-card .fi-reference-kpis small{font-size:14px;line-height:20px}.fi-emd-summary-grid .fi-source-card .fi-reference-kpis span{font-size:14px;line-height:20px}
+.fi-source-switch{height:40px;display:inline-flex;align-items:center;flex:0 0 auto;border:1px solid #f2f3f5;border-radius:8px;background:#fff;overflow:hidden}
+.fi-source-switch button{height:40px;border:0;border-left:1px solid #f2f3f5;background:#fff;color:#717784;padding:10px 14px;font:400 14px/20px Geologica,system-ui,sans-serif}
+.fi-source-switch button:first-child{border-left:0}
+.fi-source-switch button.active{background:#f9fafc;color:#c90019}
+.fi-inout-layout{display:grid;grid-template-columns:320px minmax(0,1fr);gap:16px;align-items:start;min-width:0}
+.fi-inout-side{display:flex;flex-direction:column;gap:16px;min-width:0}
+.fi-inout-list{min-height:562px}
+.fi-inout-list .fi-source-card-body{overflow:auto}
+.fi-emd-summary-grid .fi-source-card,.fi-emd-source .fi-reference-grid.three .fi-source-card{min-height:290px}
+.fi-compact-matrix{border:1px solid #f2f3f5;border-radius:8px;overflow:hidden;background:#fff}.fi-compact-matrix-head,.fi-compact-matrix-row{display:grid;grid-template-columns:var(--fi-compact-cols,minmax(160px,1fr) 72px 72px);align-items:center}.fi-compact-matrix-head span,.fi-compact-matrix-row span{min-width:0;min-height:70px;display:flex;align-items:center;padding:16px 24px;border-left:1px solid #f2f3f5;border-bottom:1px solid #f2f3f5;color:#525866;font-size:14px;line-height:20px}.fi-compact-matrix-head span:first-child,.fi-compact-matrix-row span:first-child{border-left:0}.fi-compact-matrix-head span{min-height:52px;background:#f9fafc;color:#222530;border-bottom-width:2px;font-weight:400}.fi-compact-matrix-head span:not(:first-child),.fi-compact-matrix-row span:not(:first-child){justify-content:center;padding-inline:12px}.fi-compact-matrix-row span:first-child{color:#525866}.fi-compact-matrix-row:last-child span{border-bottom:0}
+.fi-flight-info-source .fi-source-card{min-height:0}
+.baggage-source .fi-baggage-feature{min-height:342px}
+.baggage-source .fi-baggage-feature .fi-source-card-body{padding:16px}
+.baggage-source .fi-with-icon .qc-icon{color:#295bac}
+.fi-baggage-passenger-list{display:grid;border:1px solid #f2f3f5;border-radius:8px;background:#fff;overflow:auto}
+.fi-baggage-passenger-head,.fi-baggage-passenger-row{display:grid;grid-template-columns:264px 104px 104px 118px 118px 84px minmax(150px,1fr) 116px;min-width:1062px}
+.fi-baggage-passenger-head span{min-height:52px;display:flex;align-items:center;padding:16px 24px;border-right:1px solid #f2f3f5;border-bottom:2px solid #f2f3f5;background:#f9fafc;color:#222530;font-size:14px;line-height:20px;font-weight:400}
+.fi-baggage-passenger-head span:last-child{border-right:0}
+.fi-baggage-passenger-group{display:grid}
+.fi-baggage-passenger-row span{min-height:52px;display:flex;align-items:center;gap:8px;padding:14px 24px;border-right:1px solid #f2f3f5;border-bottom:1px solid #f2f3f5;color:#525866;font-size:14px;line-height:20px;background:#fff}
+.fi-baggage-passenger-group:last-child .fi-baggage-passenger-row:last-child span{border-bottom:0}
+.fi-baggage-passenger-row span:last-child{border-right:0}
+.fi-baggage-passenger-row.hop span{background:#fcfdff;color:#34404f}
+.fi-baggage-passenger-row.child span{min-height:48px;background:#fbfcfe;color:#606b7a}
+.fi-baggage-passenger-row:hover span{background:#f9fbff}
+.fi-baggage-passenger-name{color:#222530!important}
+.fi-baggage-passenger-name>button,.fi-baggage-passenger-name>i{width:24px;height:24px;display:grid;place-items:center;flex:0 0 24px;border:0;background:transparent;color:#525866;padding:0}
+.fi-baggage-passenger-name>i::before{content:"";width:6px;height:6px;border-radius:50%;background:#caced8}
+.fi-baggage-passenger-row.child .fi-baggage-passenger-name{padding-left:48px}
+.fi-baggage-passenger-row.child .fi-baggage-passenger-name>i::before{width:18px;height:1px;border-radius:0;background:#d8dee7}
+.fi-baggage-passenger-name>span{display:flex;align-items:center;gap:8px;min-width:0;padding:0!important;border:0!important;min-height:0!important;background:transparent!important;color:inherit!important}
+.fi-baggage-passenger-name strong{font-size:14px;line-height:20px;font-weight:500;color:#222530;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fi-baggage-passenger-name em{height:22px;display:inline-flex;align-items:center;border-radius:6px;background:#f6df96;color:#7a5200;padding:2px 7px;font-size:11px;line-height:18px;font-style:normal;font-weight:500}
+.fi-baggage-passenger-row .negative{color:#c90019}
+.fi-baggage-passenger-action{justify-content:flex-start}
+.fi-baggage-passenger-action .qc-icon{color:#caced8}
+.fi-baggage-passenger-action .qc-icon.success{color:#25a25a}
+@media(max-width:1440px),(max-height:900px){
+  .fi-reference-grid.two,.fi-reference-grid.three,.fi-inout-layout{grid-template-columns:1fr}
+  .fi-inout-side{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .fi-source-actions button{box-shadow:none}
+  .fi-reference-metric-row strong,.fi-reference-kpis strong{font-size:30px;line-height:38px}
+  .fi-reference-metric-row small{font-size:20px;line-height:28px}
+}
+
+
+/* Reg No tab: Paper export alignment */
+.fi-source-card-header button{font-family:Geologica,system-ui,sans-serif}
+.fi-source-card-header button:focus{outline:none}
+.fi-source-card-header button:focus-visible{outline:1px solid #cacfd8;outline-offset:2px}
+.fi-source-header-button{height:32px;display:inline-flex;align-items:center;justify-content:center;gap:4px;flex:0 0 auto;border:1px solid #e1e4ea;border-radius:8px;background:#fff;color:#34404f;padding:6px 8px;font:500 12px/18px Geologica,system-ui,sans-serif;box-shadow:none;transition:background-color .16s ease,border-color .16s ease,color .16s ease}
+.fi-source-header-button:hover{background:#f9fafc;border-color:#cacfd8;color:#222530}
+.fi-source-header-button:active{background:#f2f3f5;border-color:#cacfd8}
+.fi-source-header-button .qc-icon{color:currentColor}
+.fi-regno-source{width:100%;gap:16px}
+.fi-regno-source .fi-source-card{border-radius:16px;outline:1px solid #f2f3f5;outline-offset:-1px;background:#fff;overflow:hidden}
+.fi-regno-source .fi-source-card-body{padding:48px}
+.fi-regno-source .fi-source-card:nth-child(2) .fi-source-card-body{padding:16px}
+.fi-reg-route{display:flex;align-items:flex-start;width:100%;min-width:0;gap:4px}
+.fi-reg-route-step{display:flex;align-items:flex-start;gap:4px;min-width:0;flex:1 1 0}
+.fi-reg-route-step:last-child{flex:0 0 auto}
+.fi-reg-route-line-wrap{height:32px;display:flex;align-items:center;min-width:0;flex:1 1 auto;gap:4px}
+.fi-reg-route-dot{width:32px;height:32px;border-radius:16px;display:flex;align-items:center;justify-content:center;flex:0 0 32px;background:#fff;outline:2px solid #e1e4ea;outline-offset:-2px;overflow:hidden}
+.fi-reg-route-dot i{width:12px;height:12px;border-radius:50%;background:#e1e4ea;display:block}
+.fi-reg-route-step.active .fi-reg-route-dot{background:#c90019;outline-color:#c90019}
+.fi-reg-route-step.active .fi-reg-route-dot i{background:#fff}
+.fi-reg-route-line-wrap>b{height:2px;display:block;flex:1 1 auto;background:#e1e4ea;border-radius:999px}
+.fi-reg-route-label{display:flex;flex-direction:column;align-items:center;gap:0;min-width:32px;margin-top:36px;margin-left:-36px;text-align:center}
+.fi-reg-route-label strong{color:#525866;font-size:14px;line-height:20px;font-weight:400}
+.fi-reg-route-label span{color:#717784;font-size:12px;line-height:18px;font-weight:400;white-space:nowrap}
+.fi-regno-source .fi-source-table{border-color:#f2f3f5;border-radius:8px;overflow:auto}
+.fi-regno-source .fi-source-row span{min-height:70px;padding:8px 24px;color:#525866;font-size:14px;line-height:20px;font-weight:400;align-items:center}
+.fi-regno-source .fi-source-row.head span{min-height:54px;background:#f9fafc;color:#222530;font-weight:400;border-bottom-color:#f2f3f5}
+@media(max-width:1440px),(max-height:900px){
+  .fi-regno-source .fi-source-card-body{padding:24px}
+  .fi-reg-route{overflow:auto;padding-bottom:4px}
+  .fi-reg-route-step{min-width:180px}
+  .fi-reg-route-step:last-child{min-width:32px}
+}
+
+
+/* Inbound / Outbound source component alignment */
+.fi-inout-source .fi-source-topbar{padding-inline:8px}
+.fi-inout-source .fi-inout-layout{grid-template-columns:320px minmax(0,1fr);gap:16px;align-items:stretch}
+.fi-inout-source .fi-inout-side{height:562px;display:flex;flex-direction:column;gap:16px}
+.fi-inout-source .fi-inout-summary-card{flex:1 1 0;min-height:0}
+.fi-inout-source .fi-inout-summary-card .fi-source-card-body{gap:8px;padding:16px}
+.fi-inout-source .fi-source-card-title strong{font-size:20px;line-height:30px;font-weight:400;color:#222530}
+.fi-inout-source .fi-card-menu{box-shadow:none;background:#fff;color:#222530;transition:background-color .16s ease,color .16s ease}
+.fi-inout-source .fi-card-menu:hover{background:#f9fafc;color:#222530}
+.fi-inout-source .fi-card-menu:focus{outline:none}
+.fi-inout-source .fi-card-menu:focus-visible{outline:1px solid #cacfd8;outline-offset:2px}
+.fi-inout-source .fi-reference-metric{gap:2px}
+.fi-inout-source .fi-reference-metric-row{align-items:flex-end;padding-inline:0}
+.fi-inout-source .fi-reference-metric-row>div{gap:2px}
+.fi-inout-source .fi-reference-metric-row span{order:1;color:#525866;font-size:14px;line-height:20px}
+.fi-inout-source .fi-reference-metric-row strong{order:2;color:#3b82f6;font-size:36px;line-height:32px;font-weight:400}
+.fi-inout-source .fi-reference-metric-row small{color:#99a0ae;font-size:14px;line-height:20px}
+.fi-inout-source .fi-reference-metric-row em{color:#99a0ae;font-size:14px;line-height:20px;text-decoration:underline;text-underline-offset:2px}
+.fi-inout-source .fi-reference-metric>i{height:6px;background:#e1e4ea;border-radius:8px;margin-block:6px 0}
+.fi-inout-source .fi-reference-metric>i>b{border-radius:8px;background:#3b82f6}
+.fi-inout-source .fi-reference-progress-labels{padding-inline:0;color:#99a0ae;font-size:14px;line-height:20px}
+.fi-inout-source .fi-reference-progress-labels b{color:#3b82f6;font-size:14px;line-height:20px;font-weight:400}
+.fi-mini-stats{display:flex;flex-direction:column;gap:8px;min-width:0;margin-top:auto;color:#525866}
+.fi-mini-stats-head,.fi-mini-stats-row{display:grid;grid-template-columns:var(--fi-mini-cols);align-items:center;gap:8px;min-width:0}
+.fi-mini-stats-head{height:18px;color:#99a0ae;font-size:14px;line-height:20px}
+.fi-mini-stats-head span:not(:first-child){text-align:center}
+.fi-mini-stats::before{content:"";display:block;height:1px;background:#e1e4ea;border-radius:999px;order:1}
+.fi-mini-stats-head{order:0}
+.fi-mini-stats-row{order:2;color:#525866;font-size:14px;line-height:20px}
+.fi-mini-stats-row span:not(:first-child){text-align:center}
+.fi-mini-stats-row.error span{color:#ff3d32}
+.fi-inout-source .fi-reference-kpis{gap:24px;margin-bottom:12px}
+.fi-inout-source .fi-reference-kpis strong{color:#222530;font-size:36px;line-height:44px;font-weight:400}
+.fi-inout-source .fi-reference-kpis small{color:#99a0ae;font-size:14px;line-height:20px;align-self:flex-end;margin-bottom:6px}
+.fi-inout-source .fi-reference-kpis span{color:#717784;font-size:14px;line-height:20px}
+.fi-inout-list{height:562px;min-height:562px}
+.fi-inout-list .fi-source-card-body{padding:16px;gap:12px;overflow:hidden}
+.fi-inout-search-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-inline:8px;flex:0 0 auto}
+.fi-inout-search-row strong{color:#222530;font-size:16px;line-height:24px;font-weight:400}
+.fi-inout-search-row>div{display:flex;align-items:center;gap:8px}
+.fi-inout-search-row button{height:36px;min-width:200px;display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px solid #e1e4ea;border-radius:8px;background:#fff;color:#222530;padding:8px;font:400 14px/20px Geologica,system-ui,sans-serif;box-shadow:none;transition:background-color .16s ease,border-color .16s ease}
+.fi-inout-search-row button:hover{background:#f9fafc;border-color:#cacfd8}
+.fi-flight-matrix{--matrix-cols:132px 104px 80px repeat(3,minmax(56px,1fr)) repeat(3,minmax(56px,1fr)) repeat(2,minmax(56px,1fr));display:grid;grid-template-columns:var(--matrix-cols);align-items:stretch;width:100%;min-width:0;border:1px solid #f2f3f5;border-radius:8px;overflow:auto;background:#fff;flex:1 1 auto}
+.fi-flight-matrix-groups,.fi-flight-matrix-subheads,.fi-flight-matrix-row{display:grid;grid-template-columns:subgrid;grid-column:1/-1}
+.fi-flight-matrix-groups>span,.fi-flight-matrix-subheads>span,.fi-flight-matrix-row>span{display:flex;align-items:center;min-width:0;border-left:1px solid #f2f3f5;border-bottom:1px solid #f2f3f5;padding:16px 12px;color:#525866;font-size:14px;line-height:20px;white-space:normal}
+.fi-flight-matrix-groups>span:first-child,.fi-flight-matrix-subheads>span:first-child,.fi-flight-matrix-row>span:first-child{border-left:0}
+.fi-flight-matrix-groups>span{height:52px;background:#f9fafc;color:#222530;border-bottom-width:2px;padding-inline:24px;font-weight:400}
+.fi-flight-matrix-groups>span:nth-child(1){grid-column:1}
+.fi-flight-matrix-groups>span:nth-child(2){grid-column:2}
+.fi-flight-matrix-groups>span:nth-child(3){grid-column:3}
+.fi-flight-matrix-groups>span:nth-child(4){grid-column:4 / span 3;justify-content:center}
+.fi-flight-matrix-groups>span:nth-child(5){grid-column:7 / span 3;justify-content:center}
+.fi-flight-matrix-groups>span:nth-child(6){grid-column:10 / span 2;justify-content:center}
+.fi-flight-matrix-subheads>span{height:44px;background:#f9fafc;color:#222530;border-bottom-width:2px;justify-content:center;padding:12px;font-weight:400}
+.fi-flight-matrix-subheads>span:nth-child(-n+3){background:#f9fafc;color:transparent}
+.fi-flight-matrix-row>span{height:56px;background:#fff;padding:16px 24px}
+.fi-flight-matrix-row>span.subcell{justify-content:center;padding-inline:12px}
+.fi-flight-matrix-row>span.flight-code{gap:8px;color:#525866}
+.fi-flight-matrix-row>span.flight-code .qc-icon{color:#ff3d32;flex:0 0 auto}
+
+.fi-flight-error-trigger{display:inline-flex;align-items:center;gap:8px;color:inherit;line-height:20px;cursor:help}
+.fi-flight-error-trigger .qc-icon{color:#ff3d32;flex:0 0 auto}
+.fi-flight-matrix-row.error.strong .fi-flight-error-trigger .qc-icon{color:#c90019}
+.fi-flight-matrix-row tk-tooltip{display:inline-flex;max-width:100%}
+.fi-flight-matrix-row tk-tooltip [slot="trigger"]{display:inline-flex;max-width:100%}
+.fi-flight-matrix-row tk-tooltip .tk-tooltip-content{z-index:20}
+.fi-flight-matrix-row tk-tooltip .tk-tooltip-content.tk-tooltip-dark{background:#222530;border-color:#525866}
+.fi-flight-matrix-row tk-tooltip .tk-tooltip-content.tk-tooltip-dark .tk-tooltip-arrow{background:#222530}
+.fi-flight-matrix-row.error.soft>span{background:#fff5f5;color:#ff3d32}
+.fi-flight-matrix-row.error.strong>span{background:#eeb0b8;color:#c90019}
+@media(max-width:1440px),(max-height:900px){
+  .fi-inout-source .fi-inout-layout{grid-template-columns:1fr}
+  .fi-inout-source .fi-inout-side{height:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .fi-inout-list{height:auto;min-height:420px}
+  .fi-inout-list .fi-source-card-body{overflow:auto}
+  .fi-inout-search-row{align-items:flex-start;flex-direction:column}
+  .fi-inout-search-row>div{width:100%;flex-wrap:wrap}
+}
