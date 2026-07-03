@@ -1,15 +1,16 @@
+@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:FILL@0..1");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root { color-scheme: light; --red:#d0021b; --blue:#3b82f6; --ink:#202634; --text:#51596a; --muted:#8b95a8; --line:#e5e9f0; --bg:#f7f9fc; --motion-out:cubic-bezier(.23,1,.32,1); --motion-in-out:cubic-bezier(.77,0,.175,1); --motion-drawer:cubic-bezier(.32,.72,0,1); }
+:root { color-scheme: light; --red:#d0021b; --blue:#3b82f6; --ink:#202634; --text:#51596a; --muted:#8b95a8; --line:#e5e9f0; --bg:#f7f9fc; --motion-out:cubic-bezier(.23,1,.32,1); --motion-in-out:cubic-bezier(.77,0,.175,1); --motion-drawer:cubic-bezier(.32,.72,0,1); --motion-quick:cubic-bezier(.25,1,.5,1); }
 * { box-sizing:border-box; }
 html, body { margin:0; min-width:1180px; min-height:100%; background:var(--bg); color:var(--text); font-family:"Geologica","Segoe UI",Arial,sans-serif; }
 button,input { font:inherit; color:inherit; }
 button { cursor:pointer; }
 button:focus-visible,input:focus-visible { outline:2px solid #3b82f6; outline-offset:2px; }
-.qc-icon { display:inline-flex; align-items:center; justify-content:center; color:inherit; line-height:1; }
-.qc-icon > .tk-icon { color:inherit!important; font-size:inherit!important; }
+.qc-icon { display:inline-flex; align-items:center; justify-content:center; color:inherit; line-height:1; font-family:"Material Symbols Rounded","Material Symbols Outlined",sans-serif; font-weight:normal; font-style:normal; letter-spacing:normal; text-transform:none; white-space:nowrap; word-wrap:normal; direction:ltr; -webkit-font-smoothing:antialiased; font-feature-settings:"liga"; }
 .qc-app { min-height:100dvh; display:grid; grid-template-columns:80px 203px minmax(700px,1fr) 405px; grid-template-rows:80px minmax(1080px,calc(100dvh - 80px)); background:var(--bg); overflow:hidden; transition:grid-template-columns 220ms cubic-bezier(.22,1,.36,1); }
 .qc-app.seatmap-collapsed{grid-template-columns:80px 203px minmax(700px,1fr) 104px}
 .qc-topbar { grid-column:1/-1; display:flex; align-items:center; gap:8px; padding:0 64px 0 68px; border-bottom:1px solid #edf0f4; background:#fff; box-shadow:0 5px 20px rgba(35,45,68,.035); z-index:5; min-width:0; }
@@ -33,10 +34,11 @@ button:focus-visible,input:focus-visible { outline:2px solid #3b82f6; outline-of
 .flight-title { height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 12px }.flight-title h2{margin:0;font-size:24px;font-weight:400;color:#545c6d}.flight-title button{border:0;background:transparent}
 .date-picker{height:33px;display:grid;grid-template-columns:42px 1fr 42px;align-items:center;text-align:center;color:#444c5c;font-size:13px}.date-picker button{height:100%;border:0;background:#fff;color:#121824}
 .sidebar-label{display:block;margin:5px 14px 7px;font-size:12px;color:#202633}.sidebar-label sup{color:var(--red);font-size:12px}.terminal-select{width:calc(100% - 16px);height:34px;margin:0 8px;display:flex;align-items:center;justify-content:space-between;padding:0 8px;border:0;border-radius:8px;background:#f7f9fc;color:#9aa2b3;font-size:12px}.search-label{margin-top:9px}
-.flight-search{height:42px;margin:0 8px 10px;display:flex;align-items:center;border-bottom:1px solid #dfe4ec;padding:0 8px}.flight-search input{width:100%;border:0;outline:0;background:transparent;font-size:13px}.flight-search .qc-icon{color:#626d80}
+.flight-search{height:42px;margin:0 8px 10px;display:flex;align-items:center;border-bottom:1px solid #dfe4ec;padding:0 8px}.flight-search input{width:100%;min-width:0;border:0;outline:0;background:transparent;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.flight-search input::placeholder{color:#8b95a8;opacity:1}.flight-search .qc-icon{color:#626d80}
 .flight-items{position:relative;flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-gutter:stable;padding-right:4px}
 .flight-items::-webkit-scrollbar{width:6px}.flight-items::-webkit-scrollbar-thumb{border-radius:999px;background:#cfd7e3}.flight-items::-webkit-scrollbar-track{background:transparent}
 .flight-item{width:100%;height:58px;display:grid;align-content:center;gap:6px;padding:0 12px;border:0;border-bottom:1px solid #edf0f4;background:#fff;text-align:left;font-size:12px}.flight-item.selected{background:#f3f7ff;box-shadow:inset 0 0 0 1px #82b0ff}.flight-line{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0}.flight-line b{font-weight:500;color:#1e2532}.flight-line em{padding:2px 6px;border-radius:5px;font-style:normal;flex:0 0 auto}.flight-line em.green{background:#bfeecf;color:#168343}.flight-line em.yellow{background:#f7e7aa;color:#966d00}.flight-line time{font-size:11px;flex:0 0 auto}.flight-line time.delayed{color:#e0353f}
+.flight-empty-state{min-height:76px;display:grid;place-items:center;padding:16px;color:#8b95a8;font-size:12px;text-align:center}
 .workspace { grid-column:3; grid-row:2; min-width:0; padding:16px; background:var(--bg); }
 .flight-overview { position:relative;height:230px;border:1px solid #f2f3f5;border-radius:16px;background:#fff;padding:24px 16px;box-shadow:0 1px 2px rgba(35,45,68,.02) }
 .overview-head{display:flex;align-items:center;justify-content:space-between}.overview-head>button{border:0;background:transparent}.overview-title{display:flex;align-items:center;gap:10px;color:#202633;position:relative}.overview-title>strong{font-size:25px;font-weight:500}.overview-title>span{font-size:21px;color:#5a606b}.overview-title>span b{color:#939aaa}.overview-title>.blue{color:#3178e8}.overview-title .overview-route{font-size:25px;font-weight:500;letter-spacing:-.01em}.overview-title em{margin-left:3px;padding:5px 12px;border-radius:6px;background:#c9f0d8;color:#167c43;font-size:13px;font-style:normal}
@@ -457,7 +459,7 @@ button:focus-visible,input:focus-visible { outline:2px solid #3b82f6; outline-of
 .baggage-source .fi-baggage-feature .fi-source-card-body{padding:16px}
 .baggage-source .fi-with-icon .qc-icon{color:#295bac}
 .fi-baggage-passenger-list{display:grid;border:1px solid #f2f3f5;border-radius:8px;background:#fff;overflow:auto}
-.fi-baggage-passenger-head,.fi-baggage-passenger-row{display:grid;grid-template-columns:264px 104px 104px 118px 118px 84px minmax(150px,1fr) 116px;min-width:1062px}
+.fi-baggage-passenger-head,.fi-baggage-passenger-row{display:grid;grid-template-columns:minmax(286px,1.8fr) minmax(92px,.7fr) minmax(82px,.55fr) minmax(112px,.8fr) minmax(96px,.7fr) minmax(68px,.45fr) minmax(96px,.65fr) minmax(112px,.7fr);width:100%;min-width:982px}
 .fi-baggage-passenger-head span{min-height:52px;display:flex;align-items:center;padding:16px 24px;border-right:1px solid #f2f3f5;border-bottom:2px solid #f2f3f5;background:#f9fafc;color:#222530;font-size:14px;line-height:20px;font-weight:400}
 .fi-baggage-passenger-head span:last-child{border-right:0}
 .fi-baggage-passenger-group{display:grid}
@@ -487,6 +489,98 @@ button:focus-visible,input:focus-visible { outline:2px solid #3b82f6; outline-of
   .fi-reference-metric-row small{font-size:20px;line-height:28px}
 }
 
+/* Purposeful motion: state feedback and structural reveals only. */
+.flight-overview,
+.passenger-panel,
+.table-shell{
+  transition:border-color 180ms var(--motion-out),box-shadow 180ms var(--motion-out),background-color 180ms var(--motion-out);
+}
+
+.flight-info-presence{
+  opacity:1;
+  transform:translateY(0);
+  transition:opacity 200ms var(--motion-out),transform 220ms var(--motion-out);
+}
+
+.flight-info-presence[data-state="closed"]{
+  opacity:0;
+  transform:translateY(-6px);
+  pointer-events:none;
+}
+
+@starting-style{
+  .flight-info-presence{
+    opacity:0;
+    transform:translateY(-6px);
+  }
+}
+
+.flight-tab-panel,
+.fi-source-flow,
+.fi-paper-stack{
+  animation:qc-panel-in 180ms var(--motion-out) both;
+}
+
+.passenger-row{
+  transition:background-color 150ms var(--motion-quick),box-shadow 150ms var(--motion-quick),border-color 150ms var(--motion-quick);
+}
+
+.checkbox-core{
+  transition:background-color 150ms var(--motion-quick),transform 150ms var(--motion-quick);
+}
+
+.checkbox.checked .checkbox-core{
+  animation:qc-check-pop 150ms var(--motion-quick) both;
+}
+
+.fi-baggage-passenger-row{
+  transition:opacity 160ms var(--motion-out),transform 180ms var(--motion-out);
+}
+
+.fi-baggage-passenger-row.child{
+  animation:qc-row-in 170ms var(--motion-out) both;
+}
+
+.fi-baggage-passenger-name>button .qc-icon,
+.row-expand .qc-icon,
+.more-overview .qc-icon{
+  transition:transform 170ms var(--motion-out),color 150ms var(--motion-quick);
+}
+
+.passenger-progress .checked-progress,
+.passenger-progress .booked-progress{
+  transition:left 260ms var(--motion-out),width 260ms var(--motion-out),background-color 180ms var(--motion-out);
+}
+
+.seat-map,
+.seat-map-content,
+.seat-title{
+  transition:opacity 180ms var(--motion-out),transform 220ms var(--motion-out);
+}
+
+.qc-app.seatmap-collapsed .seat-map-content,
+.qc-app.seatmap-collapsed .seat-tools,
+.qc-app.seatmap-collapsed .cabin-label{
+  opacity:0;
+  transform:translateX(8px);
+  pointer-events:none;
+}
+
+@keyframes qc-panel-in{
+  from{opacity:0;transform:translateY(6px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+@keyframes qc-row-in{
+  from{opacity:0;transform:translateY(-4px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+@keyframes qc-check-pop{
+  0%{transform:scale(.84)}
+  100%{transform:scale(1)}
+}
+
 
 /* Reg No tab: Paper export alignment */
 .fi-source-card-header button{font-family:Geologica,system-ui,sans-serif}
@@ -501,7 +595,7 @@ button:focus-visible,input:focus-visible { outline:2px solid #3b82f6; outline-of
 .fi-regno-source .fi-source-card-body{padding:48px}
 .fi-regno-source .fi-source-card:nth-child(2) .fi-source-card-body{padding:16px}
 .fi-reg-route{display:flex;align-items:flex-start;width:100%;min-width:0;gap:4px}
-.fi-reg-route-step{display:flex;align-items:flex-start;gap:4px;min-width:0;flex:1 1 0}
+.fi-reg-route-step{position:relative;display:flex;align-items:flex-start;gap:4px;min-width:0;flex:1 1 0;padding-bottom:44px}
 .fi-reg-route-step:last-child{flex:0 0 auto}
 .fi-reg-route-line-wrap{height:32px;display:flex;align-items:center;min-width:0;flex:1 1 auto;gap:4px}
 .fi-reg-route-dot{width:32px;height:32px;border-radius:16px;display:flex;align-items:center;justify-content:center;flex:0 0 32px;background:#fff;outline:2px solid #e1e4ea;outline-offset:-2px;overflow:hidden}
@@ -509,7 +603,7 @@ button:focus-visible,input:focus-visible { outline:2px solid #3b82f6; outline-of
 .fi-reg-route-step.active .fi-reg-route-dot{background:#c90019;outline-color:#c90019}
 .fi-reg-route-step.active .fi-reg-route-dot i{background:#fff}
 .fi-reg-route-line-wrap>b{height:2px;display:block;flex:1 1 auto;background:#e1e4ea;border-radius:999px}
-.fi-reg-route-label{display:flex;flex-direction:column;align-items:center;gap:0;min-width:32px;margin-top:36px;margin-left:-36px;text-align:center}
+.fi-reg-route-label{position:absolute;left:16px;top:40px;display:flex;flex-direction:column;align-items:center;gap:0;min-width:max-content;transform:translateX(-50%);text-align:center}
 .fi-reg-route-label strong{color:#525866;font-size:14px;line-height:20px;font-weight:400}
 .fi-reg-route-label span{color:#717784;font-size:12px;line-height:18px;font-weight:400;white-space:nowrap}
 .fi-regno-source .fi-source-table{border-color:#f2f3f5;border-radius:8px;overflow:auto}
@@ -520,6 +614,7 @@ button:focus-visible,input:focus-visible { outline:2px solid #3b82f6; outline-of
   .fi-reg-route{overflow:auto;padding-bottom:4px}
   .fi-reg-route-step{min-width:180px}
   .fi-reg-route-step:last-child{min-width:32px}
+  .fi-reg-route-label{top:38px}
 }
 
 

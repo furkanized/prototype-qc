@@ -50,26 +50,36 @@ function Icon({
   sign?: boolean;
   variant?: "primary" | "secondary" | "neutral" | "info" | "success" | "danger" | "warning" | "white";
 }) {
-  const props: Record<string, unknown> = {
-    icon,
-    iconType: "rounded",
-    fill,
-    sign,
-    className: `qc-icon ${className}`,
-    "aria-hidden": true,
+  const sizeMap: Record<string, number> = {
+    xxlarge: 40,
+    xlarge: 32,
+    large: 28,
+    medium: 24,
+    base: 20,
+    small: 18,
+    xsmall: 16,
+    xxsmall: 14,
   };
+  const resolvedSize = typeof size === "number" ? size : sizeMap[size] ?? 20;
+  const resolvedClassName = [
+    "qc-icon",
+    sign ? "sign" : "",
+    variant ? `variant-${variant}` : "",
+    className,
+  ].filter(Boolean).join(" ");
 
-  if (typeof size === "number") {
-    props.style = { fontSize: `${size}px` };
-  } else {
-    props.size = size;
-  }
-
-  if (variant) {
-    props.variant = variant;
-  }
-
-  return createElement("tk-icon", props);
+  return (
+    <span
+      className={resolvedClassName}
+      aria-hidden="true"
+      style={{
+        fontSize: `${resolvedSize}px`,
+        fontVariationSettings: fill ? "\"FILL\" 1, \"wght\" 400, \"GRAD\" 0, \"opsz\" 24" : "\"FILL\" 0, \"wght\" 400, \"GRAD\" 0, \"opsz\" 24",
+      }}
+    >
+      {icon}
+    </span>
+  );
 }
 
 
@@ -318,7 +328,7 @@ type PassengerRecord = {
   tier: Tier;
 };
 
-const passengersByFlight = {
+const curatedPassengersByFlight = {
   TK2070: [
     { name: "Furkan", surname: "AYIN", pnr: "A1B2C3", group: "232", seat: "23A", ci: "checked", avatar: "man", baggage: "normal", baggageInfo: { pieces: 1, kg: 18, allowanceKg: 23, paid: false }, apis: "empty", message: 0, tier: "Elite" },
     { name: "Nesibe", surname: "AYIN", pnr: "NO REC", group: "438", seat: "11A", ci: "pending", avatar: "woman", baggage: "alert", baggageInfo: { pieces: 1, kg: 31, allowanceKg: 23, paid: false }, apis: "empty", message: 2, tier: "Classic" },
@@ -338,7 +348,145 @@ const passengersByFlight = {
   ],
 } satisfies Record<string, PassengerRecord[]>;
 
-type Passenger = typeof passengersByFlight[keyof typeof passengersByFlight][number];
+type Passenger = PassengerRecord;
+
+const generatedPassengerFirstNames = [
+  "Deniz",
+  "Selin",
+  "Kerem",
+  "Ece",
+  "Mina",
+  "Baran",
+  "Lara",
+  "Arda",
+  "Irem",
+  "Umut",
+  "Zeynep",
+  "Berk",
+  "Seda",
+  "Mert",
+  "Elif",
+  "Bora",
+  "Derya",
+  "Emre",
+  "Ceren",
+  "Can",
+] as const;
+
+const generatedPassengerSurnames = [
+  "Yilmaz",
+  "Demir",
+  "Arikan",
+  "Koc",
+  "Aslan",
+  "Kilic",
+  "Sahin",
+  "Polat",
+  "Celik",
+  "Aydin",
+  "Yildiz",
+  "Gunes",
+  "Tas",
+  "Kurt",
+  "Acar",
+  "Arslan",
+  "Kaya",
+  "Ozkan",
+  "Toprak",
+  "Eren",
+] as const;
+
+const generatedPassengerAvatars = ["man", "woman", "woman dark"] as const;
+
+function seededNumber(input: string) {
+  return Array.from(input).reduce((total, char, index) => total + char.charCodeAt(0) * (index + 17), 0);
+}
+
+function createPnr(seed: number, index: number) {
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+  return `${alphabet[(seed + index) % alphabet.length]}${(seed + index * 7) % 10}${alphabet[(seed + index * 3) % alphabet.length]}${(seed + index * 5) % 10}${alphabet[(seed + index * 11) % alphabet.length]}${(seed + index * 13) % 10}`;
+}
+
+function getAircraftCapacity(flight: FlightRecord) {
+  if (flight.regNo.includes("B787") || flight.regNo.includes("A330")) return 260;
+  if (flight.regNo.includes("A321")) return 190;
+  if (flight.regNo.includes("A320")) return 168;
+  if (flight.regNo.includes("B737")) return 162;
+  return 200;
+}
+
+function getBookedPassengerTarget(flight: FlightRecord) {
+  const remainingSeats = Number.parseInt(flight.seats, 10) || 0;
+  const capacity = getAircraftCapacity(flight);
+  return Math.max(48, Math.min(capacity - 8, capacity - remainingSeats));
+}
+
+function createGeneratedPassenger(flight: FlightRecord, seed: number, index: number, targetCount: number, usedNames: Set<string>): PassengerRecord {
+  let attempt = 0;
+  let firstName = generatedPassengerFirstNames[0];
+  let surname = generatedPassengerSurnames[0];
+  let avatar = generatedPassengerAvatars[0];
+
+  while (attempt < generatedPassengerFirstNames.length * generatedPassengerSurnames.length) {
+    firstName = generatedPassengerFirstNames[(seed + index * 7 + attempt * 3) % generatedPassengerFirstNames.length];
+    surname = generatedPassengerSurnames[(seed * 5 + index * 11 + attempt) % generatedPassengerSurnames.length];
+    const candidate = `${firstName} ${surname}`;
+    if (!usedNames.has(candidate)) {
+      usedNames.add(candidate);
+      avatar = generatedPassengerAvatars[(seed + index + attempt) % generatedPassengerAvatars.length];
+      break;
+    }
+    attempt += 1;
+  }
+
+  if (attempt >= generatedPassengerFirstNames.length * generatedPassengerSurnames.length) {
+    firstName = generatedPassengerFirstNames[(seed + index) % generatedPassengerFirstNames.length];
+    surname = `${generatedPassengerSurnames[(seed + index) % generatedPassengerSurnames.length]} ${index + 1}`;
+    avatar = generatedPassengerAvatars[(seed + index) % generatedPassengerAvatars.length];
+    usedNames.add(`${firstName} ${surname}`);
+  }
+
+  const businessTarget = Math.max(8, Math.round(targetCount * 0.16));
+  const business = index < businessTarget;
+  const row = business ? 1 + (index % 5) : 6 + ((seed + index * 3) % 30);
+  const letter = ["A", "B", "C", "D", "E", "F"][(seed + index) % 6];
+  const pieces = 1 + ((seed + index) % 8 === 0 ? 1 : 0);
+  const allowanceKg = business ? 32 : pieces > 1 ? 30 : 23;
+  const overweight = (seed + index * 7) % 9 === 0;
+  const kg = overweight ? allowanceKg + 4 + ((seed + index) % 9) : Math.max(8, allowanceKg - 10 + ((seed + index * 5) % 13));
+  const checkedTarget = Math.round(targetCount * (flight.tone === "yellow" ? 0.58 : 0.72));
+
+  return {
+    name: firstName,
+    surname,
+    pnr: createPnr(seed, index),
+    group: String(100 + ((seed + index * 31) % 800)),
+    seat: `${row}${letter}`,
+    ci: index < checkedTarget ? "checked" : "pending",
+    avatar,
+    baggage: overweight ? "alert" : index % 7 === 0 ? "muted" : "normal",
+    baggageInfo: { pieces, kg, allowanceKg, paid: overweight && index % 2 === 0 },
+    apis: index % 5 === 0 ? "empty" : "filled",
+    message: index % 13 === 1 ? 1 + (seed % 3) : 0,
+    tier: index % 6 === 0 ? "Elite" : "Classic",
+  };
+}
+
+function createPassengersForFlight(flight: FlightRecord): PassengerRecord[] {
+  const seed = seededNumber(flight.code + flight.route);
+  const targetCount = getBookedPassengerTarget(flight);
+  const curated = curatedPassengersByFlight[flight.code as keyof typeof curatedPassengersByFlight] ?? [];
+  const usedNames = new Set(curated.map((passenger) => `${passenger.name} ${passenger.surname}`));
+  const generated = Array.from({ length: Math.max(0, targetCount - curated.length) }, (_, index) =>
+    createGeneratedPassenger(flight, seed, index + curated.length, targetCount, usedNames),
+  );
+  return [...curated, ...generated];
+}
+
+const passengersByFlight = flights.reduce<Record<string, PassengerRecord[]>>((allPassengers, flight) => {
+  allPassengers[flight.code] = createPassengersForFlight(flight);
+  return allPassengers;
+}, {});
 
 function Logo() {
   return <div className="qc-logo" aria-label="QC"><img src={qcMark} alt="" /><img src={qcText} alt="" /></div>;
@@ -402,6 +550,21 @@ function AppRail() {
 }
 
 function FlightList({ selected, onSelect }: { selected: number; onSelect: (index: number) => void }) {
+  const [query, setQuery] = useState("");
+  const normalizedQuery = query.trim().toLowerCase();
+  const visibleFlights = flights
+    .map((flight, index) => ({ flight, index }))
+    .filter(({ flight }) => {
+      if (!normalizedQuery) return true;
+      return [
+        flight.code,
+        flight.route,
+        flight.time,
+        flight.state,
+        flight.regNo,
+      ].join(" ").toLowerCase().includes(normalizedQuery);
+    });
+
   return (
     <aside className="flight-sidebar">
       <div className="flight-title"><h2>Flight List</h2><button aria-label="Uçuş listesi seçenekleri"><Icon icon="more_horiz" size={22} /></button></div>
@@ -409,14 +572,15 @@ function FlightList({ selected, onSelect }: { selected: number; onSelect: (index
       <label className="sidebar-label">Select<sup>*</sup></label>
       <button className="terminal-select">Terminal <Icon icon="keyboard_arrow_up" size={17} /></button>
       <label className="sidebar-label search-label">Search<sup>*</sup></label>
-      <label className="flight-search"><input defaultValue="IST" aria-label="Uçuş ara" /><Icon icon="search" size={19} /></label>
+      <label className="flight-search"><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Airport, flight code, time..." aria-label="Uçuş ara" /><Icon icon="search" size={19} /></label>
       <div className="flight-items">
-        {flights.map((flight, index) => (
+        {visibleFlights.map(({ flight, index }) => (
           <button key={flight.code} className={`flight-item ${selected === index ? "selected" : ""}`} onClick={() => onSelect(index)}>
             <span className="flight-line"><b>{flight.code}</b><em className={flight.tone}>{flight.state}</em></span>
             <span className="flight-line"><FlightRoute route={flight.route} /><time className={flight.time.includes("/") ? "delayed" : ""}>{flight.time}</time></span>
           </button>
         ))}
+        {visibleFlights.length === 0 && <div className="flight-empty-state">Uçuş bulunamadı</div>}
       </div>
     </aside>
   );
@@ -471,15 +635,19 @@ const operationRows = [
   { item: "Load Sheet", owner: "DCS", time: "17:10", state: "Waiting" },
 ];
 
-function FlightOverview({ flight, expanded, onExpandedChange }: { flight: typeof flights[number]; expanded: boolean; onExpandedChange: (expanded: boolean) => void }) {
+function FlightOverview({ flight, passengers, expanded, onExpandedChange }: { flight: FlightRecord; passengers: Passenger[]; expanded: boolean; onExpandedChange: (expanded: boolean) => void }) {
   const [activeTab, setActiveTab] = useState<FlightInfoTab>("flight");
+  const expandedPresence = useAnimatedPresence(expanded, 220);
+  const stats = getFlightStats(flight, passengers);
+  const checkedWidth = stats.totalPassenger ? Math.round((stats.checked / stats.totalPassenger) * 100) : 0;
+  const bookedRemainderWidth = stats.totalPassenger ? Math.round(((stats.booked - stats.checked) / stats.totalPassenger) * 100) : 0;
 
   useEffect(() => {
     if (!expanded) setActiveTab("flight");
   }, [expanded]);
 
   return (
-    <section className={`flight-overview ${expanded ? "expanded" : ""}`}>
+    <section className={`flight-overview ${expandedPresence.isMounted ? "expanded" : ""}`}>
       <div className="overview-head">
         <div className="overview-title">
           <Icon icon="flight" size={25} fill />
@@ -490,11 +658,11 @@ function FlightOverview({ flight, expanded, onExpandedChange }: { flight: typeof
         </div>
         <button aria-label="Uçuş seçenekleri"><Icon icon="more_horiz" size={23} /></button>
       </div>
-      <div className="cabin-counts"><span>Economy 150</span><span>Business 50</span><span>Total Passenger 200</span></div>
+      <div className="cabin-counts"><span>Economy {stats.economy}</span><span>Business {stats.business}</span><span>Total Passenger {stats.totalPassenger}</span></div>
       <div className="passenger-progress flight-progress-expanded">
-        <div className="checked-progress"><span><Icon icon="expand_circle_down" size={18} />Passengers</span><span>100 Checked-In <Icon icon="person" size={17} fill /></span></div>
-        <div className="booked-progress"><span>100 Booked <Icon icon="person" size={17} fill /></span></div>
-        <span className="remaining">300 Seats Remain</span>
+        <div className="checked-progress" style={{ width: `${checkedWidth}%` }}><span><Icon icon="expand_circle_down" size={18} />Passengers</span><span>{stats.checked} Checked-In <Icon icon="person" size={17} fill /></span></div>
+        <div className="booked-progress" style={{ left: `${checkedWidth}%`, width: `${bookedRemainderWidth}%` }}><span>{stats.booked} Booked <Icon icon="person" size={17} fill /></span></div>
+        <span className="remaining">{stats.remainingSeats} Seats Remain</span>
       </div>
       <div className="flight-facts">
         <div><small>Gate <Icon icon="edit" size={14} /></small><b>{flight.gate}</b></div>
@@ -504,8 +672,10 @@ function FlightOverview({ flight, expanded, onExpandedChange }: { flight: typeof
         <div><small>Reg No/ Uçak Tipi <Icon icon="edit" size={14} /></small><b>{flight.regNo}</b></div>
         <div><small>Anons Zamanı</small><b className="danger">{flight.announceTime}</b></div>
       </div>
-      {expanded && (
-        <FlightInfoExpandedContent flight={flight} activeTab={activeTab} onTabChange={setActiveTab} />
+      {expandedPresence.isMounted && (
+        <div className="flight-info-presence" data-state={expandedPresence.isVisible ? "open" : "closed"}>
+          <FlightInfoExpandedContent flight={flight} passengers={passengers} activeTab={activeTab} onTabChange={setActiveTab} />
+        </div>
       )}
       <button type="button" className="more-overview" aria-expanded={expanded} onClick={() => onExpandedChange(!expanded)}>
         More <Icon icon={expanded ? "expand_less" : "keyboard_arrow_down"} size={14} />
@@ -595,28 +765,37 @@ function OverviewRouteSelector({ flight }: { flight: FlightRecord }) {
   );
 }
 
-function FlightInfoTabContent({ tabId }: { tabId: FlightInfoTab }) {
+function FlightInfoTabContent({ tabId, flight, passengers }: { tabId: FlightInfoTab; flight: FlightRecord; passengers: Passenger[] }) {
   switch (tabId) {
     case "flight":
-      return <FlightInfoGeneralTab />;
+      return <FlightInfoGeneralTab flight={flight} passengers={passengers} />;
     case "inout":
-      return <InboundOutboundTab />;
+      return <InboundOutboundTab flight={flight} passengers={passengers} />;
     case "emd":
-      return <EmdEbitTab />;
+      return <EmdEbitTab passengers={passengers} />;
     case "baggage":
-      return <BaggageInfoTab />;
+      return <BaggageInfoTab flight={flight} passengers={passengers} />;
     case "ops":
-      return <OperationsTab />;
+      return <OperationsTab flight={flight} />;
     case "reg":
-      return <RegNoFlightsTab />;
+      return <RegNoFlightsTab flight={flight} />;
     default:
       return null;
   }
 }
 
-function FlightInfoExpandedContent({ flight, activeTab, onTabChange }: { flight: typeof flights[number]; activeTab: FlightInfoTab; onTabChange: (tab: FlightInfoTab) => void }) {
+function FlightInfoExpandedContent({ flight, passengers, activeTab, onTabChange }: { flight: FlightRecord; passengers: Passenger[]; activeTab: FlightInfoTab; onTabChange: (tab: FlightInfoTab) => void }) {
   const tabsRef = useRef<HTMLElement | null>(null);
   const activeTabIndex = Math.max(0, flightInfoTabs.findIndex((tab) => tab.id === activeTab));
+  const stats = getFlightStats(flight, passengers);
+  const expandedStats = [
+    { label: "Codeshare", value: `${flight.code.replace("TK", "AV")}..` },
+    { label: "Kalkış Zamanı", value: flight.boardingTime },
+    { label: "Ekip Bilgisi", value: `${Math.max(2, Math.ceil(stats.booked / 3))} / ${Math.max(3, Math.ceil(stats.totalPassenger / 45))}` },
+    { label: "Uçuş Süresi", value: flight.time.includes("/") ? "5 sa 30 dk" : "3 sa 20 dk" },
+    { label: "Available Jumpseat", value: String(Math.max(0, Math.floor(stats.remainingSeats / 20))) },
+    { label: "Booked Passenger", value: String(stats.booked) },
+  ];
 
   useEffect(() => {
     const tabs = tabsRef.current;
@@ -639,7 +818,7 @@ function FlightInfoExpandedContent({ flight, activeTab, onTabChange }: { flight:
   return (
     <div className="flight-info-expanded-content">
       <div className="flight-extra-facts">
-        {flightInfoStats.map((item, index) => (
+        {expandedStats.map((item, index) => (
           <div key={`${item.label}-${index}`}>
             <small>{item.label}</small>
             <b>{item.value}</b>
@@ -670,7 +849,7 @@ function FlightInfoExpandedContent({ flight, activeTab, onTabChange }: { flight:
                 badged: true,
                 badgeCount: tab.badgeCount,
               },
-              activeTabIndex === index ? <FlightInfoTabContent tabId={tab.id} /> : null,
+              activeTabIndex === index ? <FlightInfoTabContent tabId={tab.id} flight={flight} passengers={passengers} /> : null,
             ),
           ),
         )}
@@ -726,7 +905,9 @@ function FlightInfoSourceCard({ title, icon, children, className = "", menu = tr
   );
 }
 
-function FlightInfoMetric({ label, value, total, remaining, progress, caption = "89% Tamamlandı" }: { label: string; value: string; total?: string; remaining?: string; progress?: number; caption?: string }) {
+function FlightInfoMetric({ label, value, total, remaining, progress, caption }: { label: string; value: string; total?: string; remaining?: string; progress?: number; caption?: string }) {
+  const progressCaption = caption ?? (typeof progress === "number" ? `${progress}% Tamamlandı` : "");
+
   return (
     <div className="fi-reference-metric">
       <div className="fi-reference-metric-row">
@@ -739,7 +920,7 @@ function FlightInfoMetric({ label, value, total, remaining, progress, caption = 
       {typeof progress === "number" && (
         <>
           <i><b style={{ width: `${Math.min(100, Math.max(0, progress))}%` }} /></i>
-          <div className="fi-reference-progress-labels"><span>0%</span><b>{caption}</b></div>
+          <div className="fi-reference-progress-labels"><span>0%</span><b>{progressCaption}</b></div>
         </>
       )}
     </div>
@@ -779,6 +960,70 @@ function FlightInfoSubsectionMetrics({
   );
 }
 
+function routeAirportCodes(route: string) {
+  return route.split("›").map((part) => part.trim()).filter(Boolean);
+}
+
+function getPassengerCabin(passenger: Passenger) {
+  const row = Number.parseInt(passenger.seat, 10);
+  return Number.isFinite(row) && row <= 5 ? "business" : "economy";
+}
+
+function getFlightStats(flight: FlightRecord, passengers: Passenger[]) {
+  const checked = passengers.filter((passenger) => passenger.ci === "checked");
+  const business = passengers.filter((passenger) => getPassengerCabin(passenger) === "business");
+  const economy = passengers.filter((passenger) => getPassengerCabin(passenger) === "economy");
+  const businessChecked = business.filter((passenger) => passenger.ci === "checked").length;
+  const economyChecked = economy.filter((passenger) => passenger.ci === "checked").length;
+  const pieces = passengers.reduce((total, passenger) => total + passenger.baggageInfo.pieces, 0);
+  const kilograms = passengers.reduce((total, passenger) => total + passenger.baggageInfo.kg, 0);
+  const paidOverweight = passengers.filter((passenger) => passenger.baggageInfo.paid).length;
+  const unpaidOverweight = passengers.filter((passenger) => passenger.baggageInfo.kg > passenger.baggageInfo.allowanceKg && !passenger.baggageInfo.paid).length;
+  const remainingSeats = Number.parseInt(flight.seats, 10) || 0;
+  const booked = passengers.length;
+  const totalPassenger = booked + remainingSeats;
+  const progress = booked ? Math.round((checked.length / booked) * 100) : 0;
+
+  return {
+    booked,
+    checked: checked.length,
+    pending: booked - checked.length,
+    business: business.length,
+    economy: economy.length,
+    businessChecked,
+    economyChecked,
+    pieces,
+    kilograms,
+    paidOverweight,
+    unpaidOverweight,
+    remainingSeats,
+    totalPassenger,
+    progress,
+  };
+}
+
+function buildConnectionRows(flight: FlightRecord, passengers: Passenger[], inbound: boolean): FlightLegMatrixRow[] {
+  const [from = "IST", to = "AMS"] = routeAirportCodes(flight.route);
+  const seed = seededNumber(flight.code + (inbound ? "IN" : "OUT"));
+  const destinations = inbound ? [from, "IST", to] : [to, "IST", from];
+  const prefixes = inbound ? [1, 8, 6] : [18, 10, 19];
+  return destinations.map((destination, index) => {
+    const expectedC = Math.max(0, Math.min(3, Math.round(passengers.filter((passenger) => getPassengerCabin(passenger) === "business").length / 2) + index - 1));
+    const expectedY = Math.max(1, passengers.filter((passenger) => getPassengerCabin(passenger) === "economy").length + ((seed + index) % 4) - 1);
+    const checkedC = Math.max(0, expectedC - ((seed + index) % 2));
+    const checkedY = Math.max(0, expectedY - (index === 1 ? 2 : (seed + index) % 2));
+    const shortY = Math.max(0, expectedY - checkedY);
+    return {
+      flight: `TK${String(prefixes[index] * 100 + ((seed + index * 17) % 90)).padStart(4, "0")}`,
+      destination,
+      time: index === 0 ? flight.boardingTime : index === 1 ? flight.arrivalTime : flight.announceTime,
+      expected: [String(expectedC), String(expectedY), String((seed + index) % 2)],
+      checked: [String(checkedC), String(checkedY), "0"],
+      short: [String(Math.max(0, expectedC - checkedC)), String(shortY)],
+      error: shortY > 2 ? "soft" : undefined,
+    };
+  });
+}
 
 function FiBadge({ children, tone = "neutral" }: { children: ReactNode; tone?: "neutral" | "blue" | "green" | "yellow" | "red" }) {
   return <em className={`fi-badge ${tone}`}>{children}</em>;
@@ -801,19 +1046,57 @@ function SourceTable({ columns, rows, widths, compact = false }: { columns: stri
 
 const baggagePassengerColumns = ["Yolcu Adı", "Şehir", "Pool ID", "Bagaj Hakkı", "Verilen Ba...", "Fark", "Özellikli B...", "Action"];
 
-function BaggagePassengerList() {
-  const [expandedPools, setExpandedPools] = useState<Set<string>>(() => new Set(baggagePassengerRows.filter((row) => row.children?.length).map((row) => row.id)));
+function createBaggagePassengerRows(passengers: Passenger[]): BaggagePassengerListRow[] {
+  const toRow = (passenger: Passenger, index: number, poolId = passenger.group): BaggagePassengerListRow => {
+    const diff = passenger.baggageInfo.allowanceKg - passenger.baggageInfo.kg;
+    return {
+      id: `${passenger.pnr}-${index}`,
+      name: passengerFullName(passenger),
+      city: passenger.surname.charAt(0) < "M" ? "Istanbul" : "Ankara",
+      poolId,
+      allowance: `${passenger.baggageInfo.pieces} pc /${passenger.baggageInfo.allowanceKg} kg`,
+      issued: String(passenger.baggageInfo.kg),
+      diff: String(diff),
+      special: passenger.baggageInfo.kg > passenger.baggageInfo.allowanceKg ? "OVER - KG" : "0",
+      commentTone: passenger.message > 0 ? "success" : "muted",
+      action: passenger.baggageInfo.kg > passenger.baggageInfo.allowanceKg && !passenger.baggageInfo.paid ? "pay" : undefined,
+    };
+  };
+
+  if (passengers.length < 3) return passengers.map((passenger, index) => toRow(passenger, index));
+
+  const poolId = passengers[0].group;
+  return [
+    {
+      ...toRow(passengers[0], 0, poolId),
+      id: `${passengers[0].pnr}-hop`,
+      isHead: true,
+      children: passengers.slice(1, 3).map((passenger, index) => toRow(passenger, index + 1, poolId)),
+    },
+    ...passengers.slice(3).map((passenger, index) => toRow(passenger, index + 3)),
+  ];
+}
+
+function BaggagePassengerList({ rows }: { rows: BaggagePassengerListRow[] }) {
+  const [expandedPools, setExpandedPools] = useState<Set<string>>(() => new Set(rows.filter((row) => row.children?.length).map((row) => row.id)));
   const [query, setQuery] = useState("");
   const [showHeadsOnly, setShowHeadsOnly] = useState(false);
   const normalizedQuery = query.trim().toLowerCase();
+
+  useEffect(() => {
+    setExpandedPools(new Set(rows.filter((row) => row.children?.length).map((row) => row.id)));
+    setQuery("");
+    setShowHeadsOnly(false);
+  }, [rows]);
+
   const visibleRows = useMemo(() => {
-    return baggagePassengerRows.filter((row) => {
+    return rows.filter((row) => {
       if (showHeadsOnly && !row.isHead) return false;
       if (!normalizedQuery) return true;
       const haystack = [row.name, row.city, row.poolId, ...(row.children ?? []).flatMap((child) => [child.name, child.city, child.poolId])].join(" ").toLowerCase();
       return haystack.includes(normalizedQuery);
     });
-  }, [normalizedQuery, showHeadsOnly]);
+  }, [normalizedQuery, rows, showHeadsOnly]);
 
   const togglePool = (poolId: string) => {
     setExpandedPools((current) => {
@@ -910,90 +1193,6 @@ type BaggagePassengerListRow = {
   isHead?: boolean;
   children?: BaggagePassengerListRow[];
 };
-
-const baggagePassengerRows: BaggagePassengerListRow[] = [
-  {
-    id: "hop-canan",
-    name: "Canan Arslan",
-    city: "Antalya",
-    poolId: "583",
-    allowance: "2 pc /25 kg",
-    issued: "-10",
-    diff: "15",
-    special: "BIKE - 8 KG",
-    commentTone: "muted",
-    action: "pay",
-    isHead: true,
-    children: [
-      {
-        id: "ahmet-reha",
-        name: "Ahmet Reha Arslan",
-        city: "Antalya",
-        poolId: "583",
-        allowance: "2 pc /25 kg",
-        issued: "10",
-        diff: "15",
-        special: "BIKE - 8 KG",
-        commentTone: "muted",
-      },
-      {
-        id: "seher-gul",
-        name: "Seher Gül Arslan",
-        city: "Antalya",
-        poolId: "583",
-        allowance: "2 pc /25 kg",
-        issued: "10",
-        diff: "15",
-        special: "BIKE - 8 KG",
-        commentTone: "success",
-      },
-    ],
-  },
-  {
-    id: "minure-kul",
-    name: "Minüre Kul",
-    city: "Kilis",
-    poolId: "154",
-    allowance: "2 pc /25 kg",
-    issued: "10",
-    diff: "15",
-    special: "0",
-    commentTone: "muted",
-  },
-  {
-    id: "beril-darbaz",
-    name: "Beril Darbaz",
-    city: "Muş",
-    poolId: "53",
-    allowance: "2 pc /25 kg",
-    issued: "10",
-    diff: "15",
-    special: "0",
-    commentTone: "muted",
-  },
-  {
-    id: "balli-mahmudiye",
-    name: "Ballı Mahmudiye",
-    city: "İzmir",
-    poolId: "694",
-    allowance: "2 pc /25 kg",
-    issued: "10",
-    diff: "15",
-    special: "0",
-    commentTone: "muted",
-  },
-  {
-    id: "bulent-serttas",
-    name: "Bülent Serttaş",
-    city: "Kastamonu",
-    poolId: "346",
-    allowance: "1 pc /25 kg",
-    issued: "10",
-    diff: "15",
-    special: "0",
-    commentTone: "muted",
-  },
-];
 
 type FlightLegMatrixRow = {
   flight: string;
@@ -1112,38 +1311,52 @@ function FlightLegMatrix({ rows }: { rows: FlightLegMatrixRow[] }) {
   );
 }
 
-function FlightInfoGeneralTab() {
+function FlightInfoGeneralTab({ flight, passengers }: { flight: FlightRecord; passengers: Passenger[] }) {
+  const stats = getFlightStats(flight, passengers);
+  const male = passengers.filter((passenger) => passenger.avatar === "man").length;
+  const female = passengers.length - male;
+  const businessAvailable = Math.max(0, Math.round(stats.remainingSeats * 0.18));
+  const economyAvailable = Math.max(0, stats.remainingSeats - businessAvailable);
+  const verified = passengers.filter((passenger) => passenger.apis === "filled").length;
+  const unverified = passengers.length - verified;
+
   return (
     <div className="fi-source-flow fi-flight-info-source">
       <FlightInfoTopActions />
       <div className="fi-reference-grid two">
         <FlightInfoSourceCard title="Boarded Yolcu Sayısı" icon="flight">
-          <FlightInfoMetric label="Boarded" value="200" total="259" remaining="59 Kalan" progress={89} />
-          <SourceTable columns={["Kategori", "C", "Y"]} rows={[["Checked-in", "50", "50"], ["Boarded", "150", "150"], ["Infant", "0", "2"], ["Ön Kontrol", "45", "0"]]} compact />
+          <FlightInfoMetric label="Boarded" value={String(stats.checked)} total={String(stats.booked)} remaining={`${stats.pending} Kalan`} progress={stats.progress} />
+          <SourceTable columns={["Kategori", "C", "Y"]} rows={[["Checked-in", String(stats.businessChecked), String(stats.economyChecked)], ["Booked", String(stats.business), String(stats.economy)], ["Infant", "0", String(Math.max(0, Math.floor(stats.economy / 6)))], ["Ön Kontrol", String(Math.max(0, stats.business - stats.businessChecked)), String(Math.max(0, stats.economy - stats.economyChecked))]]} compact />
         </FlightInfoSourceCard>
         <FlightInfoSourceCard title="Uçuş Özeti" icon="flight">
-          <SourceTable columns={["Sınıf", "C", "Y"]} rows={[["Available", "4", "23"], ["Booked", "15", "129"], ["Accepted", "1", "14"], ["On STB", "0", "0"], ["Z Bloke", "0", "0"]]} compact />
+          <SourceTable columns={["Sınıf", "C", "Y"]} rows={[["Available", String(businessAvailable), String(economyAvailable)], ["Booked", String(stats.business), String(stats.economy)], ["Accepted", String(stats.businessChecked), String(stats.economyChecked)], ["On STB", "0", String(Math.max(0, stats.pending - 1))], ["Z Bloke", String(stats.unpaidOverweight), "0"]]} compact />
         </FlightInfoSourceCard>
         <FlightInfoSourceCard title="Yolcu İstatistikleri" icon="person">
-          <SourceTable columns={["Sınıf", "C", "Y"]} rows={[["Male", "4", "16"], ["Female", "23", "129"], ["Child", "0", "0"], ["Infant", "4", "24"]]} compact />
+          <SourceTable columns={["Sınıf", "C", "Y"]} rows={[["Male", String(Math.min(male, stats.business)), String(Math.max(0, male - stats.business))], ["Female", String(Math.max(0, stats.business - Math.min(male, stats.business))), String(Math.max(0, female - Math.max(0, stats.business - Math.min(male, stats.business))))], ["Child", "0", String(Math.max(0, Math.floor(stats.booked / 8)))], ["Infant", "0", String(Math.max(0, Math.floor(stats.booked / 10)))]]} compact />
         </FlightInfoSourceCard>
         <FlightInfoSourceCard title="Kapasite Bilgisi" icon="groups">
-          <SourceTable columns={["Sınıf", "C", "Y"]} rows={[["Kapasite / Doluluk (182)", "20", "162"], ["Giden (Transfer From)", "0", "0"], ["Giden (Transfer To)", "0", "0"], ["Real Availability", "4", "24"]]} compact />
+          <SourceTable columns={["Sınıf", "C", "Y"]} rows={[[`Kapasite / Doluluk (${stats.totalPassenger})`, String(stats.business + businessAvailable), String(stats.economy + economyAvailable)], ["Giden (Transfer From)", String(Math.floor(stats.business / 3)), String(Math.floor(stats.economy / 4))], ["Giden (Transfer To)", String(Math.floor(stats.business / 4)), String(Math.floor(stats.economy / 5))], ["Real Availability", String(businessAvailable), String(economyAvailable)]]} compact />
         </FlightInfoSourceCard>
         <FlightInfoSourceCard title="Doğrulanmamış Yolcu Sayısı" icon="manage_accounts">
-          <SourceTable columns={["Sınıf", "C", "Y"]} rows={[["Toplam", "16", "2"], ["Doğrulanmış", "129", "18"], ["Doğrulanmamış", "0", "21"]]} compact />
+          <SourceTable columns={["Sınıf", "C", "Y"]} rows={[["Toplam", String(stats.business), String(stats.economy)], ["Doğrulanmış", String(Math.min(verified, stats.business)), String(Math.max(0, verified - stats.business))], ["Doğrulanmamış", String(Math.max(0, stats.business - Math.min(verified, stats.business))), String(Math.max(0, unverified - Math.max(0, stats.business - Math.min(verified, stats.business))))]]} compact />
         </FlightInfoSourceCard>
         <FlightInfoSourceCard title="Bagaj İstatistikleri" icon="luggage">
-          <SourceTable columns={["Sınıf", "C", "Y"]} rows={[["Piece", "4", "16"], ["Weight", "23", "129"]]} compact />
+          <SourceTable columns={["Sınıf", "C", "Y"]} rows={[["Piece", String(passengers.filter((passenger) => getPassengerCabin(passenger) === "business").reduce((sum, passenger) => sum + passenger.baggageInfo.pieces, 0)), String(passengers.filter((passenger) => getPassengerCabin(passenger) === "economy").reduce((sum, passenger) => sum + passenger.baggageInfo.pieces, 0))], ["Weight", String(passengers.filter((passenger) => getPassengerCabin(passenger) === "business").reduce((sum, passenger) => sum + passenger.baggageInfo.kg, 0)), String(passengers.filter((passenger) => getPassengerCabin(passenger) === "economy").reduce((sum, passenger) => sum + passenger.baggageInfo.kg, 0))]]} compact />
         </FlightInfoSourceCard>
       </div>
     </div>
   );
 }
 
-function InboundOutboundTab() {
+function InboundOutboundTab({ flight, passengers }: { flight: FlightRecord; passengers: Passenger[] }) {
   const [direction, setDirection] = useState<"outbound" | "inbound">("outbound");
   const isInbound = direction === "inbound";
+  const stats = getFlightStats(flight, passengers);
+  const businessBags = passengers.filter((passenger) => getPassengerCabin(passenger) === "business").reduce((sum, passenger) => sum + passenger.baggageInfo.pieces, 0);
+  const economyBags = passengers.filter((passenger) => getPassengerCabin(passenger) === "economy").reduce((sum, passenger) => sum + passenger.baggageInfo.pieces, 0);
+  const businessWeight = passengers.filter((passenger) => getPassengerCabin(passenger) === "business").reduce((sum, passenger) => sum + passenger.baggageInfo.kg, 0);
+  const economyWeight = passengers.filter((passenger) => getPassengerCabin(passenger) === "economy").reduce((sum, passenger) => sum + passenger.baggageInfo.kg, 0);
+  const connectionRows = buildConnectionRows(flight, passengers, isInbound);
 
   return (
     <div className="fi-source-flow fi-inout-source">
@@ -1156,12 +1369,12 @@ function InboundOutboundTab() {
       <div className="fi-inout-layout">
         <div className="fi-inout-side">
           <FlightInfoSourceCard title="Yolcu Sayısı" icon="person" className="fi-inout-summary-card">
-            <FlightInfoMetric label="Checked-in" value="58" total="103" remaining="103 Kalan" progress={10} caption="Checked-in 58" />
-            <FlightMiniStats columns={["Beklenen", "Checked-in", "Infant"]} rows={[{ label: "Business (C)", values: ["12", "1", "1"] }, { label: "Economy (Y)", values: ["91", "11", "2"] }]} />
+            <FlightInfoMetric label="Checked-in" value={String(stats.checked)} total={String(stats.booked)} remaining={`${stats.pending} Kalan`} progress={stats.progress} caption={`Checked-in ${stats.checked}`} />
+            <FlightMiniStats columns={["Beklenen", "Checked-in", "Infant"]} rows={[{ label: "Business (C)", values: [String(stats.business), String(stats.businessChecked), "0"] }, { label: "Economy (Y)", values: [String(stats.economy), String(stats.economyChecked), String(Math.floor(stats.economy / 6))] }]} />
           </FlightInfoSourceCard>
           <FlightInfoSourceCard title="Bagaj Sayısı" icon="luggage" className="fi-inout-summary-card">
-            <FlightInfoKpiPair items={[{ value: "2", label: "Toplam Bagaj" }, { value: "23", suffix: "kg", label: "Toplam Ağırlık" }]} />
-            <FlightMiniStats columns={["Adet", "Ağırlık (kg)"]} rows={[{ label: "Business (C)", values: ["1", "12"] }, { label: "Economy (Y)", values: ["1", "11"] }]} />
+            <FlightInfoKpiPair items={[{ value: String(stats.pieces), label: "Toplam Bagaj" }, { value: String(stats.kilograms), suffix: "kg", label: "Toplam Ağırlık" }]} />
+            <FlightMiniStats columns={["Adet", "Ağırlık (kg)"]} rows={[{ label: "Business (C)", values: [String(businessBags), String(businessWeight)] }, { label: "Economy (Y)", values: [String(economyBags), String(economyWeight)] }]} />
           </FlightInfoSourceCard>
         </div>
         <FlightInfoSourceCard title={`${isInbound ? "Inbound" : "Outbound"} Uçuş Listesi`} icon={isInbound ? "flight_land" : "flight_takeoff"} className="fi-inout-list">
@@ -1172,47 +1385,53 @@ function InboundOutboundTab() {
               <button type="button">Varış Noktası <Icon icon="keyboard_arrow_down" size={20} /></button>
             </div>
           </div>
-          <FlightLegMatrix rows={isInbound ? inboundFlightRows : outInFlightRows} />
+          <FlightLegMatrix rows={connectionRows} />
         </FlightInfoSourceCard>
       </div>
     </div>
   );
 }
 
-function EmdEbitTab({ embedded = false }: { embedded?: boolean }) {
+function EmdEbitTab({ passengers, embedded = false }: { passengers: Passenger[]; embedded?: boolean }) {
+  const stats = getFlightStats({ code: "TEMP", route: "IST  ›  AMS", time: "", state: "FO", tone: "green", gate: "", boardingTime: "", arrivalTime: "", seats: "0", regNo: "", announceTime: "" }, passengers);
+  const businessPaid = passengers.filter((passenger) => getPassengerCabin(passenger) === "business" && passenger.baggageInfo.paid).length;
+  const economyPaid = passengers.filter((passenger) => getPassengerCabin(passenger) === "economy" && passenger.baggageInfo.paid).length;
+  const businessNoEmd = passengers.filter((passenger) => getPassengerCabin(passenger) === "business" && passenger.baggageInfo.kg > passenger.baggageInfo.allowanceKg && !passenger.baggageInfo.paid).length;
+  const economyNoEmd = passengers.filter((passenger) => getPassengerCabin(passenger) === "economy" && passenger.baggageInfo.kg > passenger.baggageInfo.allowanceKg && !passenger.baggageInfo.paid).length;
+
   return (
     <div className={`fi-source-flow fi-emd-source ${embedded ? "embedded" : ""}`.trim()}>
       {!embedded && <FlightInfoTopActions />}
       <div className="fi-reference-grid three fi-emd-summary-grid">
         <FlightInfoSourceCard title="Ekstra Bagaj" icon="luggage">
-          <FlightInfoKpiPair items={[{ value: "4", label: "Toplam Bagaj" }, { value: "85", suffix: "kg", label: "Toplam Ağırlık" }]} />
-          <FlightMiniStats columns={["Piece", "Ağırlık (kg)"]} rows={[{ label: "Business (C)", values: ["1", "12"] }, { label: "Economy (Y)", values: ["1", "11"] }]} />
+          <FlightInfoKpiPair items={[{ value: String(stats.pieces), label: "Toplam Bagaj" }, { value: String(stats.kilograms), suffix: "kg", label: "Toplam Ağırlık" }]} />
+          <FlightMiniStats columns={["Piece", "Ağırlık (kg)"]} rows={[{ label: "Business (C)", values: [String(passengers.filter((passenger) => getPassengerCabin(passenger) === "business").reduce((sum, passenger) => sum + passenger.baggageInfo.pieces, 0)), String(passengers.filter((passenger) => getPassengerCabin(passenger) === "business").reduce((sum, passenger) => sum + passenger.baggageInfo.kg, 0))] }, { label: "Economy (Y)", values: [String(passengers.filter((passenger) => getPassengerCabin(passenger) === "economy").reduce((sum, passenger) => sum + passenger.baggageInfo.pieces, 0)), String(passengers.filter((passenger) => getPassengerCabin(passenger) === "economy").reduce((sum, passenger) => sum + passenger.baggageInfo.kg, 0))] }]} />
         </FlightInfoSourceCard>
         <FlightInfoSourceCard title="EMD" icon="receipt_long">
-          <FlightInfoSubsectionMetrics title="EMD" items={[{ value: "4", label: "Total Business EMD" }, { value: "85", suffix: "kg", label: "Total Economy EMD" }]} />
-          <FlightInfoSubsectionMetrics title="No-Emd" items={[{ value: "4", label: "Business No-EMD" }, { value: "85", suffix: "kg", label: "Economy No-EMD" }]} />
+          <FlightInfoSubsectionMetrics title="EMD" items={[{ value: String(businessPaid), label: "Total Business EMD" }, { value: String(economyPaid), label: "Total Economy EMD" }]} />
+          <FlightInfoSubsectionMetrics title="No-Emd" items={[{ value: String(businessNoEmd), label: "Business No-EMD" }, { value: String(economyNoEmd), label: "Economy No-EMD" }]} />
         </FlightInfoSourceCard>
         <FlightInfoSourceCard title="E-Tkt" icon="receipt_long">
-          <FlightInfoSubsectionMetrics title="Total E-Tkt" items={[{ value: "4", label: "Business (C)" }, { value: "139", label: "Economy (Y)" }]} />
-          <FlightInfoSubsectionMetrics title="No Total E-Tkt" items={[{ value: "4", label: "Business (C)" }, { value: "139", label: "Economy (Y)" }]} />
+          <FlightInfoSubsectionMetrics title="Total E-Tkt" items={[{ value: String(stats.business), label: "Business (C)" }, { value: String(stats.economy), label: "Economy (Y)" }]} />
+          <FlightInfoSubsectionMetrics title="No Total E-Tkt" items={[{ value: String(Math.max(0, stats.business - stats.businessChecked)), label: "Business (C)" }, { value: String(Math.max(0, stats.economy - stats.economyChecked)), label: "Economy (Y)" }]} />
         </FlightInfoSourceCard>
       </div>
       <div className="fi-reference-grid two">
         <FlightInfoSourceCard title="EMD Tablosu" icon="table_chart">
           <FlightInfoCompactMatrix columns={["C", "Y", "C", "Y"]} rows={[
-            { label: "Booked", values: ["0", "0", "8", "8"] },
-            { label: "Accepted", values: ["0", "0", "2", "2"] },
-            { label: "No Show", values: ["0", "0", "6", "6"] },
-            { label: "STA NOK", values: ["0", "0", "6", "6"] },
+            { label: "Booked", values: [String(stats.business), String(stats.economy), String(stats.business), String(stats.economy)] },
+            { label: "Accepted", values: [String(stats.businessChecked), String(stats.economyChecked), String(businessPaid), String(economyPaid)] },
+            { label: "No Show", values: [String(Math.max(0, stats.business - stats.businessChecked)), String(Math.max(0, stats.economy - stats.economyChecked)), String(businessNoEmd), String(economyNoEmd)] },
+            { label: "STA NOK", values: [String(businessNoEmd), String(economyNoEmd), String(stats.unpaidOverweight), "0"] },
             { label: "Jumpseat", values: ["0", "0", "0", "0"] },
           ]} />
         </FlightInfoSourceCard>
         <FlightInfoSourceCard title="E-TKT Tablosu" icon="confirmation_number">
           <FlightInfoCompactMatrix columns={["C", "Y"]} rows={[
-            { label: "Booked", values: ["8", "8"] },
-            { label: "Accepted", values: ["2", "2"] },
-            { label: "No Show", values: ["6", "6"] },
-            { label: "STA NOK", values: ["6", "6"] },
+            { label: "Booked", values: [String(stats.business), String(stats.economy)] },
+            { label: "Accepted", values: [String(stats.businessChecked), String(stats.economyChecked)] },
+            { label: "No Show", values: [String(Math.max(0, stats.business - stats.businessChecked)), String(Math.max(0, stats.economy - stats.economyChecked))] },
+            { label: "STA NOK", values: [String(businessNoEmd), String(economyNoEmd)] },
             { label: "Jumpseat", values: ["0", "0"] },
           ]} />
         </FlightInfoSourceCard>
@@ -1221,18 +1440,39 @@ function EmdEbitTab({ embedded = false }: { embedded?: boolean }) {
   );
 }
 
-function BaggageInfoTab() {
+function BaggageInfoTab({ flight, passengers }: { flight: FlightRecord; passengers: Passenger[] }) {
+  const standardBags = passengers.reduce((sum, passenger) => sum + passenger.baggageInfo.pieces, 0);
+  const cabinBags = Math.max(1, Math.floor(passengers.length / 2));
+  const overweight = passengers.filter((passenger) => passenger.baggageInfo.kg > passenger.baggageInfo.allowanceKg).length;
+  const baggageRows = createBaggagePassengerRows(passengers);
+  const chartBars = [
+    { label: "Std", value: standardBags, strong: true },
+    { label: "Over", value: overweight },
+    { label: "Cabin", value: cabinBags },
+    { label: "Paid", value: passengers.filter((passenger) => passenger.baggageInfo.paid).length },
+    { label: "Msg", value: passengers.filter((passenger) => passenger.message > 0).length },
+    { label: "Elite", value: passengers.filter((passenger) => passenger.tier === "Elite").length },
+    { label: "Classic", value: passengers.filter((passenger) => passenger.tier === "Classic").length },
+    { label: "APIS", value: passengers.filter((passenger) => passenger.apis === "filled").length },
+    { label: "NoRec", value: passengers.filter((passenger) => passenger.pnr === "NO REC").length },
+  ];
+
   return (
     <div className="fi-source-flow baggage-source">
-      <FlightInfoSourceCard title="TK0619" icon="flight" className="fi-baggage-feature" menu={false}>
+      <FlightInfoSourceCard title={flight.code} icon="flight" className="fi-baggage-feature" menu={false}>
         <div className="fi-baggage-feature-body">
           <div className="fi-baggage-property-table">
-            <SourceTable columns={["Bagaj Özelliği", "Adet"]} rows={baggagePropertyRows.map(([name, value]) => [<span className="fi-with-icon"><Icon icon="flight" size={17} />{name}</span>, value])} widths="minmax(260px,1fr) 92px" compact />
+            <SourceTable columns={["Bagaj Özelliği", "Adet"]} rows={[
+              ["Standart", String(standardBags)],
+              ["Kabin El Bagajı", String(cabinBags)],
+              ["Fazla Bagaj", String(overweight)],
+              ["Ödenmiş EMD", String(passengers.filter((passenger) => passenger.baggageInfo.paid).length)],
+            ].map(([name, value]) => [<span className="fi-with-icon"><Icon icon="flight" size={17} />{name}</span>, value])} widths="minmax(260px,1fr) 92px" compact />
           </div>
           <div className="fi-baggage-chart" aria-label="Bagaj özellikleri grafiği">
             <div className="fi-chart-axis"><span>200</span><span>150</span><span>100</span><span>50</span><span>0</span></div>
-            {[{ label: "Std", value: 145, strong: true }, { label: "Zem.", value: 55 }, { label: "T. San.", value: 50 }, { label: "Bebek.", value: 48 }, { label: "El Bg.", value: 44 }, { label: "Abcd", value: 38 }, { label: "Abcd", value: 34 }, { label: "Abcd", value: 30 }, { label: "Abcd", value: 26 }].map((bar) => (
-              <div className="fi-chart-bar" key={bar.label + bar.value} style={{ ["--bar" as string]: `${bar.value / 2}%` }}>
+            {chartBars.map((bar) => (
+              <div className="fi-chart-bar" key={bar.label + bar.value} style={{ ["--bar" as string]: `${Math.max(8, bar.value * 10)}%` }}>
                 <i className={bar.strong ? "strong" : ""}>{bar.strong ? bar.value : ""}</i><span>{bar.label}</span>
               </div>
             ))}
@@ -1240,35 +1480,60 @@ function BaggageInfoTab() {
         </div>
       </FlightInfoSourceCard>
       <FlightInfoSourceCard title="Yolcu Listesi" icon="groups">
-        <BaggagePassengerList />
+        <BaggagePassengerList rows={baggageRows} />
       </FlightInfoSourceCard>
     </div>
   );
 }
 
-function OperationsTab() {
+function OperationsTab({ flight }: { flight: FlightRecord }) {
+  const rows = [
+    { item: "Boarding", owner: "Gate", time: flight.boardingTime, state: "Ready" },
+    { item: "Catering", owner: "Ramp", time: flight.announceTime, state: "Completed" },
+    { item: "Fuel", owner: "Ops", time: flight.announceTime, state: "Completed" },
+    { item: "Load Sheet", owner: "DCS", time: flight.arrivalTime, state: flight.tone === "yellow" ? "Waiting" : "Ready" },
+  ];
+
   return (
     <div className="fi-paper-stack">
       <FlightInfoPanel title="Uçuş Operasyon" icon="bolt">
-        <SourceTable columns={["Operasyon", "Owner", "Time", "Status"]} rows={operationRows.map((row) => [row.item, row.owner, row.time, <FiBadge tone={row.state === "Waiting" ? "yellow" : "green"}>{row.state}</FiBadge>])} />
+        <SourceTable columns={["Operasyon", "Owner", "Time", "Status"]} rows={rows.map((row) => [row.item, row.owner, row.time, <FiBadge tone={row.state === "Waiting" ? "yellow" : "green"}>{row.state}</FiBadge>])} />
       </FlightInfoPanel>
     </div>
   );
 }
 
-function RegNoFlightsTab() {
-  const routeStops = [
-    { code: "ADB", time: "08:10", active: true },
-    { code: "IST", time: "09:20", active: true },
-    { code: "CTA", time: "11:30", active: false },
-  ];
+function RegNoFlightsTab({ flight }: { flight: FlightRecord }) {
+  const [from = "IST", to = "AMS"] = routeAirportCodes(flight.route);
+  const multiLegStops = flight.multiLeg?.legs.map((leg, index) => {
+    const [legFrom = from, legTo = to] = leg.label.split("-").map((part) => part.trim());
+    return index === 0 ? [legFrom, legTo] : [legTo];
+  }).flat();
+  const stopCodes = multiLegStops?.length ? Array.from(new Set(multiLegStops)) : [from, to];
+  const routeStops = stopCodes.map((code, index) => ({
+    code,
+    time: index === 0 ? flight.boardingTime : index === stopCodes.length - 1 ? flight.arrivalTime : flight.announceTime,
+    active: index < stopCodes.length - 1 || flight.tone === "green",
+  }));
+  const aircraft = flight.regNo.split("/")[0].trim();
+  const legRows = routeStops.slice(0, -1).map((stop, index) => {
+    const nextStop = routeStops[index + 1];
+    return [
+      index === 0 ? flight.code : `TK${String((seededNumber(flight.code + stop.code) % 8000) + 1000).padStart(4, "0")}`,
+      stop.code,
+      nextStop.code,
+      stop.time,
+      nextStop.time,
+      aircraft,
+    ];
+  });
 
   return (
     <div className="fi-source-flow fi-regno-source">
       <FlightInfoSourceCard
         title="Route Timeline"
         icon="groups"
-        action={<button type="button" className="fi-source-header-button"><span>TC- ASD</span><Icon icon="refresh" size={20} /></button>}
+        action={<button type="button" className="fi-source-header-button"><span>{aircraft}</span><Icon icon="refresh" size={20} /></button>}
       >
         <div className="fi-reg-route" aria-label="Route timeline">
           {routeStops.map((stop, index) => (
@@ -1292,7 +1557,7 @@ function RegNoFlightsTab() {
       >
         <SourceTable
           columns={["Flight", "From", "To", "Departure", "Arrival", "Aircraft"]}
-          rows={[["TK0201", "ADB", "IST", "08:10", "09:20", "TC-ASD"], ["TK0872", "IST", "CTA", "10:15", "11:30", "TC-ASD"], ["TK873", "CTA", "IST", "12:30", "14:10", "TC-ASD"]]}
+          rows={legRows}
           widths="minmax(160px,1fr) minmax(140px,1fr) minmax(140px,1fr) minmax(150px,1fr) minmax(150px,1fr) minmax(150px,1fr)"
         />
       </FlightInfoSourceCard>
@@ -1333,11 +1598,12 @@ function getPoolChargeMetrics(passengers: Passenger[], bagCount: number, payment
   const includedBags = passengers.length;
   const totalBagCount = Math.max(0, bagCount);
   const extraPieceCount = Math.max(0, totalBagCount - includedBags);
-  const extraWeightKg = extraPieceCount * 10;
-  const totalWeightKg = poolMetrics.kilograms + extraWeightKg;
+  const addedPieceWeightKg = extraPieceCount * 10;
+  const totalWeightKg = poolMetrics.kilograms + addedPieceWeightKg;
   const overweightKg = Math.max(0, totalWeightKg - baggageLimitKg);
   const extraPiecePrice = extraPieceCount * 125;
-  const extraWeightPrice = extraPieceCount * 125;
+  const extraWeightKg = overweightKg;
+  const extraWeightPrice = extraWeightKg > 0 ? Math.ceil(extraWeightKg / 10) * 125 : 0;
   const totalPaid = paymentCompleted ? extraPiecePrice + extraWeightPrice : 0;
   const isOverweight = totalWeightKg > baggageLimitKg;
   const displayAllowanceKg = paymentCompleted && isOverweight ? totalWeightKg : baggageLimitKg;
@@ -1350,6 +1616,7 @@ function getPoolChargeMetrics(passengers: Passenger[], bagCount: number, payment
     pieces: totalBagCount,
     extraPieceCount,
     extraWeightKg,
+    addedPieceWeightKg,
     overweightKg,
     extraPiecePrice,
     extraWeightPrice,
@@ -2533,7 +2800,7 @@ export function FlightSearchPage() {
       <AppRail />
       <FlightList selected={selectedFlight} onSelect={setSelectedFlight} />
       <main className={`workspace ${flightInfoExpanded ? "flight-info-expanded" : ""}`}>
-        <FlightOverview flight={flight} expanded={flightInfoExpanded} onExpandedChange={setFlightInfoExpanded} />
+        <FlightOverview flight={flight} passengers={passengers} expanded={flightInfoExpanded} onExpandedChange={setFlightInfoExpanded} />
         <PassengerTable passengers={passengers} />
       </main>
       <SeatMap collapsed={seatMapCollapsed} onCollapsedChange={setSeatMapCollapsed} />
