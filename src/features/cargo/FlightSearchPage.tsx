@@ -19,6 +19,22 @@ defineTkTabs();
 defineTkTabsItem();
 defineTkTooltip();
 
+function useAnimatedPresence(open: boolean, duration = 220) {
+  const [isMounted, setIsMounted] = useState(open);
+
+  useEffect(() => {
+    if (open) {
+      setIsMounted(true);
+      return;
+    }
+
+    const timeout = window.setTimeout(() => setIsMounted(false), duration);
+    return () => window.clearTimeout(timeout);
+  }, [duration, open]);
+
+  return { isMounted, isVisible: open };
+}
+
 function Icon({
   icon,
   size = 20,
@@ -197,11 +213,88 @@ function CommentNotificationIcon({ count }: { count: number }) {
   );
 }
 
-const flights = [
+const baseFlights = [
   { code: "TK2070", route: "IST  ›  AMS", time: "14:30", state: "FO", tone: "green", gate: "32", boardingTime: "17:00", arrivalTime: "20:30", seats: "100", regNo: "GRDE6/ N63", announceTime: "17:30" },
   { code: "TK0706", route: "IST  ›  KBL", time: "15:20/15:55", state: "FO", tone: "green", gate: "18", boardingTime: "16:10", arrivalTime: "22:15", seats: "86", regNo: "TC-LAM / A321", announceTime: "16:40" },
   { code: "TK2911", route: "IST  ›  SFO", time: "16:55", state: "FH", tone: "yellow", gate: "11", boardingTime: "18:25", arrivalTime: "23:50", seats: "74", regNo: "TC-JET / B787", announceTime: "18:05" },
-];
+] satisfies FlightRecord[];
+
+type FlightRecord = {
+  code: string;
+  route: string;
+  time: string;
+  state: "FO" | "FH";
+  tone: "green" | "yellow";
+  gate: string;
+  boardingTime: string;
+  arrivalTime: string;
+  seats: string;
+  regNo: string;
+  announceTime: string;
+  multiLeg?: {
+    selectedIndex: number;
+    legs: Array<{
+      label: string;
+    }>;
+  };
+};
+
+const generatedFlightTemplates = [
+  ["TK1865", "IST  ›  FCO", "13:05", "22", "16:20", "18:45", "118", "TC-JRK / A321", "15:55"],
+  ["TK1983", "IST  ›  LHR", "13:40/14:10", "24", "16:45", "20:15", "92", "TC-LSM / A330", "16:05"],
+  ["TK1857", "IST  ›  MAD", "14:05", "27", "16:55", "19:30", "64", "TC-JHM / B737", "16:25"],
+  ["TK1785", "IST  ›  CPH", "14:50", "12", "17:15", "20:05", "131", "TC-LCN / A321", "16:50"],
+  ["TK1827", "IST  ›  CDG", "15:15/15:45", "41", "17:40", "20:20", "75", "TC-JOA / A330", "17:00"],
+  ["TK1959", "IST  ›  BER", "15:35", "06", "18:00", "20:40", "105", "TC-LTR / A321", "17:25"],
+  ["TK1909", "IST  ›  ZRH", "16:10", "09", "18:35", "21:10", "88", "TC-JSU / B737", "18:05"],
+  ["TK1877", "IST  ›  MXP", "16:45/17:05", "34", "19:10", "21:55", "112", "TC-LDI / A321", "18:40"],
+  ["TK1971", "IST  ›  DUB", "17:20", "19", "19:50", "23:20", "69", "TC-JNP / B737", "19:15"],
+  ["TK1923", "IST  ›  BSL", "17:55", "29", "20:15", "22:50", "97", "TC-LGB / A321", "19:45"],
+  ["TK1037", "IST  ›  BUD", "18:20", "38", "20:45", "22:35", "124", "TC-JVK / A321", "20:05"],
+  ["TK1895", "IST  ›  VIE", "18:45/19:05", "14", "21:10", "23:00", "81", "TC-LAA / B737", "20:25"],
+  ["TK1849", "IST  ›  ATH", "19:10", "03", "21:25", "23:15", "143", "TC-JYD / A320", "20:55"],
+  ["TK1727", "IST  ›  PRG", "19:35", "26", "21:55", "00:05", "109", "TC-LPC / A321", "21:15"],
+  ["TK1815", "IST  ›  NCE", "20:05/20:30", "31", "22:25", "01:10", "72", "TC-JKA / B737", "21:50"],
+  ["TK1883", "IST  ›  HAM", "20:40", "07", "23:05", "01:35", "94", "TC-LSF / A321", "22:20"],
+] as const;
+
+function createRandomizedFlights() {
+  return [
+    ...baseFlights,
+    ...generatedFlightTemplates
+      .map((template, index) => {
+        const [code, route, time, gate, boardingTime, arrivalTime, seats, regNo, announceTime] = template;
+        const delayed = time.includes("/");
+        return {
+          code,
+          route,
+          time,
+          state: delayed || index % 5 === 2 ? "FH" : "FO",
+          tone: delayed || index % 5 === 2 ? "yellow" : "green",
+          gate,
+          boardingTime,
+          arrivalTime,
+          seats,
+          regNo,
+          announceTime,
+          multiLeg:
+            code === "TK1983" || code === "TK1849"
+              ? {
+                  selectedIndex: 1,
+                  legs: [
+                    { label: "Istanbul - Karakas" },
+                    { label: "Karakas - Havana" },
+                    { label: "Havana - İstanbul" },
+                  ],
+                }
+              : undefined,
+        } satisfies FlightRecord;
+      })
+      .sort(() => Math.random() - 0.5),
+  ];
+}
+
+const flights = createRandomizedFlights();
 
 type Tier = "Elite" | "Classic";
 type BaggageTone = "normal" | "alert" | "muted";
@@ -321,7 +414,7 @@ function FlightList({ selected, onSelect }: { selected: number; onSelect: (index
         {flights.map((flight, index) => (
           <button key={flight.code} className={`flight-item ${selected === index ? "selected" : ""}`} onClick={() => onSelect(index)}>
             <span className="flight-line"><b>{flight.code}</b><em className={flight.tone}>{flight.state}</em></span>
-            <span className="flight-line"><FlightRoute route={flight.route} /><time className={index === 1 ? "delayed" : ""}>{flight.time}</time></span>
+            <span className="flight-line"><FlightRoute route={flight.route} /><time className={flight.time.includes("/") ? "delayed" : ""}>{flight.time}</time></span>
           </button>
         ))}
       </div>
@@ -392,7 +485,7 @@ function FlightOverview({ flight, expanded, onExpandedChange }: { flight: typeof
           <Icon icon="flight" size={25} fill />
           <strong>{flight.code}</strong>
           <span>19 FEB <b>{flight.time}</b> /14:45</span>
-          <FlightRoute route={flight.route} className="overview-route blue" />
+          {flight.multiLeg ? <OverviewRouteSelector flight={flight} /> : <FlightRoute route={flight.route} className="overview-route blue" />}
           <em>Flight Open</em>
         </div>
         <button aria-label="Uçuş seçenekleri"><Icon icon="more_horiz" size={23} /></button>
@@ -418,6 +511,87 @@ function FlightOverview({ flight, expanded, onExpandedChange }: { flight: typeof
         More <Icon icon={expanded ? "expand_less" : "keyboard_arrow_down"} size={14} />
       </button>
     </section>
+  );
+}
+
+function OverviewRouteSelector({ flight }: { flight: FlightRecord }) {
+  const [open, setOpen] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(flight.multiLeg?.selectedIndex ?? 0);
+  const selectorRef = useRef<HTMLDivElement | null>(null);
+  const legs = flight.multiLeg?.legs ?? [];
+  const { isMounted, isVisible } = useAnimatedPresence(open, 170);
+
+  useEffect(() => {
+    setSelectedIndex(flight.multiLeg?.selectedIndex ?? 0);
+    setOpen(false);
+  }, [flight.code, flight.multiLeg?.selectedIndex]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const handlePointerDown = (event: MouseEvent) => {
+      if (!selectorRef.current?.contains(event.target as Node)) setOpen(false);
+    };
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [open]);
+
+  return (
+    <div className="overview-route-selector" ref={selectorRef}>
+      <button
+        type="button"
+        className={`overview-route-trigger ${open ? "open" : ""}`.trim()}
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        aria-label={`${flight.code} multi-leg route selector`}
+        onClick={() => setOpen((current) => !current)}
+      >
+        <FlightRoute route={flight.route} className="overview-route blue" />
+        <span className="overview-route-chevron" aria-hidden="true">
+          <Icon icon={open ? "expand_less" : "keyboard_arrow_down"} size={18} />
+        </span>
+      </button>
+      {isMounted && (
+        <div
+          className="overview-route-popover"
+          data-state={isVisible ? "open" : "closed"}
+          role="dialog"
+          aria-label={`${flight.code} leg listesi`}
+        >
+          <span className="overview-route-popover-arrow" aria-hidden="true" />
+          <div className="overview-route-popover-list">
+            {legs.map((leg, index) => {
+              const active = index === selectedIndex;
+              return (
+                <button
+                  type="button"
+                  key={`${flight.code}-${leg.label}`}
+                  className={`overview-route-option ${active ? "active" : ""}`.trim()}
+                  onClick={() => setSelectedIndex(index)}
+                >
+                  <span className={`overview-route-option-icon ${active ? "active" : ""}`.trim()}>
+                    <Icon icon="flight" size={16} fill />
+                  </span>
+                  <span className="overview-route-option-label">{leg.label}</span>
+                  <span className="overview-route-option-check" aria-hidden="true">
+                    {active ? <Icon icon="check" size={16} /> : null}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -871,7 +1045,7 @@ function FlightInfoCompactMatrix({ columns, rows }: { columns: string[]; rows: A
     <div className="fi-compact-matrix" role="table" style={{ ["--fi-compact-cols" as string]: `minmax(160px,1fr) repeat(${columns.length}, 72px)` }}>
       <div className="fi-compact-matrix-head" role="row">
         <span>Sınıf</span>
-        {columns.map((column) => <span key={column}>{column}</span>)}
+        {columns.map((column, index) => <span key={`${column}-${index}`}>{column}</span>)}
       </div>
       {rows.map((row) => (
         <div className="fi-compact-matrix-row" role="row" key={row.label}>
@@ -884,8 +1058,8 @@ function FlightInfoCompactMatrix({ columns, rows }: { columns: string[]; rows: A
 }
 
 function FlightLegMatrix({ rows }: { rows: FlightLegMatrixRow[] }) {
-  const renderCell = (value: ReactNode, row: FlightLegMatrixRow, className = "") => (
-    <span className={`${className} ${row.error ? `error ${row.error}` : ""}`.trim()}>{value}</span>
+  const renderCell = (value: ReactNode, row: FlightLegMatrixRow, className = "", key?: string) => (
+    <span key={key} className={`${className} ${row.error ? `error ${row.error}` : ""}`.trim()}>{value}</span>
   );
   const renderFlightCode = (row: FlightLegMatrixRow) => {
     const content = <span className="fi-flight-error-trigger"><Icon icon="error" size={20} fill />{row.flight}</span>;
@@ -929,9 +1103,9 @@ function FlightLegMatrix({ rows }: { rows: FlightLegMatrixRow[] }) {
           {renderFlightCode(row)}
           {renderCell(row.destination, row)}
           {renderCell(row.time, row)}
-          {row.expected.map((value, index) => renderCell(value, row, `subcell expected-${index}`))}
-          {row.checked.map((value, index) => renderCell(value, row, `subcell checked-${index}`))}
-          {row.short.map((value, index) => renderCell(value, row, `subcell short-${index}`))}
+          {row.expected.map((value, index) => renderCell(value, row, `subcell expected-${index}`, `expected-${index}`))}
+          {row.checked.map((value, index) => renderCell(value, row, `subcell checked-${index}`, `checked-${index}`))}
+          {row.short.map((value, index) => renderCell(value, row, `subcell short-${index}`, `short-${index}`))}
         </div>
       ))}
     </div>
@@ -1254,24 +1428,27 @@ function PassengerSelectionBar({
 }
 
 function PassengerCheckInOverlay({
+  open,
   selectedPassengers,
   onClose,
   onConfirm,
 }: {
+  open: boolean;
   selectedPassengers: Passenger[];
   onClose: () => void;
   onConfirm: () => void;
 }) {
   const [checkedPassengers, setCheckedPassengers] = useState(() => new Set(selectedPassengers.map((passenger) => passenger.pnr)));
+  const { isMounted, isVisible } = useAnimatedPresence(open, 220);
 
   useEffect(() => {
     setCheckedPassengers(new Set(selectedPassengers.map((passenger) => passenger.pnr)));
   }, [selectedPassengers]);
 
-  if (selectedPassengers.length === 0) return null;
+  if (selectedPassengers.length === 0 || !isMounted) return null;
 
   return (
-    <div className="checkin-overlay" role="dialog" aria-modal="true" aria-labelledby="checkin-title">
+    <div className="checkin-overlay" data-state={isVisible ? "open" : "closed"} role="dialog" aria-modal="true" aria-labelledby="checkin-title">
       <div className="checkin-overlay-scrim" />
       <aside className="checkin-popup">
         <header className="checkin-popup-header">
@@ -1337,11 +1514,13 @@ type PosPaymentStep = "select" | "processing" | "completed" | "failed";
 type LinkPaymentStep = "default" | "waiting" | "creating" | "completed";
 
 function ExcessBaggagePaymentPopup({
+  open,
   amount,
   responsible,
   onClose,
   onPaymentComplete,
 }: {
+  open: boolean;
   amount: string;
   responsible: string;
   onClose: () => void;
@@ -1354,6 +1533,7 @@ function ExcessBaggagePaymentPopup({
   const [linkChannel, setLinkChannel] = useState<"email" | "sms">("email");
   const [selectedPos, setSelectedPos] = useState("POS-04");
   const [linkCountdown, setLinkCountdown] = useState(10);
+  const { isMounted, isVisible } = useAnimatedPresence(open, 200);
 
   useEffect(() => {
     if (cardStep !== "processing") return;
@@ -1591,8 +1771,10 @@ function ExcessBaggagePaymentPopup({
     body = renderLinkProgress();
   }
 
+  if (!isMounted) return null;
+
   return (
-    <div className="payment-overlay" role="dialog" aria-modal="true" aria-labelledby="payment-title">
+    <div className="payment-overlay" data-state={isVisible ? "open" : "closed"} role="dialog" aria-modal="true" aria-labelledby="payment-title">
       <div className="payment-overlay-scrim" onClick={onClose} />
       <section className={`payment-popup ${isLinkProgress ? "wide" : ""} ${isTerminal ? "terminal" : ""}`}>
         <header className="payment-popup-header">
@@ -1647,10 +1829,12 @@ function PaymentStatusTable({ status, amount }: { status: "waiting" | "creating"
 
 
 function CreatePoolOverlay({
+  open,
   selectedPassengers,
   onClose,
   onSuccess,
 }: {
+  open: boolean;
   selectedPassengers: Passenger[];
   onClose: () => void;
   onSuccess: () => void;
@@ -1660,6 +1844,7 @@ function CreatePoolOverlay({
   const [paymentCompleted, setPaymentCompleted] = useState(false);
   const [paymentPopupOpen, setPaymentPopupOpen] = useState(false);
   const [bagCount, setBagCount] = useState(() => getPoolMetrics(selectedPassengers).pieces);
+  const { isMounted, isVisible } = useAnimatedPresence(open, 220);
   const poolMetrics = getPoolMetrics(selectedPassengers);
   const chargeMetrics = getPoolChargeMetrics(selectedPassengers, bagCount, paymentCompleted);
   const headPassenger = selectedPassengers.find((passenger) => passenger.pnr === headPassengerPnr) ?? selectedPassengers[0];
@@ -1695,7 +1880,7 @@ function CreatePoolOverlay({
     return () => window.clearTimeout(timeout);
   }, [onSuccess, step]);
 
-  if (selectedPassengers.length === 0) return null;
+  if (selectedPassengers.length === 0 || !isMounted) return null;
 
   const goNext = () => {
     if (step === "Head of Pool") {
@@ -1722,7 +1907,7 @@ function CreatePoolOverlay({
 
   return (
     <>
-    <div className="pool-overlay" role="dialog" aria-modal="true" aria-labelledby="pool-title">
+    <div className="pool-overlay" data-state={isVisible ? "open" : "closed"} role="dialog" aria-modal="true" aria-labelledby="pool-title">
       <div className="pool-overlay-scrim" />
       <aside className={`pool-popup step-${step.toLowerCase().replaceAll(" ", "-")}`}>
         <header className="pool-popup-header">
@@ -1950,18 +2135,17 @@ function CreatePoolOverlay({
         )}
       </aside>
     </div>
-    {paymentPopupOpen && (
-      <ExcessBaggagePaymentPopup
-        amount={formatEuro(chargeMetrics.extraPiecePrice + chargeMetrics.extraWeightPrice)}
-        responsible={passengerFullName(headPassenger)}
-        onClose={() => setPaymentPopupOpen(false)}
-        onPaymentComplete={() => {
-          setPaymentPopupOpen(false);
-          setPaymentCompleted(true);
-          setStep("Paid");
-        }}
-      />
-    )}
+    <ExcessBaggagePaymentPopup
+      open={paymentPopupOpen}
+      amount={formatEuro(chargeMetrics.extraPiecePrice + chargeMetrics.extraWeightPrice)}
+      responsible={passengerFullName(headPassenger)}
+      onClose={() => setPaymentPopupOpen(false)}
+      onPaymentComplete={() => {
+        setPaymentPopupOpen(false);
+        setPaymentCompleted(true);
+        setStep("Paid");
+      }}
+    />
     </>
   );
 }
@@ -1971,13 +2155,13 @@ function PassengerTable({ passengers }: { passengers: Passenger[] }) {
   const [checkInOverlayOpen, setCheckInOverlayOpen] = useState(false);
   const [poolOverlayOpen, setPoolOverlayOpen] = useState(false);
   const [floatingBarMode, setFloatingBarMode] = useState<"selection" | "checkin-completed" | "pool-success" | "pool-error">("selection");
-  const [query, setQuery] = useState(passengers[0]?.surname === "AYIN" ? "AYIN" : "");
+  const [query, setQuery] = useState("");
   useEffect(() => {
     setSelectedRowsState(passengers.map(() => false));
     setCheckInOverlayOpen(false);
     setPoolOverlayOpen(false);
     setFloatingBarMode("selection");
-    setQuery(passengers[0]?.surname === "AYIN" ? "AYIN" : "");
+    setQuery("");
   }, [passengers]);
   const visible = useMemo(() => passengers.filter((p) => `${p.name} ${p.surname} ${p.pnr}`.toLowerCase().includes(query.toLowerCase())), [passengers, query]);
   const selectedPassengers = useMemo(() => passengers.filter((_, index) => selectedRowsState[index]), [passengers, selectedRowsState]);
@@ -2023,7 +2207,7 @@ function PassengerTable({ passengers }: { passengers: Passenger[] }) {
         <header className="passenger-toolbar">
           <h2><Icon icon="groups" size={23} fill />Yolcu Listesi</h2>
           <div className="table-tools">
-            <label className="passenger-search"><input value={query} onChange={(event) => setQuery(event.target.value)} aria-label="Yolcu ara" /><Icon icon="search" size={19} /></label>
+            <label className="passenger-search"><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search" aria-label="Yolcu ara" /><Icon icon="search" size={19} /></label>
             <button><Icon icon="filter_list" size={19} /><span>Filter</span><Icon icon="keyboard_arrow_down" size={17} /></button>
             <button><Icon icon="filter_list" size={19} /><span>Filter</span><Icon icon="keyboard_arrow_down" size={17} /></button>
             <button aria-label="Yenile"><Icon icon="refresh" size={22} /></button>
@@ -2064,8 +2248,8 @@ function PassengerTable({ passengers }: { passengers: Passenger[] }) {
         setFloatingBarMode("selection");
         if (floatingBarMode === "pool-error") setPoolOverlayOpen(true);
       }} />
-      {checkInOverlayOpen && <PassengerCheckInOverlay selectedPassengers={selectedPassengers} onClose={() => setCheckInOverlayOpen(false)} onConfirm={completeCheckIn} />}
-      {poolOverlayOpen && <CreatePoolOverlay selectedPassengers={selectedPassengers} onClose={() => setPoolOverlayOpen(false)} onSuccess={completePool} />}
+      <PassengerCheckInOverlay open={checkInOverlayOpen} selectedPassengers={selectedPassengers} onClose={() => setCheckInOverlayOpen(false)} onConfirm={completeCheckIn} />
+      <CreatePoolOverlay open={poolOverlayOpen} selectedPassengers={selectedPassengers} onClose={() => setPoolOverlayOpen(false)} onSuccess={completePool} />
     </>
   );
 }
