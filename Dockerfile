@@ -2,14 +2,12 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-COPY package.json pnpm-lock.yaml ./
+COPY package.json package-lock.json ./
 
-RUN corepack enable && corepack prepare pnpm@10 --activate
-
-RUN pnpm install --no-frozen-lockfile
+RUN npm install
 
 COPY . .
 
-RUN pnpm build
+RUN npm run build
 
-CMD ["sh", "-c", "pnpm preview --host 0.0.0.0 --port ${PORT:-4173}"]
+CMD ["sh", "-c", "npm run start -- --host 0.0.0.0 --port ${PORT:-4173}"]
