@@ -8,7 +8,7 @@
   "build": "vite build",
   "start": "vite preview",
   "preview": "vite preview"
-}
+},
   "dependencies": {
     "@takeoff-ui/core": "latest",
     "@takeoff-ui/react": "^0.11.10",
