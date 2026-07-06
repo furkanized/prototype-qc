@@ -1,4 +1,6 @@
 import { createElement, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
+import { TkDatepicker } from "@takeoff-ui/react";
 import { defineCustomElement as defineTkIcon } from "@takeoff-ui/core/components/tk-icon.js";
 import { defineCustomElement as defineTkButton } from "@takeoff-ui/core/components/tk-button.js";
 import { defineCustomElement as defineTkInput } from "@takeoff-ui/core/components/tk-input.js";
@@ -549,9 +551,51 @@ function AppRail() {
   );
 }
 
+function toIsoDateString(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function formatShortDate(date: Date) {
+  return date.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+}
+
 function FlightList({ selected, onSelect }: { selected: number; onSelect: (index: number) => void }) {
   const [query, setQuery] = useState("");
+  const [selectedDate, setSelectedDate] = useState(() => new Date(new Date().getFullYear(), 0, 29));
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
+  const [datePickerPosition, setDatePickerPosition] = useState({ top: 0, left: 0 });
+  const datePickerRef = useRef<HTMLDivElement>(null);
+  const datePickerPopoverRef = useRef<HTMLDivElement>(null);
   const normalizedQuery = query.trim().toLowerCase();
+
+  useEffect(() => {
+    if (!datePickerOpen) return;
+    const handlePointerDown = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (datePickerRef.current?.contains(target)) return;
+      if (datePickerPopoverRef.current?.contains(target)) return;
+      setDatePickerOpen(false);
+    };
+    document.addEventListener("mousedown", handlePointerDown);
+    return () => document.removeEventListener("mousedown", handlePointerDown);
+  }, [datePickerOpen]);
+
+  const openDatePicker = () => {
+    const rect = datePickerRef.current?.getBoundingClientRect();
+    if (rect) setDatePickerPosition({ top: rect.bottom + 4, left: rect.left });
+    setDatePickerOpen((open) => !open);
+  };
+
+  const shiftDate = (days: number) => {
+    setSelectedDate((current) => {
+      const next = new Date(current);
+      next.setDate(next.getDate() + days);
+      return next;
+    });
+  };
   const visibleFlights = flights
     .map((flight, index) => ({ flight, index }))
     .filter(({ flight }) => {
@@ -568,7 +612,28 @@ function FlightList({ selected, onSelect }: { selected: number; onSelect: (index
   return (
     <aside className="flight-sidebar">
       <div className="flight-title"><h2>Flight List</h2><button aria-label="Uçuş listesi seçenekleri"><Icon icon="more_horiz" size={22} /></button></div>
-      <div className="date-picker"><button aria-label="Önceki gün"><Icon icon="chevron_left" size={20} /></button><span>29 Jan</span><button aria-label="Sonraki gün"><Icon icon="chevron_right" size={20} /></button></div>
+      <div className="date-picker" ref={datePickerRef}>
+        <button aria-label="Önceki gün" onClick={() => shiftDate(-1)}><Icon icon="chevron_left" size={20} /></button>
+        <button type="button" className="date-picker-trigger" onClick={openDatePicker}>{formatShortDate(selectedDate)}</button>
+        <button aria-label="Sonraki gün" onClick={() => shiftDate(1)}><Icon icon="chevron_right" size={20} /></button>
+        {datePickerOpen && createPortal(
+          <div className="date-picker-popover" ref={datePickerPopoverRef} style={{ top: datePickerPosition.top, left: datePickerPosition.left }}>
+            <TkDatepicker
+              inline
+              value={toIsoDateString(selectedDate)}
+              onTkChange={(event) => {
+                const detail = event.detail;
+                if (typeof detail === "string" && detail) {
+                  const [year, month, day] = detail.split("-").map(Number);
+                  setSelectedDate(new Date(year, month - 1, day));
+                }
+                setDatePickerOpen(false);
+              }}
+            />
+          </div>,
+          document.body,
+        )}
+      </div>
       <label className="sidebar-label">Select<sup>*</sup></label>
       <button className="terminal-select">Terminal <Icon icon="keyboard_arrow_up" size={17} /></button>
       <label className="sidebar-label search-label">Search<sup>*</sup></label>
@@ -640,7 +705,8 @@ function FlightOverview({ flight, passengers, expanded, onExpandedChange }: { fl
   const expandedPresence = useAnimatedPresence(expanded, 220);
   const stats = getFlightStats(flight, passengers);
   const checkedWidth = stats.totalPassenger ? Math.round((stats.checked / stats.totalPassenger) * 100) : 0;
-  const bookedRemainderWidth = stats.totalPassenger ? Math.round(((stats.booked - stats.checked) / stats.totalPassenger) * 100) : 0;
+  const bookedWidth = stats.totalPassenger ? Math.round((stats.booked / stats.totalPassenger) * 100) : 0;
+  const showPassengersLabel = checkedWidth >= 32;
 
   useEffect(() => {
     if (!expanded) setActiveTab("flight");
@@ -660,8 +726,8 @@ function FlightOverview({ flight, passengers, expanded, onExpandedChange }: { fl
       </div>
       <div className="cabin-counts"><span>Economy {stats.economy}</span><span>Business {stats.business}</span><span>Total Passenger {stats.totalPassenger}</span></div>
       <div className="passenger-progress flight-progress-expanded">
-        <div className="checked-progress" style={{ width: `${checkedWidth}%` }}><span><Icon icon="expand_circle_down" size={18} />Passengers</span><span>{stats.checked} Checked-In <Icon icon="person" size={17} fill /></span></div>
-        <div className="booked-progress" style={{ left: `${checkedWidth}%`, width: `${bookedRemainderWidth}%` }}><span>{stats.booked} Booked <Icon icon="person" size={17} fill /></span></div>
+        <div className="checked-progress" style={{ width: `${checkedWidth}%` }}><span><Icon icon="expand_circle_down" size={18} />{showPassengersLabel && "Passengers"}</span><span>{stats.checked} Checked-In <Icon icon="person" size={17} fill /></span></div>
+        <div className="booked-progress" style={{ left: 0, width: `${bookedWidth}%` }}><span>{stats.booked} Booked <Icon icon="person" size={17} fill /></span></div>
         <span className="remaining">{stats.remainingSeats} Seats Remain</span>
       </div>
       <div className="flight-facts">
