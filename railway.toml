@@ -1,5 +1,5 @@
 [build]
-buildCommand = "npm install && npm run build"
+buildCommand = "npm install -g pnpm && pnpm install --no-frozen-lockfile && pnpm build"
 
 [deploy]
-startCommand = "npm run start"
+startCommand = "npm install -g pnpm && pnpm preview --host 0.0.0.0 --port $PORT"
