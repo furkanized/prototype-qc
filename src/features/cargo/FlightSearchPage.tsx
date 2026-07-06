@@ -270,43 +270,75 @@ const generatedFlightTemplates = [
   ["TK1883", "IST  ›  HAM", "20:40", "07", "23:05", "01:35", "94", "TC-LSF / A321", "22:20"],
 ] as const;
 
-function createRandomizedFlights() {
-  return [
-    ...baseFlights,
-    ...generatedFlightTemplates
-      .map((template, index) => {
-        const [code, route, time, gate, boardingTime, arrivalTime, seats, regNo, announceTime] = template;
-        const delayed = time.includes("/");
-        return {
-          code,
-          route,
-          time,
-          state: delayed || index % 5 === 2 ? "FH" : "FO",
-          tone: delayed || index % 5 === 2 ? "yellow" : "green",
-          gate,
-          boardingTime,
-          arrivalTime,
-          seats,
-          regNo,
-          announceTime,
-          multiLeg:
-            code === "TK1983" || code === "TK1849"
-              ? {
-                  selectedIndex: 1,
-                  legs: [
-                    { label: "Istanbul - Karakas" },
-                    { label: "Karakas - Havana" },
-                    { label: "Havana - İstanbul" },
-                  ],
-                }
-              : undefined,
-        } satisfies FlightRecord;
-      })
-      .sort(() => Math.random() - 0.5),
-  ];
+const defaultFlightDateKey = "2026-01-29";
+
+function adjustClock(time: string, minutes: number) {
+  return time.split("/").map((part) => {
+    const [hour = 0, minute = 0] = part.split(":").map(Number);
+    const total = (hour * 60 + minute + minutes + 24 * 60) % (24 * 60);
+    return `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
+  }).join("/");
 }
 
-const flights = createRandomizedFlights();
+function createDateFlightCode(seed: number, index: number, usedCodes: Set<string>) {
+  let codeNumber = 1000 + ((seed * 37 + index * 211) % 8900);
+  let code = `TK${codeNumber}`;
+  while (usedCodes.has(code)) {
+    codeNumber = codeNumber >= 9899 ? 1000 : codeNumber + 17;
+    code = `TK${codeNumber}`;
+  }
+  usedCodes.add(code);
+  return code;
+}
+
+function createRandomizedFlights(dateKey = defaultFlightDateKey) {
+  const seed = seededNumber(dateKey);
+  const preserveBaseDate = dateKey === defaultFlightDateKey;
+  const usedCodes = new Set<string>();
+  const templates = [...baseFlights, ...generatedFlightTemplates.map((template) => {
+    const [code, route, time, gate, boardingTime, arrivalTime, seats, regNo, announceTime] = template;
+    return { code, route, time, gate, boardingTime, arrivalTime, seats, regNo, announceTime };
+  })];
+
+  return templates
+    .map((template, index) => {
+      const dateOffset = preserveBaseDate ? 0 : seed + index * 19;
+      const code = preserveBaseDate ? template.code : createDateFlightCode(seed, index, usedCodes);
+      if (preserveBaseDate) usedCodes.add(code);
+      const timeShift = preserveBaseDate ? 0 : ((dateOffset % 7) - 3) * 10;
+      const delayed = template.time.includes("/") || (!preserveBaseDate && dateOffset % 6 === 0);
+      const departureTime = adjustClock(template.time, timeShift);
+      const time = delayed && !departureTime.includes("/") ? `${departureTime}/${adjustClock(departureTime, 25)}` : departureTime;
+      const seats = String(Math.max(24, Number.parseInt(template.seats, 10) + (preserveBaseDate ? 0 : (dateOffset % 55) - 24)));
+      const gate = String(1 + ((Number.parseInt(template.gate, 10) + dateOffset) % 48)).padStart(2, "0");
+
+      return {
+        code,
+        route: template.route,
+        time,
+        state: delayed || index % 5 === 2 ? "FH" : "FO",
+        tone: delayed || index % 5 === 2 ? "yellow" : "green",
+        gate,
+        boardingTime: adjustClock(template.boardingTime, timeShift),
+        arrivalTime: adjustClock(template.arrivalTime, timeShift),
+        seats,
+        regNo: template.regNo,
+        announceTime: adjustClock(template.announceTime, timeShift),
+        multiLeg:
+          template.code === "TK1983" || template.code === "TK1849"
+            ? {
+                selectedIndex: 1,
+                legs: [
+                  { label: "Istanbul - Karakas" },
+                  { label: "Karakas - Havana" },
+                  { label: "Havana - İstanbul" },
+                ],
+              }
+            : undefined,
+      } satisfies FlightRecord;
+    })
+    .sort((a, b) => seededNumber(`${dateKey}-${a.code}`) - seededNumber(`${dateKey}-${b.code}`));
+}
 
 type Tier = "Elite" | "Classic";
 type BaggageTone = "normal" | "alert" | "muted";
@@ -485,11 +517,6 @@ function createPassengersForFlight(flight: FlightRecord): PassengerRecord[] {
   return [...curated, ...generated];
 }
 
-const passengersByFlight = flights.reduce<Record<string, PassengerRecord[]>>((allPassengers, flight) => {
-  allPassengers[flight.code] = createPassengersForFlight(flight);
-  return allPassengers;
-}, {});
-
 function Logo() {
   return <div className="qc-logo" aria-label="QC"><img src={qcMark} alt="" /><img src={qcText} alt="" /></div>;
 }
@@ -562,9 +589,20 @@ function formatShortDate(date: Date) {
   return date.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
 }
 
-function FlightList({ selected, onSelect }: { selected: number; onSelect: (index: number) => void }) {
+function FlightList({
+  flights,
+  selected,
+  onSelect,
+  selectedDate,
+  onDateChange,
+}: {
+  flights: FlightRecord[];
+  selected: number;
+  onSelect: (index: number) => void;
+  selectedDate: Date;
+  onDateChange: (date: Date) => void;
+}) {
   const [query, setQuery] = useState("");
-  const [selectedDate, setSelectedDate] = useState(() => new Date(new Date().getFullYear(), 0, 29));
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [datePickerPosition, setDatePickerPosition] = useState({ top: 0, left: 0 });
   const datePickerRef = useRef<HTMLDivElement>(null);
@@ -590,11 +628,9 @@ function FlightList({ selected, onSelect }: { selected: number; onSelect: (index
   };
 
   const shiftDate = (days: number) => {
-    setSelectedDate((current) => {
-      const next = new Date(current);
-      next.setDate(next.getDate() + days);
-      return next;
-    });
+    const next = new Date(selectedDate);
+    next.setDate(next.getDate() + days);
+    onDateChange(next);
   };
   const visibleFlights = flights
     .map((flight, index) => ({ flight, index }))
@@ -625,7 +661,7 @@ function FlightList({ selected, onSelect }: { selected: number; onSelect: (index
                 const detail = event.detail;
                 if (typeof detail === "string" && detail) {
                   const [year, month, day] = detail.split("-").map(Number);
-                  setSelectedDate(new Date(year, month - 1, day));
+                  onDateChange(new Date(year, month - 1, day));
                 }
                 setDatePickerOpen(false);
               }}
@@ -2851,20 +2887,32 @@ function SeatMap({ collapsed, onCollapsedChange }: { collapsed: boolean; onColla
 
 export function FlightSearchPage() {
   const [selectedFlight, setSelectedFlight] = useState(0);
+  const [selectedDate, setSelectedDate] = useState(() => new Date(new Date().getFullYear(), 0, 29));
   const [seatMapCollapsed, setSeatMapCollapsed] = useState(false);
   const [flightInfoExpanded, setFlightInfoExpanded] = useState(false);
-  const flight = flights[selectedFlight];
+  const dateKey = toIsoDateString(selectedDate);
+  const flights = useMemo(() => createRandomizedFlights(dateKey), [dateKey]);
+  const passengersByFlight = useMemo(() => flights.reduce<Record<string, PassengerRecord[]>>((allPassengers, item) => {
+    allPassengers[item.code] = createPassengersForFlight(item);
+    return allPassengers;
+  }, {}), [flights]);
+  const flight = flights[selectedFlight] ?? flights[0];
   const passengers = passengersByFlight[flight.code] ?? [];
 
   useEffect(() => {
     setFlightInfoExpanded(false);
   }, [selectedFlight]);
 
+  useEffect(() => {
+    setSelectedFlight(0);
+    setFlightInfoExpanded(false);
+  }, [dateKey]);
+
   return (
     <div className={`qc-app ${seatMapCollapsed ? "seatmap-collapsed" : ""}`}>
       <TopBar />
       <AppRail />
-      <FlightList selected={selectedFlight} onSelect={setSelectedFlight} />
+      <FlightList flights={flights} selected={selectedFlight} onSelect={setSelectedFlight} selectedDate={selectedDate} onDateChange={setSelectedDate} />
       <main className={`workspace ${flightInfoExpanded ? "flight-info-expanded" : ""}`}>
         <FlightOverview flight={flight} passengers={passengers} expanded={flightInfoExpanded} onExpandedChange={setFlightInfoExpanded} />
         <PassengerTable passengers={passengers} />
