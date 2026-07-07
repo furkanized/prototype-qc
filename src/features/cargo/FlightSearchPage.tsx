@@ -1,4 +1,4 @@
-import { createElement, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { createElement, useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import { TkDatepicker } from "@takeoff-ui/react";
 import { defineCustomElement as defineTkIcon } from "@takeoff-ui/core/components/tk-icon.js";
@@ -20,6 +20,15 @@ defineTkSpinner();
 defineTkTabs();
 defineTkTabsItem();
 defineTkTooltip();
+
+const FLIGHT_SIDEBAR_OVERDRAW = 18;
+
+function getFlightSidebarWidthValue() {
+  if (typeof window === "undefined") return 203;
+  const rawWidth = window.getComputedStyle(document.documentElement).getPropertyValue("--flight-sidebar-width").trim();
+  const parsedWidth = Number.parseFloat(rawWidth);
+  return Number.isFinite(parsedWidth) ? parsedWidth : 203;
+}
 
 function useAnimatedPresence(open: boolean, duration = 220) {
   const [isMounted, setIsMounted] = useState(open);
@@ -563,10 +572,17 @@ function TopBar() {
   );
 }
 
-function AppRail() {
+function AppRail({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => void }) {
   return (
     <aside className="app-rail" aria-label="Uygulama menüsü">
-      <button className="rail-collapse" aria-label="Menüyü daralt"><Icon icon="chevron_left" size={22} /></button>
+      <button
+        className="rail-collapse"
+        aria-label={collapsed ? "Menüyü genişlet" : "Menüyü daralt"}
+        aria-pressed={collapsed}
+        onClick={onToggle}
+      >
+        <Icon icon={collapsed ? "chevron_right" : "chevron_left"} size={22} />
+      </button>
       <span className="rail-caption">Seçenek</span>
       <span className="rail-code">+NR</span>
       <span className="rail-tile">UB</span>
@@ -595,12 +611,16 @@ function FlightList({
   onSelect,
   selectedDate,
   onDateChange,
+  collapsed,
+  panelRef,
 }: {
   flights: FlightRecord[];
   selected: number;
   onSelect: (index: number) => void;
   selectedDate: Date;
   onDateChange: (date: Date) => void;
+  collapsed: boolean;
+  panelRef: RefObject<HTMLElement | null>;
 }) {
   const [query, setQuery] = useState("");
   const [datePickerOpen, setDatePickerOpen] = useState(false);
@@ -646,42 +666,44 @@ function FlightList({
     });
 
   return (
-    <aside className="flight-sidebar">
-      <div className="flight-title"><h2>Flight List</h2><button aria-label="Uçuş listesi seçenekleri"><Icon icon="more_horiz" size={22} /></button></div>
-      <div className="date-picker" ref={datePickerRef}>
-        <button aria-label="Önceki gün" onClick={() => shiftDate(-1)}><Icon icon="chevron_left" size={20} /></button>
-        <button type="button" className="date-picker-trigger" onClick={openDatePicker}>{formatShortDate(selectedDate)}</button>
-        <button aria-label="Sonraki gün" onClick={() => shiftDate(1)}><Icon icon="chevron_right" size={20} /></button>
-        {datePickerOpen && createPortal(
-          <div className="date-picker-popover" ref={datePickerPopoverRef} style={{ top: datePickerPosition.top, left: datePickerPosition.left }}>
-            <TkDatepicker
-              inline
-              value={toIsoDateString(selectedDate)}
-              onTkChange={(event) => {
-                const detail = event.detail;
-                if (typeof detail === "string" && detail) {
-                  const [year, month, day] = detail.split("-").map(Number);
-                  onDateChange(new Date(year, month - 1, day));
-                }
-                setDatePickerOpen(false);
-              }}
-            />
-          </div>,
-          document.body,
-        )}
-      </div>
-      <label className="sidebar-label">Select<sup>*</sup></label>
-      <button className="terminal-select">Terminal <Icon icon="keyboard_arrow_up" size={17} /></button>
-      <label className="sidebar-label search-label">Search<sup>*</sup></label>
-      <label className="flight-search"><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Airport, flight code, time..." aria-label="Uçuş ara" /><Icon icon="search" size={19} /></label>
-      <div className="flight-items">
-        {visibleFlights.map(({ flight, index }) => (
-          <button key={flight.code} className={`flight-item ${selected === index ? "selected" : ""}`} onClick={() => onSelect(index)}>
-            <span className="flight-line"><b>{flight.code}</b><em className={flight.tone}>{flight.state}</em></span>
-            <span className="flight-line"><FlightRoute route={flight.route} /><time className={flight.time.includes("/") ? "delayed" : ""}>{flight.time}</time></span>
-          </button>
-        ))}
-        {visibleFlights.length === 0 && <div className="flight-empty-state">Uçuş bulunamadı</div>}
+    <aside ref={panelRef} className={`flight-sidebar ${collapsed ? "collapsed" : ""}`.trim()} aria-hidden={collapsed}>
+      <div className="flight-sidebar-track">
+        <div className="flight-title"><h2>Flight List</h2><button aria-label="Uçuş listesi seçenekleri"><Icon icon="more_horiz" size={22} /></button></div>
+        <div className="date-picker" ref={datePickerRef}>
+          <button aria-label="Önceki gün" onClick={() => shiftDate(-1)}><Icon icon="chevron_left" size={20} /></button>
+          <button type="button" className="date-picker-trigger" onClick={openDatePicker}>{formatShortDate(selectedDate)}</button>
+          <button aria-label="Sonraki gün" onClick={() => shiftDate(1)}><Icon icon="chevron_right" size={20} /></button>
+          {datePickerOpen && createPortal(
+            <div className="date-picker-popover" ref={datePickerPopoverRef} style={{ top: datePickerPosition.top, left: datePickerPosition.left }}>
+              <TkDatepicker
+                inline
+                value={toIsoDateString(selectedDate)}
+                onTkChange={(event) => {
+                  const detail = event.detail;
+                  if (typeof detail === "string" && detail) {
+                    const [year, month, day] = detail.split("-").map(Number);
+                    onDateChange(new Date(year, month - 1, day));
+                  }
+                  setDatePickerOpen(false);
+                }}
+              />
+            </div>,
+            document.body,
+          )}
+        </div>
+        <label className="sidebar-label">Select<sup>*</sup></label>
+        <button className="terminal-select">Terminal <Icon icon="keyboard_arrow_up" size={17} /></button>
+        <label className="sidebar-label search-label">Search<sup>*</sup></label>
+        <label className="flight-search"><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Airport, flight code, time..." aria-label="Uçuş ara" /><Icon icon="search" size={19} /></label>
+        <div className="flight-items">
+          {visibleFlights.map(({ flight, index }) => (
+            <button key={flight.code} className={`flight-item ${selected === index ? "selected" : ""}`} onClick={() => onSelect(index)}>
+              <span className="flight-line"><b>{flight.code}</b><em className={flight.tone}>{flight.state}</em></span>
+              <span className="flight-line"><FlightRoute route={flight.route} /><time className={flight.time.includes("/") ? "delayed" : ""}>{flight.time}</time></span>
+            </button>
+          ))}
+          {visibleFlights.length === 0 && <div className="flight-empty-state">Uçuş bulunamadı</div>}
+        </div>
       </div>
     </aside>
   );
@@ -761,11 +783,15 @@ function FlightOverview({ flight, passengers, expanded, onExpandedChange }: { fl
         <button aria-label="Uçuş seçenekleri"><Icon icon="more_horiz" size={23} /></button>
       </div>
       <div className="cabin-counts"><span>Economy {stats.economy}</span><span>Business {stats.business}</span><span>Total Passenger {stats.totalPassenger}</span></div>
-      <div className="passenger-progress flight-progress-expanded">
-        <div className="checked-progress" style={{ width: `${checkedWidth}%` }}><span><Icon icon="expand_circle_down" size={18} />{showPassengersLabel && "Passengers"}</span><span>{stats.checked} Checked-In <Icon icon="person" size={17} fill /></span></div>
-        <div className="booked-progress" style={{ left: 0, width: `${bookedWidth}%` }}><span>{stats.booked} Booked <Icon icon="person" size={17} fill /></span></div>
-        <span className="remaining">{stats.remainingSeats} Seats Remain</span>
-      </div>
+      <AnimatedPassengerProgress
+        key={`${flight.code}-${flight.time}`}
+        checkedWidth={checkedWidth}
+        bookedWidth={bookedWidth}
+        checkedCount={stats.checked}
+        bookedCount={stats.booked}
+        remainingSeats={stats.remainingSeats}
+        showPassengersLabel={showPassengersLabel}
+      />
       <div className="flight-facts">
         <div><small>Gate <Icon icon="edit" size={14} /></small><b>{flight.gate}</b></div>
         <div><small>Boarding Time <Icon icon="edit" size={14} /></small><b>{flight.boardingTime}</b></div>
@@ -783,6 +809,46 @@ function FlightOverview({ flight, passengers, expanded, onExpandedChange }: { fl
         More <Icon icon={expanded ? "expand_less" : "keyboard_arrow_down"} size={14} />
       </button>
     </section>
+  );
+}
+
+function AnimatedPassengerProgress({
+  checkedWidth,
+  bookedWidth,
+  checkedCount,
+  bookedCount,
+  remainingSeats,
+  showPassengersLabel,
+}: {
+  checkedWidth: number;
+  bookedWidth: number;
+  checkedCount: number;
+  bookedCount: number;
+  remainingSeats: number;
+  showPassengersLabel: boolean;
+}) {
+  const [animatedProgress, setAnimatedProgress] = useState({ checked: 0, booked: 0 });
+
+  useEffect(() => {
+    let frame = 0;
+
+    setAnimatedProgress({ checked: 0, booked: 0 });
+
+    frame = window.requestAnimationFrame(() => {
+      setAnimatedProgress({ checked: checkedWidth, booked: bookedWidth });
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+    };
+  }, [checkedWidth, bookedWidth]);
+
+  return (
+    <div className="passenger-progress flight-progress-expanded">
+      <div className="checked-progress" style={{ width: `${animatedProgress.checked}%` }}><span><Icon icon="expand_circle_down" size={18} />{showPassengersLabel && "Passengers"}</span><span>{checkedCount} Checked-In <Icon icon="person" size={17} fill /></span></div>
+      <div className="booked-progress" style={{ left: 0, width: `${animatedProgress.booked}%` }}><span>{bookedCount} Booked <Icon icon="person" size={17} fill /></span></div>
+      <span className="remaining">{remainingSeats} Seats Remain</span>
+    </div>
   );
 }
 
@@ -2888,8 +2954,11 @@ function SeatMap({ collapsed, onCollapsedChange }: { collapsed: boolean; onColla
 export function FlightSearchPage() {
   const [selectedFlight, setSelectedFlight] = useState(0);
   const [selectedDate, setSelectedDate] = useState(() => new Date(new Date().getFullYear(), 0, 29));
+  const [flightListCollapsed, setFlightListCollapsed] = useState(false);
   const [seatMapCollapsed, setSeatMapCollapsed] = useState(false);
   const [flightInfoExpanded, setFlightInfoExpanded] = useState(false);
+  const flightSidebarRef = useRef<HTMLElement | null>(null);
+  const contentBodyRef = useRef<HTMLDivElement | null>(null);
   const dateKey = toIsoDateString(selectedDate);
   const flights = useMemo(() => createRandomizedFlights(dateKey), [dateKey]);
   const passengersByFlight = useMemo(() => flights.reduce<Record<string, PassengerRecord[]>>((allPassengers, item) => {
@@ -2908,16 +2977,58 @@ export function FlightSearchPage() {
     setFlightInfoExpanded(false);
   }, [dateKey]);
 
+  useEffect(() => {
+    const sidebar = flightSidebarRef.current;
+    const contentBody = contentBodyRef.current;
+    if (!sidebar || !contentBody) return;
+    const sidebarWidth = getFlightSidebarWidthValue();
+    const transform = flightListCollapsed ? `translate3d(${-(sidebarWidth + FLIGHT_SIDEBAR_OVERDRAW)}px,0,0)` : "translate3d(0,0,0)";
+    const marginLeft = flightListCollapsed ? "0px" : `${sidebarWidth}px`;
+
+    sidebar.style.transform = transform;
+    contentBody.style.marginLeft = marginLeft;
+
+    const handleResize = () => {
+      const nextSidebarWidth = getFlightSidebarWidthValue();
+      const previousSidebarTransition = sidebar.style.transition;
+      const previousBodyTransition = contentBody.style.transition;
+      sidebar.style.transition = "none";
+      contentBody.style.transition = "none";
+      sidebar.style.transform = flightListCollapsed ? `translate3d(${-(nextSidebarWidth + FLIGHT_SIDEBAR_OVERDRAW)}px,0,0)` : "translate3d(0,0,0)";
+      contentBody.style.marginLeft = flightListCollapsed ? "0px" : `${nextSidebarWidth}px`;
+      void sidebar.offsetHeight;
+      sidebar.style.transition = previousSidebarTransition;
+      contentBody.style.transition = previousBodyTransition;
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [flightListCollapsed]);
+
   return (
-    <div className={`qc-app ${seatMapCollapsed ? "seatmap-collapsed" : ""}`}>
+    <div className={`qc-app allow-flightlist-motion ${flightListCollapsed ? "flight-list-collapsed" : ""} ${seatMapCollapsed ? "seatmap-collapsed" : ""}`}>
       <TopBar />
-      <AppRail />
-      <FlightList flights={flights} selected={selectedFlight} onSelect={setSelectedFlight} selectedDate={selectedDate} onDateChange={setSelectedDate} />
-      <main className={`workspace ${flightInfoExpanded ? "flight-info-expanded" : ""}`}>
-        <FlightOverview flight={flight} passengers={passengers} expanded={flightInfoExpanded} onExpandedChange={setFlightInfoExpanded} />
-        <PassengerTable passengers={passengers} />
-      </main>
-      <SeatMap collapsed={seatMapCollapsed} onCollapsedChange={setSeatMapCollapsed} />
+      <div className="qc-main-row">
+        <AppRail collapsed={flightListCollapsed} onToggle={() => setFlightListCollapsed((current) => !current)} />
+        <div className="qc-content-shell">
+          <FlightList
+            flights={flights}
+            selected={selectedFlight}
+            onSelect={setSelectedFlight}
+            selectedDate={selectedDate}
+            onDateChange={setSelectedDate}
+            collapsed={flightListCollapsed}
+            panelRef={flightSidebarRef}
+          />
+          <div ref={contentBodyRef} className="qc-content-body">
+            <main className={`workspace ${flightInfoExpanded ? "flight-info-expanded" : ""}`}>
+              <FlightOverview flight={flight} passengers={passengers} expanded={flightInfoExpanded} onExpandedChange={setFlightInfoExpanded} />
+              <PassengerTable passengers={passengers} />
+            </main>
+            <SeatMap collapsed={seatMapCollapsed} onCollapsedChange={setSeatMapCollapsed} />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
