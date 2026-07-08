@@ -897,23 +897,30 @@ function FlightOverview({ flight, passengers, expanded, onExpandedChange }: { fl
           showPassengersLabel={showPassengersLabel}
         />
       )}
-      <div className="flight-facts">
-        <div><small>Gate <Icon icon="edit" size={14} /></small><b>{flight.gate}</b></div>
-        <div><small>Boarding Time <Icon icon="edit" size={14} /></small><b>{flight.boardingTime}</b></div>
-        <div><small>Arrival Time</small><b>{flight.arrivalTime}</b></div>
-        <div><small>Kalan Koltuk</small><b className="link">{flight.seats}</b></div>
-        <div><small>Reg No/ Uçak Tipi <Icon icon="edit" size={14} /></small><b>{flight.regNo}</b></div>
-        <div><small>Anons Zamanı</small><b className="danger">{flight.announceTime}</b></div>
-      </div>
+      {!expandedPresence.isMounted && <FlightFacts flight={flight} />}
       {expandedPresence.isMounted && (
         <div className="flight-info-presence" data-state={expandedPresence.isVisible ? "open" : "closed"}>
+          <FlightFacts flight={flight} />
           <FlightInfoExpandedContent flight={flight} passengers={passengers} activeTab={activeTab} onTabChange={setActiveTab} />
         </div>
       )}
       <button type="button" className="more-overview" aria-expanded={expanded} onClick={() => onExpandedChange(!expanded)}>
-        More <Icon icon={expanded ? "expand_less" : "keyboard_arrow_down"} size={14} />
+        {expanded ? "Less" : "More"} <Icon icon="keyboard_arrow_down" size={14} />
       </button>
     </section>
+  );
+}
+
+function FlightFacts({ flight }: { flight: FlightRecord }) {
+  return (
+    <div className="flight-facts">
+      <div><small>Gate <Icon icon="edit" size={14} /></small><b>{flight.gate}</b></div>
+      <div><small>Boarding Time <Icon icon="edit" size={14} /></small><b>{flight.boardingTime}</b></div>
+      <div><small>Arrival Time</small><b>{flight.arrivalTime}</b></div>
+      <div><small>Kalan Koltuk</small><b className="link">{flight.seats}</b></div>
+      <div><small>Reg No/ Uçak Tipi <Icon icon="edit" size={14} /></small><b>{flight.regNo}</b></div>
+      <div><small>Anons Zamanı</small><b className="danger">{flight.announceTime}</b></div>
+    </div>
   );
 }
 
@@ -923,6 +930,7 @@ function FlightStatusControl({ flightCode }: { flightCode: string }) {
   const [pendingCode, setPendingCode] = useState<FlightStatusCode>("FT");
   const [view, setView] = useState<"menu" | "confirm">("menu");
   const [hoveredCode, setHoveredCode] = useState<FlightStatusCode | null>(null);
+  const statusControlRef = useRef<HTMLDivElement>(null);
   const currentStatus = flightStatusByCode[currentCode];
   const pendingStatus = flightStatusByCode[pendingCode];
   const statusOptions = flightStatusDefinitions.filter((status) => status.code !== currentCode);
@@ -933,6 +941,25 @@ function FlightStatusControl({ flightCode }: { flightCode: string }) {
     setView("menu");
     setPendingCode("FT");
   }, [flightCode]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const handlePointerDown = (event: MouseEvent) => {
+      if (!statusControlRef.current?.contains(event.target as Node)) setOpen(false);
+    };
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [open]);
 
   const openMenu = () => {
     setOpen((isOpen) => {
@@ -956,7 +983,7 @@ function FlightStatusControl({ flightCode }: { flightCode: string }) {
   };
 
   return (
-    <div className="flight-status-control">
+    <div className="flight-status-control" ref={statusControlRef}>
       <button type="button" className="flight-status-trigger" aria-expanded={open} onClick={openMenu}>
         {currentStatus.label}
       </button>
@@ -968,7 +995,7 @@ function FlightStatusControl({ flightCode }: { flightCode: string }) {
               {statusOptions.map((status) => (
                 <button type="button" className="flight-status-option" key={status.code} onClick={() => selectStatus(status)}>
                   <span className="flight-status-mini-badge">{status.code}</span>
-                  <span>
+                  <span className="flight-status-option-copy">
                     <strong>{status.label}</strong>
                     <small>{status.description}</small>
                   </span>

@@ -61,7 +61,7 @@ button:focus-visible,input:focus-visible { outline:2px solid #3b82f6; outline-of
 .overview-route-option-label{min-width:0;font-size:14px;line-height:20px}
 .overview-route-option-check{display:grid;place-items:center}
 .flight-status-control{position:relative;display:inline-flex;align-items:center;z-index:6;margin-left:3px}
-.flight-status-trigger{height:auto;display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:6px;background:#c9f0d8;color:#167c43;padding:5px 12px;font-size:13px;line-height:16px;font-family:inherit;white-space:nowrap}
+.flight-status-trigger{height:24px;display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:6px;background:#c9f0d8;color:#167c43;padding:4px 12px;font-size:13px;line-height:16px;font-family:inherit;white-space:nowrap}
 .flight-status-trigger:hover{background:#c1edcf}
 .flight-status-trigger:focus-visible{outline:2px solid #abc9fb;outline-offset:2px}
 .flight-status-popover{position:absolute;top:calc(100% + 12px);left:0;width:240px;display:flex;flex-direction:column;gap:4px;padding:8px;border:1px solid #e1e4ea;border-radius:16px;background:#fff;box-shadow:0 2px 1px rgba(82,88,102,.04),0 6px 6px rgba(82,88,102,.04),0 8px 10px rgba(82,88,102,.04)}
@@ -71,8 +71,9 @@ button:focus-visible,input:focus-visible { outline:2px solid #3b82f6; outline-of
 .flight-status-option:hover{background:#f9fafc}
 .flight-status-option:focus-visible{outline:2px solid #abc9fb;outline-offset:-2px}
 .flight-status-mini-badge{height:20px;display:inline-flex;align-items:center;justify-content:center;border-radius:4px;background:#c7eeea;color:#0b655b;padding:0 6px;font-size:11px;line-height:16px;white-space:nowrap}
-.flight-status-option strong{display:block;color:#222530;font-size:14px;line-height:20px;font-weight:500}
-.flight-status-option small{display:block;color:#222530;font-size:14px;line-height:20px;font-weight:400;white-space:normal}
+.flight-status-option-copy{display:grid;gap:0;min-width:0}
+.flight-status-option strong{display:block;color:var(--text-darkest,#222530);font-size:14px;line-height:20px;font-weight:400}
+.flight-status-option small{display:block;color:var(--text-sub-base,#99a0ae);font-size:11px;line-height:16px;font-weight:400;white-space:normal}
 .flight-status-option .qc-icon{color:#717784}
 .flight-status-warning{position:relative;display:grid;gap:4px}
 .flight-status-warning-content{display:grid;gap:0;padding:12px;color:#717784}
@@ -614,6 +615,10 @@ button:focus-visible,input:focus-visible { outline:2px solid #3b82f6; outline-of
 .row-expand .qc-icon,
 .more-overview .qc-icon{
   transition:transform 170ms var(--motion-out),color 150ms var(--motion-quick);
+}
+
+.more-overview[aria-expanded="true"] .qc-icon{
+  transform:rotate(180deg);
 }
 
 .passenger-progress .checked-progress,
