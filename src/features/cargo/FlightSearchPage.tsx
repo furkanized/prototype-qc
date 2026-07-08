@@ -1,4 +1,4 @@
-import { createElement, useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from "react";
+import { Fragment, createElement, useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import { TkDatepicker } from "@takeoff-ui/react";
 import { defineCustomElement as defineTkIcon } from "@takeoff-ui/core/components/tk-icon.js";
@@ -416,6 +416,36 @@ const generatedPassengerFirstNames = [
   "Can",
 ] as const;
 
+const femalePassengerNames = new Set([
+  "ayse",
+  "canan",
+  "ceren",
+  "derya",
+  "ece",
+  "elif",
+  "irem",
+  "lara",
+  "mina",
+  "nesibe",
+  "seda",
+  "selin",
+  "zeynep",
+]);
+
+const malePassengerNames = new Set([
+  "arda",
+  "baran",
+  "berk",
+  "bora",
+  "can",
+  "emre",
+  "furkan",
+  "kerem",
+  "mert",
+  "ozan",
+  "umut",
+]);
+
 const generatedPassengerSurnames = [
   "Yilmaz",
   "Demir",
@@ -439,10 +469,37 @@ const generatedPassengerSurnames = [
   "Eren",
 ] as const;
 
-const generatedPassengerAvatars = ["man", "woman", "woman dark"] as const;
-
 function seededNumber(input: string) {
   return Array.from(input).reduce((total, char, index) => total + char.charCodeAt(0) * (index + 17), 0);
+}
+
+function normalizePassengerName(name: string) {
+  return name
+    .trim()
+    .toLocaleLowerCase("tr-TR")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/ı/g, "i")
+    .replace(/ğ/g, "g")
+    .replace(/ü/g, "u")
+    .replace(/ş/g, "s")
+    .replace(/ö/g, "o")
+    .replace(/ç/g, "c");
+}
+
+function inferPassengerGenderFromName(name: string): AvatarGender {
+  const normalizedName = normalizePassengerName(name);
+  if (femalePassengerNames.has(normalizedName)) return "female";
+  if (malePassengerNames.has(normalizedName)) return "male";
+  return "male";
+}
+
+function getPassengerAvatarType(name: string, seed = 0) {
+  const gender = inferPassengerGenderFromName(name);
+  const avatarTypes = gender === "female"
+    ? ["woman", "young-woman", "child-girl"]
+    : ["man", "young-man", "child-boy"];
+  return avatarTypes[Math.abs(seed) % avatarTypes.length];
 }
 
 function createPnr(seed: number, index: number) {
@@ -458,6 +515,16 @@ function getAircraftCapacity(flight: FlightRecord) {
   return 200;
 }
 
+function getCabinCapacities(flight: FlightRecord) {
+  const totalCapacity = getAircraftCapacity(flight);
+
+  if (totalCapacity >= 260) return { business: 28, economy: totalCapacity - 28 };
+  if (totalCapacity >= 190) return { business: 16, economy: totalCapacity - 16 };
+  if (totalCapacity >= 168) return { business: 12, economy: totalCapacity - 12 };
+  if (totalCapacity >= 162) return { business: 12, economy: totalCapacity - 12 };
+  return { business: 16, economy: totalCapacity - 16 };
+}
+
 function getBookedPassengerTarget(flight: FlightRecord) {
   const remainingSeats = Number.parseInt(flight.seats, 10) || 0;
   const capacity = getAircraftCapacity(flight);
@@ -468,7 +535,7 @@ function createGeneratedPassenger(flight: FlightRecord, seed: number, index: num
   let attempt = 0;
   let firstName = generatedPassengerFirstNames[0];
   let surname = generatedPassengerSurnames[0];
-  let avatar = generatedPassengerAvatars[0];
+  let avatar = getPassengerAvatarType(firstName, seed + index);
 
   while (attempt < generatedPassengerFirstNames.length * generatedPassengerSurnames.length) {
     firstName = generatedPassengerFirstNames[(seed + index * 7 + attempt * 3) % generatedPassengerFirstNames.length];
@@ -476,7 +543,7 @@ function createGeneratedPassenger(flight: FlightRecord, seed: number, index: num
     const candidate = `${firstName} ${surname}`;
     if (!usedNames.has(candidate)) {
       usedNames.add(candidate);
-      avatar = generatedPassengerAvatars[(seed + index + attempt) % generatedPassengerAvatars.length];
+      avatar = getPassengerAvatarType(firstName, seed + index + attempt);
       break;
     }
     attempt += 1;
@@ -485,11 +552,12 @@ function createGeneratedPassenger(flight: FlightRecord, seed: number, index: num
   if (attempt >= generatedPassengerFirstNames.length * generatedPassengerSurnames.length) {
     firstName = generatedPassengerFirstNames[(seed + index) % generatedPassengerFirstNames.length];
     surname = `${generatedPassengerSurnames[(seed + index) % generatedPassengerSurnames.length]} ${index + 1}`;
-    avatar = generatedPassengerAvatars[(seed + index) % generatedPassengerAvatars.length];
+    avatar = getPassengerAvatarType(firstName, seed + index);
     usedNames.add(`${firstName} ${surname}`);
   }
 
-  const businessTarget = Math.max(8, Math.round(targetCount * 0.16));
+  const cabinCapacities = getCabinCapacities(flight);
+  const businessTarget = Math.min(cabinCapacities.business, Math.max(8, Math.round(targetCount * 0.16)));
   const business = index < businessTarget;
   const row = business ? 1 + (index % 5) : 6 + ((seed + index * 3) % 30);
   const letter = ["A", "B", "C", "D", "E", "F"][(seed + index) % 6];
@@ -758,6 +826,24 @@ const operationRows = [
   { item: "Load Sheet", owner: "DCS", time: "17:10", state: "Waiting" },
 ];
 
+type FlightStatusCode = "FO" | "FE" | "FT";
+
+type FlightStatusDefinition = {
+  code: FlightStatusCode;
+  label: string;
+  description: string;
+};
+
+const flightStatusDefinitions: FlightStatusDefinition[] = [
+  { code: "FO", label: "Flight Open", description: "Uçuş yolcu işlemlerine açık durumda" },
+  { code: "FE", label: "Flight Editing", description: "Yolculara bilgi girişi yapılabilir durumda" },
+  { code: "FT", label: "Flight Thru", description: "Inboundlu yolculara diğer istasyonlardan check-in" },
+];
+
+const flightStatusByCode = Object.fromEntries(
+  flightStatusDefinitions.map((status) => [status.code, status]),
+) as Record<FlightStatusCode, FlightStatusDefinition>;
+
 function FlightOverview({ flight, passengers, expanded, onExpandedChange }: { flight: FlightRecord; passengers: Passenger[]; expanded: boolean; onExpandedChange: (expanded: boolean) => void }) {
   const [activeTab, setActiveTab] = useState<FlightInfoTab>("flight");
   const expandedPresence = useAnimatedPresence(expanded, 220);
@@ -765,6 +851,7 @@ function FlightOverview({ flight, passengers, expanded, onExpandedChange }: { fl
   const checkedWidth = stats.totalPassenger ? Math.round((stats.checked / stats.totalPassenger) * 100) : 0;
   const bookedWidth = stats.totalPassenger ? Math.round((stats.booked / stats.totalPassenger) * 100) : 0;
   const showPassengersLabel = checkedWidth >= 32;
+  const cabinCapacities = getCabinCapacities(flight);
 
   useEffect(() => {
     if (!expanded) setActiveTab("flight");
@@ -778,20 +865,38 @@ function FlightOverview({ flight, passengers, expanded, onExpandedChange }: { fl
           <strong>{flight.code}</strong>
           <span>19 FEB <b>{flight.time}</b> /14:45</span>
           {flight.multiLeg ? <OverviewRouteSelector flight={flight} /> : <FlightRoute route={flight.route} className="overview-route blue" />}
-          <em>Flight Open</em>
+          <FlightStatusControl flightCode={flight.code} />
         </div>
         <button aria-label="Uçuş seçenekleri"><Icon icon="more_horiz" size={23} /></button>
       </div>
       <div className="cabin-counts"><span>Economy {stats.economy}</span><span>Business {stats.business}</span><span>Total Passenger {stats.totalPassenger}</span></div>
-      <AnimatedPassengerProgress
-        key={`${flight.code}-${flight.time}`}
-        checkedWidth={checkedWidth}
-        bookedWidth={bookedWidth}
-        checkedCount={stats.checked}
-        bookedCount={stats.booked}
-        remainingSeats={stats.remainingSeats}
-        showPassengersLabel={showPassengersLabel}
-      />
+      {expanded ? (
+        <ExpandedCabinPassengerProgress
+          key={`${flight.code}-${flight.time}-expanded`}
+          economy={{
+            capacity: cabinCapacities.economy,
+            booked: stats.economy,
+            checked: stats.economyChecked,
+            standby: Math.max(0, stats.economy - stats.economyChecked),
+          }}
+          business={{
+            capacity: cabinCapacities.business,
+            booked: stats.business,
+            checked: stats.businessChecked,
+            standby: Math.max(0, stats.business - stats.businessChecked),
+          }}
+        />
+      ) : (
+        <AnimatedPassengerProgress
+          key={`${flight.code}-${flight.time}`}
+          checkedWidth={checkedWidth}
+          bookedWidth={bookedWidth}
+          checkedCount={stats.checked}
+          bookedCount={stats.booked}
+          remainingSeats={stats.remainingSeats}
+          showPassengersLabel={showPassengersLabel}
+        />
+      )}
       <div className="flight-facts">
         <div><small>Gate <Icon icon="edit" size={14} /></small><b>{flight.gate}</b></div>
         <div><small>Boarding Time <Icon icon="edit" size={14} /></small><b>{flight.boardingTime}</b></div>
@@ -809,6 +914,248 @@ function FlightOverview({ flight, passengers, expanded, onExpandedChange }: { fl
         More <Icon icon={expanded ? "expand_less" : "keyboard_arrow_down"} size={14} />
       </button>
     </section>
+  );
+}
+
+function FlightStatusControl({ flightCode }: { flightCode: string }) {
+  const [currentCode, setCurrentCode] = useState<FlightStatusCode>("FO");
+  const [open, setOpen] = useState(false);
+  const [pendingCode, setPendingCode] = useState<FlightStatusCode>("FT");
+  const [view, setView] = useState<"menu" | "confirm">("menu");
+  const [hoveredCode, setHoveredCode] = useState<FlightStatusCode | null>(null);
+  const currentStatus = flightStatusByCode[currentCode];
+  const pendingStatus = flightStatusByCode[pendingCode];
+  const statusOptions = flightStatusDefinitions.filter((status) => status.code !== currentCode);
+
+  useEffect(() => {
+    setCurrentCode("FO");
+    setOpen(false);
+    setView("menu");
+    setPendingCode("FT");
+  }, [flightCode]);
+
+  const openMenu = () => {
+    setOpen((isOpen) => {
+      const nextOpen = !isOpen;
+      if (nextOpen) setView("menu");
+      return nextOpen;
+    });
+  };
+
+  const selectStatus = (status: FlightStatusDefinition) => {
+    setPendingCode(status.code);
+    setHoveredCode(null);
+    setView("confirm");
+  };
+
+  const applyStatus = () => {
+    setCurrentCode(pendingCode);
+    setOpen(false);
+    setView("menu");
+    setHoveredCode(null);
+  };
+
+  return (
+    <div className="flight-status-control">
+      <button type="button" className="flight-status-trigger" aria-expanded={open} onClick={openMenu}>
+        {currentStatus.label}
+      </button>
+      {open && (
+        <div className={`flight-status-popover ${view === "confirm" ? "confirm" : "menu"}`} role="dialog" aria-label="Uçuş statüsü">
+          <span className="flight-status-popover-arrow" aria-hidden="true" />
+          {view === "menu" ? (
+            <div className="flight-status-options">
+              {statusOptions.map((status) => (
+                <button type="button" className="flight-status-option" key={status.code} onClick={() => selectStatus(status)}>
+                  <span className="flight-status-mini-badge">{status.code}</span>
+                  <span>
+                    <strong>{status.label}</strong>
+                    <small>{status.description}</small>
+                  </span>
+                  <Icon icon="keyboard_arrow_right" size={20} />
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="flight-status-warning">
+              <div className="flight-status-warning-content">
+                <small>Uyarı</small>
+                <FlightStatusFlowPreview
+                  from={currentStatus}
+                  to={pendingStatus}
+                  hoveredCode={hoveredCode}
+                  onHover={setHoveredCode}
+                />
+                <p>
+                  "{flightCode} uçağının uçuş statüsü {currentStatus.label}'dan {pendingStatus.label} olarak değiştirilecektir"
+                  <br />
+                  <br />
+                  Bu işlem geri alınamaz.
+                </p>
+              </div>
+              <div className="flight-status-actions">
+                <button type="button" className="flight-status-apply" onClick={applyStatus}>Uygula</button>
+                <button type="button" className="flight-status-back" aria-label="Geri dön" onClick={() => setView("menu")}>
+                  <Icon icon="undo" size={22} fill />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function FlightStatusFlowPreview({
+  from,
+  to,
+  hoveredCode,
+  onHover,
+}: {
+  from: FlightStatusDefinition;
+  to: FlightStatusDefinition;
+  hoveredCode: FlightStatusCode | null;
+  onHover: (code: FlightStatusCode | null) => void;
+}) {
+  return (
+    <div className="flight-status-flow" data-has-hover={hoveredCode ? "true" : "false"}>
+      {[from, to].map((status, index) => (
+        <Fragment key={status.code}>
+          {index > 0 && <span className="flight-status-flow-line" aria-hidden="true" />}
+          <button
+            type="button"
+            className="flight-status-flow-badge"
+            data-hovered={hoveredCode === status.code}
+            onMouseEnter={() => onHover(status.code)}
+            onMouseLeave={() => onHover(null)}
+            onFocus={() => onHover(status.code)}
+            onBlur={() => onHover(null)}
+            aria-label={`${status.code} ${status.label}`}
+          >
+            <span className="flight-status-code">{status.code}</span>
+            <em className="flight-status-full-label">{status.label}</em>
+          </button>
+        </Fragment>
+      ))}
+    </div>
+  );
+}
+
+type CabinProgressData = {
+  capacity: number;
+  booked: number;
+  checked: number;
+  standby: number;
+};
+
+function ExpandedCabinPassengerProgress({
+  economy,
+  business,
+}: {
+  economy: CabinProgressData;
+  business: CabinProgressData;
+}) {
+  const [animatedRows, setAnimatedRows] = useState({
+    economy: { checked: 0, booked: 0 },
+    business: { checked: 0, booked: 0 },
+  });
+
+  useEffect(() => {
+    let frame = 0;
+
+    setAnimatedRows({
+      economy: { checked: 0, booked: 0 },
+      business: { checked: 0, booked: 0 },
+    });
+
+    frame = window.requestAnimationFrame(() => {
+      setAnimatedRows({
+        economy: {
+          checked: economy.capacity ? Math.round((economy.checked / economy.capacity) * 100) : 0,
+          booked: economy.capacity ? Math.round((economy.booked / economy.capacity) * 100) : 0,
+        },
+        business: {
+          checked: business.capacity ? Math.round((business.checked / business.capacity) * 100) : 0,
+          booked: business.capacity ? Math.round((business.booked / business.capacity) * 100) : 0,
+        },
+      });
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+    };
+  }, [economy.capacity, economy.booked, economy.checked, business.capacity, business.booked, business.checked]);
+
+  return (
+    <div className="expanded-passenger-progress">
+      <CabinProgressRow
+        tone="economy"
+        label="Economy"
+        remains={Math.max(0, economy.capacity - economy.booked)}
+        booked={economy.booked}
+        checked={economy.checked}
+        standby={economy.standby}
+        animatedCheckedWidth={animatedRows.economy.checked}
+        animatedBookedWidth={animatedRows.economy.booked}
+      />
+      <CabinProgressRow
+        tone="business"
+        label="Business"
+        remains={Math.max(0, business.capacity - business.booked)}
+        booked={business.booked}
+        checked={business.checked}
+        standby={business.standby}
+        animatedCheckedWidth={animatedRows.business.checked}
+        animatedBookedWidth={animatedRows.business.booked}
+      />
+    </div>
+  );
+}
+
+function CabinProgressRow({
+  tone,
+  label,
+  remains,
+  booked,
+  checked,
+  standby,
+  animatedCheckedWidth,
+  animatedBookedWidth,
+}: {
+  tone: "economy" | "business";
+  label: string;
+  remains: number;
+  booked: number;
+  checked: number;
+  standby: number;
+  animatedCheckedWidth: number;
+  animatedBookedWidth: number;
+}) {
+  return (
+    <div className="cabin-progress-row">
+      <div className="cabin-progress-track">
+        <div className="cabin-progress-remaining">
+          <span>{remains} Passenger Remains</span>
+        </div>
+        <div className={`cabin-progress-booked ${tone}`} style={{ width: `${animatedBookedWidth}%` }}>
+          <div className="cabin-progress-booked-inner">
+            <span><Icon icon="expand_circle_down" size={18} />Checked-in</span>
+            <span>{booked} Booked <Icon icon="person" size={16} fill /></span>
+          </div>
+        </div>
+        <div className={`cabin-progress-checked ${tone}`} style={{ width: `${animatedCheckedWidth}%` }}>
+          <div className="cabin-progress-checked-inner">
+            <span><span className={tone === "business" ? "cabin-progress-icon rotated" : "cabin-progress-icon"}><Icon icon="expand_circle_down" size={18} /></span>{label}</span>
+            <span>{checked} Checked-In <Icon icon="person" size={16} fill /></span>
+          </div>
+        </div>
+      </div>
+      <div className="cabin-progress-standby">
+        <span>Standby</span>
+        <span>{standby} Passenger <Icon icon="person" size={16} fill /></span>
+      </div>
+    </div>
   );
 }
 
@@ -1481,7 +1828,7 @@ function FlightLegMatrix({ rows }: { rows: FlightLegMatrixRow[] }) {
 
 function FlightInfoGeneralTab({ flight, passengers }: { flight: FlightRecord; passengers: Passenger[] }) {
   const stats = getFlightStats(flight, passengers);
-  const male = passengers.filter((passenger) => passenger.avatar === "man").length;
+  const male = passengers.filter((passenger) => inferPassengerGenderFromName(passenger.name) === "male").length;
   const female = passengers.length - male;
   const businessAvailable = Math.max(0, Math.round(stats.remainingSeats * 0.18));
   const economyAvailable = Math.max(0, stats.remainingSeats - businessAvailable);
@@ -1733,8 +2080,72 @@ function RegNoFlightsTab({ flight }: { flight: FlightRecord }) {
   );
 }
 
-function Avatar({ type }: { type: string }) {
-  return <span className={`avatar ${type}`}><span className="avatar-head" /><span className="avatar-body" /></span>;
+type AvatarGender = "male" | "female";
+type AvatarState = "active" | "danger" | "muted" | "selected" | "head";
+type AvatarSize = "sm" | "md" | "lg";
+type AvatarAge = "adult" | "young" | "child";
+type AvatarKind = "man" | "woman" | "young-man" | "young-woman" | "child-boy" | "child-girl";
+
+function getAvatarGender(type: string): AvatarGender {
+  return type.includes("woman") || type.includes("girl") || type.includes("female") ? "female" : "male";
+}
+
+function getAvatarAge(type: string): AvatarAge {
+  if (type.includes("child")) return "child";
+  if (type.includes("young")) return "young";
+  return "adult";
+}
+
+function getAvatarKind(gender: AvatarGender, age: AvatarAge): AvatarKind {
+  if (age === "child") return gender === "female" ? "child-girl" : "child-boy";
+  if (age === "young") return gender === "female" ? "young-woman" : "young-man";
+  return gender === "female" ? "woman" : "man";
+}
+
+function getAvatarState(type: string): AvatarState {
+  if (type.includes("dark") || type.includes("alt")) return "muted";
+  return "active";
+}
+
+function Avatar({
+  type,
+  gender,
+  state,
+  size = "sm",
+}: {
+  type: string;
+  gender?: AvatarGender;
+  state?: AvatarState;
+  size?: AvatarSize;
+}) {
+  const resolvedGender = gender ?? getAvatarGender(type);
+  const resolvedKind = getAvatarKind(resolvedGender, getAvatarAge(type));
+  const resolvedState = state ?? getAvatarState(type);
+
+  return (
+    <span
+      className={`avatar avatar-gender-${resolvedGender} avatar-kind-${resolvedKind} avatar-state-${resolvedState} avatar-size-${size}`}
+      aria-hidden="true"
+    >
+      <svg className="avatar-svg" viewBox="0 0 20 20" width="20" height="20" focusable="false">
+        {resolvedGender === "female" ? (
+          <>
+            <path className="avatar-hair" d="M4.7 11.9c-1.1-.7-.9-1.7-.7-2.3.2-.6-.4-1-.2-1.9.2-.9 1-.9 1.1-2 .2-2.3 2.2-4 4.6-4 2.7 0 4.7 1.9 4.8 4.4.1 1.1.9 1.3.9 2.2 0 .8-.5 1.2-.4 1.9.1.7.2 1.4-.7 1.9H4.7Z" />
+            <path className="avatar-face" d="M7.1 11.1V8.7c-1.2-.2-1.1-2 .1-1.6.4.1.8-.5.8-1.1 1.3 1 3.6-.7 4.1.8.4 1.4-.1 3.6-1.8 3.9v.7c.7.4 1.5.8 2.4 1.1-.7 1-1.9 1.7-3.2 1.7-1.4 0-2.6-.7-3.3-1.8.4-.2.7-.4.9-.6Z" />
+            <path className="avatar-shirt" d="M3.4 18c.3-2.5.8-4 1.6-4.7.4-.3 1.4-.8 2.1-1.2.6.6 1.4.9 2.4.9s1.8-.3 2.4-.9c.8.4 1.8.9 2.2 1.2.8.7 1.3 2.2 1.6 4.7H3.4Z" />
+            <path className="avatar-accent" d="M7.6 4.8c.9-.7 2-.7 3.2 0 .2-.4.5-.6.9-.6.8 0 .9 1.2.1 1.4-.4.1-.8-.1-1-.4-1 .5-1.9.5-2.9 0-.2.3-.6.5-1 .4-.8-.2-.7-1.4.1-1.4.3 0 .5.2.6.6Z" />
+          </>
+        ) : (
+          <>
+            <path className="avatar-hair" d="M5.1 8.3c-.8-2.9.8-5.7 4.7-5.9 3.9-.1 5.3 2.6 4.5 5.8l-1.1 2.6H6.2L5.1 8.3Z" />
+            <path className="avatar-face" d="M7.3 11.1V8.8c-1.1-.2-1.1-1.8.1-1.5.5.1.9-.4 1-1.2 1.5 1.2 3.4-.2 4.2.7.2 1.9-.4 3.6-2 3.9v.8c.5.4 1.3.8 2.3 1.2-.8.9-1.9 1.4-3.2 1.4-1.4 0-2.5-.6-3.3-1.5.4-.2.7-.4.9-.6Z" />
+            <path className="avatar-shirt" d="M2.7 18c.4-2.5.9-4 1.6-4.7.5-.5 2.1-1.1 3-1.5.5.7 1.3 1.1 2.4 1.1 1 0 1.8-.4 2.3-1.1.9.4 2.6 1 3.1 1.5.7.7 1.2 2.2 1.6 4.7H2.7Z" />
+            <path className="avatar-accent" d="M8.1 12.2h3.2l-.8 4.8h-1.6l-.8-4.8Z" />
+          </>
+        )}
+      </svg>
+    </span>
+  );
 }
 
 function passengerFullName(passenger: Passenger) {
@@ -1845,7 +2256,7 @@ function PassengerSelectionBar({
         <div className="selection-chips">
           {selectedPassengers.slice(0, 3).map((passenger) => (
             <span className="selection-chip" key={`${passenger.pnr}-${passenger.name}`}>
-              <Avatar type={passenger.avatar} />
+              <Avatar type={passenger.avatar} gender={inferPassengerGenderFromName(passenger.name)} state="selected" size="sm" />
               <span>{passenger.name} {passenger.surname.charAt(0) + passenger.surname.slice(1).toLowerCase()}</span>
               <button type="button" aria-label={`${passenger.name} seçimini kaldır`} onClick={() => onRemove(passenger)}><Icon icon="close" size={17} /></button>
             </span>
@@ -1921,7 +2332,7 @@ function PassengerCheckInOverlay({
                   >
                     <CheckboxMark checked={checked} />
                   </button>
-                  <Avatar type={passenger.avatar} />
+                  <Avatar type={passenger.avatar} gender={inferPassengerGenderFromName(passenger.name)} state={checked ? "selected" : "active"} size="md" />
                   <div>
                     <strong>{passenger.name} {passenger.surname.charAt(0) + passenger.surname.slice(1).toLowerCase()}</strong>
                     <span>{passenger.pnr} - Seat: {passenger.seat} - Baggage: 1pc /{index === 0 ? "18" : index === 1 ? "22" : "12"}kg</span>
@@ -2410,7 +2821,7 @@ function CreatePoolOverlay({
                           tabIndex={step === "Head of Pool" ? 0 : -1}
                           disabled={step !== "Head of Pool"}
                         >
-                          <Avatar type={passenger.avatar} />
+                          <Avatar type={passenger.avatar} gender={inferPassengerGenderFromName(passenger.name)} state={isHead ? "head" : checked ? "selected" : "active"} size="md" />
                         </button>
                         <div>
                           <strong>{passengerFullName(passenger)}</strong>
@@ -2666,7 +3077,15 @@ function PassengerTable({ passengers }: { passengers: Passenger[] }) {
                 <button className="check-button" aria-label={`${person.name} seç`} onClick={() => toggle(index)}><CheckboxMark checked={selectedRowsState[index]} /></button>
                 <span className={`ci-state ${person.ci}`}><Icon icon={person.ci === "checked" ? "touch_app" : "refresh"} size={25} /></span>
                 <span>{person.pnr}</span>
-                <span className="passenger-name"><Avatar type={person.avatar} />{person.name}</span>
+                <span className="passenger-name">
+                  <Avatar
+                    type={person.avatar}
+                    gender={inferPassengerGenderFromName(person.name)}
+                    state={selectedRowsState[index] ? "selected" : person.baggage === "alert" ? "danger" : person.ci === "checked" ? "active" : "muted"}
+                    size="sm"
+                  />
+                  {person.name}
+                </span>
                 <span>{person.surname}</span><span>{person.group}</span><span>{person.seat}</span>
                 <span className={`bag ${person.baggage} baggage-cell`}><BaggageNotificationIcon tone={person.baggage} /></span>
                 <span className={`apis ${person.apis}`}><b>A</b></span>
@@ -3004,6 +3423,45 @@ export function FlightSearchPage() {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, [flightListCollapsed]);
+
+  useEffect(() => {
+    const isEditableTarget = (target: EventTarget | null) => {
+      if (!(target instanceof HTMLElement)) return false;
+      const tagName = target.tagName;
+      return target.isContentEditable || tagName === "INPUT" || tagName === "TEXTAREA" || tagName === "SELECT";
+    };
+
+    const handleKeyboardShortcut = (event: KeyboardEvent) => {
+      if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+      if (isEditableTarget(event.target)) return;
+
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        setFlightListCollapsed((current) => !current);
+        return;
+      }
+
+      if (event.key === "ArrowRight") {
+        event.preventDefault();
+        setSeatMapCollapsed((current) => !current);
+        return;
+      }
+
+      if (event.key === "ArrowDown") {
+        event.preventDefault();
+        setFlightInfoExpanded(true);
+        return;
+      }
+
+      if (event.key === "ArrowUp") {
+        event.preventDefault();
+        setFlightInfoExpanded(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyboardShortcut);
+    return () => window.removeEventListener("keydown", handleKeyboardShortcut);
+  }, []);
 
   return (
     <div className={`qc-app allow-flightlist-motion ${flightListCollapsed ? "flight-list-collapsed" : ""} ${seatMapCollapsed ? "seatmap-collapsed" : ""}`}>
