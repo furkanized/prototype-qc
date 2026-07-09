@@ -533,8 +533,8 @@ function getBookedPassengerTarget(flight: FlightRecord) {
 
 function createGeneratedPassenger(flight: FlightRecord, seed: number, index: number, targetCount: number, usedNames: Set<string>): PassengerRecord {
   let attempt = 0;
-  let firstName = generatedPassengerFirstNames[0];
-  let surname = generatedPassengerSurnames[0];
+  let firstName: string = generatedPassengerFirstNames[0];
+  let surname: string = generatedPassengerSurnames[0];
   let avatar = getPassengerAvatarType(firstName, seed + index);
 
   while (attempt < generatedPassengerFirstNames.length * generatedPassengerSurnames.length) {
