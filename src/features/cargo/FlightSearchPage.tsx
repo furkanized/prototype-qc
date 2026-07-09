@@ -1,6 +1,8 @@
 import { Fragment, createElement, useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from "react";
 import { createPortal } from "react-dom";
-import { TkDatepicker } from "@takeoff-ui/react";
+import * as React from "react";
+import { createComponent, type EventName } from "@stencil/react-output-target/runtime";
+import { TkDatepicker as TkDatepickerElement, defineCustomElement as defineTkDatepicker } from "@takeoff-ui/core/components/tk-datepicker.js";
 import { defineCustomElement as defineTkIcon } from "@takeoff-ui/core/components/tk-icon.js";
 import { defineCustomElement as defineTkButton } from "@takeoff-ui/core/components/tk-button.js";
 import { defineCustomElement as defineTkInput } from "@takeoff-ui/core/components/tk-input.js";
@@ -11,6 +13,24 @@ import { defineCustomElement as defineTkTabsItem } from "@takeoff-ui/core/compon
 import { defineCustomElement as defineTkTooltip } from "@takeoff-ui/core/components/tk-tooltip.js";
 import qcMark from "../../assets/qc-mark.svg";
 import qcText from "../../assets/qc-text.svg";
+
+// Local wrapper mirroring @takeoff-ui/react's generated TkDatepicker; importing it
+// from the package barrel would pull every Takeoff component into the bundle.
+const TkDatepicker = createComponent({
+  tagName: "tk-datepicker",
+  elementClass: TkDatepickerElement,
+  react: React,
+  events: {
+    onTkInputChange: "tk-input-change",
+    onTkChange: "tk-change",
+    onTkInvalid: "tk-invalid",
+  } as {
+    onTkInputChange: EventName<CustomEvent<string>>;
+    onTkChange: EventName<CustomEvent<string>>;
+    onTkInvalid: EventName<CustomEvent<void>>;
+  },
+  defineCustomElement: defineTkDatepicker,
+});
 
 defineTkIcon();
 defineTkButton();
