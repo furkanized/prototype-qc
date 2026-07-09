@@ -3510,6 +3510,54 @@ export function FlightSearchPage() {
     return () => window.removeEventListener("keydown", handleKeyboardShortcut);
   }, []);
 
+  // Headless bridge for the QC Experience platform (Free Mode). Maps external
+  // navigation commands onto the existing workspace state — no UI changes.
+  useEffect(() => {
+    const handleCommand = (event: Event) => {
+      const command = (event as CustomEvent<{ command: string }>).detail?.command;
+      switch (command) {
+        case "flight-board":
+          setFlightListCollapsed(false);
+          setFlightInfoExpanded(false);
+          setSeatMapCollapsed(true);
+          break;
+        case "overview":
+          setFlightListCollapsed(false);
+          setFlightInfoExpanded(false);
+          setSeatMapCollapsed(false);
+          break;
+        case "flight-info":
+          setFlightInfoExpanded(true);
+          break;
+        case "passenger-list":
+          setFlightListCollapsed(true);
+          setFlightInfoExpanded(false);
+          setSeatMapCollapsed(true);
+          break;
+        case "seat-map":
+          setFlightListCollapsed(true);
+          setFlightInfoExpanded(false);
+          setSeatMapCollapsed(false);
+          break;
+        case "compact":
+          setFlightListCollapsed(true);
+          setFlightInfoExpanded(false);
+          setSeatMapCollapsed(true);
+          break;
+        case "restart":
+          setSelectedFlight(0);
+          setFlightListCollapsed(false);
+          setSeatMapCollapsed(false);
+          setFlightInfoExpanded(false);
+          break;
+        default:
+          break;
+      }
+    };
+    window.addEventListener("qcx-command", handleCommand);
+    return () => window.removeEventListener("qcx-command", handleCommand);
+  }, []);
+
   return (
     <div className={`qc-app allow-flightlist-motion ${flightListCollapsed ? "flight-list-collapsed" : ""} ${seatMapCollapsed ? "seatmap-collapsed" : ""}`}>
       <TopBar />
