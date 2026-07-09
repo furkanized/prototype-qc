@@ -754,7 +754,7 @@ function FlightList({
     });
 
   return (
-    <aside ref={panelRef} className={`flight-sidebar ${collapsed ? "collapsed" : ""}`.trim()} aria-hidden={collapsed}>
+    <aside ref={panelRef} className={`flight-sidebar ${collapsed ? "collapsed" : ""}`.trim()} aria-hidden={collapsed} inert={collapsed}>
       <div className="flight-sidebar-track">
         <div className="flight-title"><h2>Flight List</h2><button aria-label="Uçuş listesi seçenekleri"><Icon icon="more_horiz" size={22} /></button></div>
         <div className="date-picker" ref={datePickerRef}>
@@ -3362,7 +3362,7 @@ function SeatMap({ collapsed, onCollapsedChange }: { collapsed: boolean; onColla
     return next;
   });
   return (
-    <aside className={`seat-map ${collapsed ? "collapsed" : ""}`} aria-label="Koltuk haritası" aria-expanded={!collapsed}>
+    <aside className={`seat-map ${collapsed ? "collapsed" : ""}`} aria-label="Koltuk haritası">
       <div className="seat-title">
         <button
           type="button"
