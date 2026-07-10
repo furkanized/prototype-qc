@@ -447,6 +447,66 @@ html.qcx-reduced-motion *, html.qcx-reduced-motion *::before, html.qcx-reduced-m
 .qcx-dock-screen small { font-size: 10.5px; color: var(--qcx-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 260px; }
 
 /* --------------------------------------------------------------------------
+   Scenario step guide (Family Check-in) — floating dock over the prototype
+   -------------------------------------------------------------------------- */
+.qcx-guide {
+  position: fixed; right: 18px; bottom: 18px; z-index: 90;
+  width: min(330px, calc(100vw - 36px)); display: grid; gap: 12px; padding: 14px 14px 12px;
+  border: 1px solid var(--qcx-line); border-radius: 16px; background: rgba(255, 255, 255, 0.96);
+  box-shadow: var(--qcx-shadow-md); backdrop-filter: blur(10px);
+  animation: qcx-toast-in 300ms var(--qcx-ease);
+}
+.qcx-guide-head { display: flex; align-items: center; gap: 10px; }
+.qcx-guide-head > div { flex: 1; min-width: 0; }
+.qcx-guide-icon { width: 32px; height: 32px; flex: 0 0 32px; display: grid; place-items: center; border-radius: 9px; background: #fdf1f2; color: var(--qcx-red); }
+.qcx-guide-head strong { display: block; font-size: 13.5px; font-weight: 500; color: var(--qcx-ink); }
+.qcx-guide-head small { display: block; font-size: 11px; color: var(--qcx-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.qcx-guide-mini { width: 28px; height: 28px; display: grid; place-items: center; border: 0; border-radius: 8px; background: transparent; color: var(--qcx-muted); }
+.qcx-guide-mini:hover { background: #f0f3f8; }
+
+.qcx-guide-steps { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.qcx-guide-steps li {
+  display: flex; align-items: flex-start; gap: 9px; padding: 6px 8px; border-radius: 9px;
+  font-size: 12.5px; line-height: 17px; color: var(--qcx-muted);
+  transition: background-color 200ms var(--qcx-ease), color 200ms var(--qcx-ease);
+}
+.qcx-guide-steps li.current { background: var(--qcx-blue-soft); color: var(--qcx-ink); font-weight: 450; }
+.qcx-guide-steps li.done { color: var(--qcx-text); }
+.qcx-guide-check {
+  width: 18px; height: 18px; flex: 0 0 18px; margin-top: 0; display: grid; place-items: center;
+  border-radius: 50%; border: 1.5px solid #d5dbe5; background: #fff; color: var(--qcx-muted);
+  font-size: 10px; transition: background-color 200ms var(--qcx-ease), border-color 200ms var(--qcx-ease), color 200ms var(--qcx-ease);
+}
+.qcx-guide-check b { font-weight: 500; font-size: 10px; }
+.qcx-guide-steps li.current .qcx-guide-check { border-color: #2b62c4; color: #2b62c4; }
+.qcx-guide-steps li.done .qcx-guide-check { background: var(--qcx-green); border-color: var(--qcx-green); color: #fff; }
+
+.qcx-guide-actions { display: flex; align-items: center; gap: 8px; }
+.qcx-guide-button {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  height: 34px; padding: 0 14px; border: 1px solid transparent; border-radius: 9px;
+  font-size: 12.5px; font-weight: 500; white-space: nowrap;
+  transition: background-color 160ms var(--qcx-ease), transform 160ms var(--qcx-ease);
+}
+.qcx-guide-button.primary { flex: 1; background: var(--qcx-ink); color: #fff; }
+.qcx-guide-button.primary:hover { background: #2b3346; }
+.qcx-guide-button.ghost { width: 34px; padding: 0; background: transparent; border-color: #dce2ea; color: var(--qcx-text); }
+.qcx-guide-button.ghost:hover:not(:disabled) { background: #f0f3f8; }
+.qcx-guide-button.ghost:disabled { opacity: 0.4; cursor: not-allowed; }
+.qcx-guide-progress { font-size: 11.5px; color: var(--qcx-muted); font-variant-numeric: tabular-nums; }
+.qcx-guide-hint { flex: 1; font-size: 11px; color: var(--qcx-muted); }
+.qcx-guide-hint.ready { color: var(--qcx-green); font-weight: 500; }
+
+.qcx-guide-fab {
+  position: fixed; right: 18px; bottom: 18px; z-index: 90;
+  display: inline-flex; align-items: center; gap: 7px; height: 40px; padding: 0 14px;
+  border: 1px solid var(--qcx-line); border-radius: 999px; background: rgba(255, 255, 255, 0.96);
+  color: var(--qcx-red); box-shadow: var(--qcx-shadow-md); backdrop-filter: blur(10px);
+  animation: qcx-toast-in 240ms var(--qcx-ease);
+}
+.qcx-guide-fab em { font-style: normal; font-size: 12px; font-weight: 500; color: var(--qcx-ink); font-variant-numeric: tabular-nums; }
+
+/* --------------------------------------------------------------------------
    Responsiveness — adapt, don't just shrink
    -------------------------------------------------------------------------- */
 @media (max-width: 1240px) {
@@ -481,3 +541,390 @@ html.qcx-reduced-motion *, html.qcx-reduced-motion *::before, html.qcx-reduced-m
   .qcx-back-pill span { display: none; }
   .qcx-back-pill { padding: 0 13px; }
 }
+
+/* --------------------------------------------------------------------------
+   User Testing Studio
+   -------------------------------------------------------------------------- */
+.uts-studio { max-width: 1120px; }
+.uts-stats { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+
+.uts-test-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+.uts-test-card { animation: qcx-card-in 340ms var(--qcx-ease) both; transition: transform 200ms var(--qcx-ease), box-shadow 200ms var(--qcx-ease), border-color 200ms var(--qcx-ease); }
+.uts-test-card:hover { transform: translateY(-3px); box-shadow: var(--qcx-shadow-md); border-color: #d8dfe9; }
+
+/* Stars */
+.uts-stars { display: inline-flex; gap: 1px; }
+.uts-star { border: 0; background: transparent; padding: 0; color: #d5dbe5; display: grid; place-items: center; }
+.uts-star.on { color: #e7a600; }
+.uts-star.editable { cursor: pointer; transition: transform 120ms var(--qcx-ease), color 120ms var(--qcx-ease); }
+.uts-star.editable:hover { transform: scale(1.15); color: #e7a600; }
+.uts-star:disabled { cursor: default; }
+
+/* Metric bars / heat */
+.uts-metric-bar { display: grid; gap: 5px; }
+.uts-metric-bar-head { display: flex; justify-content: space-between; font-size: 12px; color: var(--qcx-muted); }
+.uts-metric-bar-head strong { color: var(--qcx-ink); font-weight: 500; }
+.uts-track { display: block; height: 6px; border-radius: 6px; background: #edf0f5; overflow: hidden; }
+.uts-fill { display: block; height: 100%; border-radius: 6px; transition: width 500ms var(--qcx-ease); }
+.uts-fill.blue { background: var(--qcx-blue); }
+.uts-fill.green { background: var(--qcx-green); }
+.uts-fill.red { background: var(--qcx-red); }
+.uts-fill.amber { background: #e7a600; }
+
+/* Feedback cards */
+.uts-feedback-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+.uts-feedback-card p { flex: 0; font-size: 13px; color: var(--qcx-ink); }
+.uts-feedback-improve { display: flex; align-items: flex-start; gap: 6px; color: var(--qcx-muted) !important; font-size: 12px !important; }
+.uts-feedback-head { display: flex; align-items: center; gap: 10px; }
+.uts-feedback-head > div { flex: 1; min-width: 0; }
+.uts-feedback-head strong { display: block; font-size: 13.5px; font-weight: 500; color: var(--qcx-ink); }
+.uts-feedback-head small { display: block; font-size: 11.5px; color: var(--qcx-muted); }
+.uts-avatar-sm { width: 30px; height: 30px; font-size: 11px; flex: 0 0 30px; }
+
+/* Create form */
+.uts-create-card { padding: 26px; }
+.uts-form-section { margin: 6px 0 14px; font-size: 13px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--qcx-muted); }
+.uts-form-section:not(:first-child) { margin-top: 26px; padding-top: 22px; border-top: 1px solid var(--qcx-line); }
+.uts-task-builder { display: grid; gap: 16px; justify-items: start; }
+.uts-task-builder > .qcx-button { justify-self: stretch; justify-content: center; border-style: dashed; }
+.uts-task-editor { position: relative; width: 100%; margin: 0; padding: 18px; border: 1px solid var(--qcx-line); border-radius: 12px; background: var(--qcx-bg); }
+.uts-task-editor legend { padding: 0 8px; font-size: 12.5px; font-weight: 600; color: var(--qcx-ink); }
+.uts-task-editor-tools { position: absolute; top: 10px; right: 10px; display: flex; gap: 2px; }
+.uts-task-editor-tools .qcx-icon-button { width: 30px; height: 30px; }
+.uts-task-editor-tools .qcx-icon-button:disabled { opacity: 0.35; }
+.uts-create-actions { gap: 10px; }
+
+/* Live observation */
+.uts-live-dot { display: inline-block; width: 10px; height: 10px; margin-right: 10px; border-radius: 50%; background: var(--qcx-red); animation: qcx-pulse 1.4s ease-in-out infinite; vertical-align: middle; }
+.uts-live-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.uts-live-grid { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(280px, 1fr); gap: 16px; align-items: start; }
+.uts-live-panel { gap: 18px; }
+.uts-live-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
+.uts-live-kpi { padding: 12px 14px; border: 1px solid var(--qcx-line); border-radius: 11px; background: var(--qcx-bg); }
+.uts-live-kpi small { display: block; font-size: 10.5px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--qcx-muted); }
+.uts-live-kpi strong { display: block; margin-top: 3px; font-size: 15px; font-weight: 550; color: var(--qcx-ink); }
+.uts-clock { font-variant-numeric: tabular-nums; color: var(--qcx-red) !important; }
+.uts-warn { color: var(--qcx-red) !important; }
+.uts-good { color: var(--qcx-green); display: inline-flex; align-items: center; gap: 6px; }
+.uts-live-task { display: grid; gap: 6px; padding: 14px 16px; border: 1px solid #dbe6fb; border-radius: 12px; background: var(--qcx-blue-soft); }
+.uts-live-task small { font-size: 10.5px; letter-spacing: 0.04em; text-transform: uppercase; color: #2b62c4; }
+.uts-live-task strong { font-size: 14.5px; font-weight: 550; color: var(--qcx-ink); }
+.uts-live-task p { margin: 0; font-size: 12.5px; color: var(--qcx-text); }
+.uts-live-columns { display: grid; grid-template-columns: 1.2fr 1fr; gap: 20px; }
+.uts-live-columns h3 { margin: 0 0 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--qcx-muted); }
+.uts-live-columns h3:not(:first-child) { margin-top: 16px; }
+.uts-task-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.uts-task-list li { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--qcx-ink); }
+.uts-task-list li em { margin-left: auto; font-style: normal; font-size: 11.5px; color: var(--qcx-muted); font-variant-numeric: tabular-nums; }
+.uts-task-list li.done .qc-icon { color: var(--qcx-green); }
+.uts-task-list li.failed .qc-icon { color: var(--qcx-red); }
+.uts-task-list li.current { font-weight: 550; }
+.uts-task-list li.current .qc-icon { color: var(--qcx-blue); }
+.uts-task-list li .qc-icon { color: #c1c8d4; }
+.uts-task-list li.muted, .muted { color: var(--qcx-muted); font-size: 12.5px; }
+.uts-nav-history { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; max-height: 260px; overflow-y: auto; }
+.uts-nav-history li { display: flex; align-items: center; gap: 10px; padding: 6px 9px; border-radius: 8px; font-size: 12.5px; color: var(--qcx-text); }
+.uts-nav-history li.current { background: var(--qcx-blue-soft); color: #2b62c4; font-weight: 500; }
+.uts-nav-history li em { font-style: normal; font-size: 11px; color: var(--qcx-muted); font-variant-numeric: tabular-nums; }
+
+/* Notes */
+.uts-notes-panel { gap: 12px; position: sticky; top: 76px; }
+.uts-notes-panel h3 { margin: 0; display: flex; align-items: center; gap: 7px; font-size: 14px; font-weight: 550; color: var(--qcx-ink); }
+.uts-notes-list { display: grid; gap: 8px; max-height: 340px; overflow-y: auto; }
+.uts-note { display: flex; align-items: flex-start; gap: 10px; padding: 9px 11px; border: 1px solid var(--qcx-line); border-radius: 10px; background: var(--qcx-bg); font-size: 12.5px; color: var(--qcx-ink); animation: qcx-card-in 240ms var(--qcx-ease) both; }
+.uts-note em { flex: 0 0 auto; font-style: normal; font-weight: 600; font-size: 11.5px; color: var(--qcx-red); font-variant-numeric: tabular-nums; }
+.uts-note-input { display: flex; gap: 8px; }
+.uts-note-input input { flex: 1; min-width: 0; height: 38px; padding: 0 12px; border: 1px solid #dce2ea; border-radius: 10px; font-size: 13px; color: var(--qcx-ink); outline: 0; }
+.uts-note-input input:focus { border-color: var(--qcx-blue); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12); }
+
+/* Feedback form */
+.uts-feedback-form { padding: 26px; gap: 20px; max-width: 640px; }
+.uts-rating-grid { display: grid; gap: 12px; }
+.uts-rating-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding-bottom: 12px; border-bottom: 1px solid #f0f3f7; font-size: 13.5px; color: var(--qcx-ink); }
+.uts-rating-row.compact { padding-bottom: 6px; border-bottom: 0; font-size: 12.5px; }
+.uts-open-questions { margin-top: 4px; }
+
+/* Detail / analytics */
+.uts-analytics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; align-items: start; }
+.uts-card-title { margin: 0 0 4px; display: flex; align-items: center; gap: 8px; font-size: 14.5px; font-weight: 550; color: var(--qcx-ink); }
+.uts-card-title .qc-icon { color: var(--qcx-red); }
+.uts-task-result { display: grid; gap: 7px; padding: 12px 0; border-bottom: 1px solid #f0f3f7; }
+.uts-task-result:last-of-type { border-bottom: 0; }
+.uts-task-result-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.uts-task-result-head strong { font-size: 13px; font-weight: 500; color: var(--qcx-ink); }
+.uts-heat-row { display: grid; gap: 6px; padding: 9px 0; }
+.uts-heat-label { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+.uts-heat-label span { font-size: 13px; font-weight: 500; color: var(--qcx-ink); }
+.uts-heat-label small { font-size: 11px; color: var(--qcx-muted); text-align: right; }
+.uts-analytics-callouts { margin-top: 10px; display: grid; gap: 6px; padding-top: 12px; border-top: 1px solid #f0f3f7; }
+.uts-analytics-callouts p { margin: 0; display: flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--qcx-text); }
+.uts-analytics-callouts .qc-icon { color: var(--qcx-red); }
+
+/* Replay */
+.uts-replay-grid { display: grid; grid-template-columns: minmax(260px, 320px) minmax(0, 1fr); gap: 16px; align-items: start; }
+.uts-session-list { display: grid; gap: 8px; max-height: 560px; overflow-y: auto; }
+.uts-session-row { display: flex; align-items: center; gap: 10px; padding: 11px 13px; border: 1px solid var(--qcx-line); border-radius: 12px; background: var(--qcx-surface); text-align: left; transition: border-color 150ms var(--qcx-ease), box-shadow 150ms var(--qcx-ease); }
+.uts-session-row:hover { border-color: #c3ccd9; box-shadow: var(--qcx-shadow-sm); }
+.uts-session-row.active { border-color: var(--qcx-blue); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12); }
+.uts-session-copy { flex: 1; min-width: 0; }
+.uts-session-copy strong { display: block; font-size: 13px; font-weight: 500; color: var(--qcx-ink); }
+.uts-session-copy small { display: block; font-size: 11px; color: var(--qcx-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.uts-replay-card { gap: 16px; }
+.uts-replay { display: grid; gap: 12px; }
+.uts-replay-stage { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 18px; border: 1px solid #dbe6fb; border-radius: 12px; background: linear-gradient(135deg, #f2f6fd 0%, #eaf1fe 100%); }
+.uts-replay-screen { display: grid; gap: 2px; }
+.uts-replay-screen strong { font-size: 16px; font-weight: 550; color: var(--qcx-ink); }
+.uts-replay-screen small { font-size: 11.5px; color: var(--qcx-muted); }
+.uts-replay-screen .qc-icon { color: #2b62c4; }
+.uts-replay-counters { display: grid; gap: 5px; justify-items: end; font-size: 12px; color: var(--qcx-text); }
+.uts-replay-counters span { display: inline-flex; align-items: center; gap: 5px; font-variant-numeric: tabular-nums; }
+.uts-replay-controls { display: flex; align-items: center; gap: 10px; }
+.uts-replay-controls input[type="range"] { flex: 1; accent-color: var(--qcx-red); }
+.uts-event-log { margin: 0; padding: 0; list-style: none; display: grid; gap: 3px; max-height: 220px; overflow-y: auto; }
+.uts-event-log li { display: flex; align-items: center; gap: 8px; padding: 5px 8px; border-radius: 7px; font-size: 12px; color: var(--qcx-text); animation: qcx-card-in 200ms var(--qcx-ease) both; }
+.uts-event-log li em { font-style: normal; font-size: 11px; color: var(--qcx-muted); font-variant-numeric: tabular-nums; flex: 0 0 36px; }
+.uts-event-log li.kind-misclick, .uts-event-log li.kind-task_fail { color: var(--qcx-red); }
+.uts-event-log li.kind-task_complete { color: var(--qcx-green); }
+.uts-event-log li.kind-screen { color: #2b62c4; }
+.uts-session-extra { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; padding-top: 14px; border-top: 1px solid #f0f3f7; }
+.uts-session-extra h4 { margin: 0 0 8px; display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--qcx-muted); }
+.uts-session-extra p { margin: 4px 0; font-size: 12.5px; color: var(--qcx-text); }
+.uts-session-feedback { display: grid; gap: 2px; }
+
+@media (max-width: 1000px) {
+  .uts-live-grid, .uts-replay-grid { grid-template-columns: 1fr; }
+  .uts-notes-panel { position: static; }
+  .uts-session-list { max-height: 260px; }
+}
+@media (max-width: 720px) {
+  .uts-live-columns, .uts-session-extra { grid-template-columns: 1fr; }
+  .uts-rating-row { flex-direction: column; align-items: flex-start; gap: 6px; }
+}
+
+/* --------------------------------------------------------------------------
+   User Testing Studio — real live session host
+   -------------------------------------------------------------------------- */
+.uts-setup-card { padding: 26px; max-width: 640px; gap: 18px; }
+.uts-setup-tasks { display: grid; gap: 8px; padding: 16px 18px; border: 1px solid var(--qcx-line); border-radius: 12px; background: var(--qcx-bg); }
+.uts-setup-tasks strong { font-size: 13px; font-weight: 550; color: var(--qcx-ink); }
+.uts-setup-tasks ol { margin: 0; padding-left: 20px; display: grid; gap: 5px; font-size: 13px; color: var(--qcx-text); }
+.uts-setup-tasks em { font-style: normal; color: var(--qcx-muted); font-size: 11.5px; }
+
+.uts-live-host { position: fixed; inset: 0; z-index: 95; background: #fff; }
+.uts-live-stage { position: absolute; inset: 0; overflow: auto; }
+
+.uts-observer {
+  position: fixed; top: 16px; right: 16px; z-index: 97; width: 320px; max-height: calc(100dvh - 32px);
+  display: flex; flex-direction: column; gap: 14px; padding: 16px; overflow-y: auto;
+  border: 1px solid var(--qcx-line); border-radius: 16px; background: rgba(255, 255, 255, 0.96);
+  box-shadow: var(--qcx-shadow-md); backdrop-filter: blur(10px);
+  animation: qcx-toast-in 280ms var(--qcx-ease);
+}
+.uts-observer.collapsed { width: auto; padding: 0; border: 0; background: transparent; box-shadow: none; overflow: visible; }
+.uts-observer-pill {
+  display: inline-flex; align-items: center; gap: 9px; height: 40px; padding: 0 14px;
+  border: 1px solid var(--qcx-line); border-radius: 999px; background: rgba(255, 255, 255, 0.96);
+  box-shadow: var(--qcx-shadow-md); backdrop-filter: blur(10px); font-size: 13px; font-weight: 550; color: var(--qcx-ink);
+}
+.uts-observer-head { display: flex; align-items: center; gap: 9px; }
+.uts-observer-head > div { flex: 1; min-width: 0; }
+.uts-observer-head strong { display: block; font-size: 13.5px; font-weight: 550; color: var(--qcx-ink); }
+.uts-observer-head small { display: block; font-size: 11px; color: var(--qcx-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.uts-observer-head .qcx-icon-button { width: 30px; height: 30px; flex: 0 0 30px; }
+.uts-observer-clock { font-size: 14px; font-weight: 600; }
+.uts-observer-kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.uts-observer-kpis > div { padding: 9px 11px; border: 1px solid var(--qcx-line); border-radius: 10px; background: var(--qcx-bg); }
+.uts-observer-kpis small { display: block; font-size: 9.5px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--qcx-muted); }
+.uts-observer-kpis strong { display: block; margin-top: 2px; font-size: 13px; font-weight: 550; color: var(--qcx-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.uts-observer .uts-live-task { padding: 12px 13px; }
+.uts-observer .uts-live-task strong { font-size: 13px; }
+.uts-observer .uts-live-task p { font-size: 11.5px; }
+.uts-task-verdict { display: flex; gap: 8px; margin-top: 8px; }
+.uts-task-verdict .qcx-button { height: 32px; padding: 0 12px; font-size: 12.5px; flex: 1; justify-content: center; }
+.uts-observer-tasks { display: grid; gap: 5px; }
+.uts-observer-task { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--qcx-text); }
+.uts-observer-task .qc-icon { color: #c1c8d4; }
+.uts-observer-task.done .qc-icon { color: var(--qcx-green); }
+.uts-observer-task.failed .qc-icon { color: var(--qcx-red); }
+.uts-observer-task.current { font-weight: 550; color: var(--qcx-ink); }
+.uts-observer-task.current .qc-icon { color: var(--qcx-blue); }
+.uts-observer-task em { margin-left: auto; font-style: normal; font-size: 10.5px; color: var(--qcx-muted); font-variant-numeric: tabular-nums; }
+.uts-observer-notes, .uts-observer-history { display: grid; gap: 7px; }
+.uts-observer-notes > small, .uts-observer-history > small { font-size: 10px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--qcx-muted); font-weight: 600; }
+.uts-observer .uts-notes-list { max-height: 130px; }
+.uts-observer .uts-note { padding: 7px 9px; font-size: 11.5px; }
+.uts-observer .uts-note-input input { height: 34px; font-size: 12.5px; }
+.uts-observer .uts-nav-history { max-height: 130px; }
+.uts-observer-foot { display: flex; gap: 8px; margin-top: 2px; }
+.uts-observer-foot .qcx-button { flex: 1; justify-content: center; height: 34px; font-size: 12.5px; }
+
+.uts-feedback-overlay {
+  position: fixed; inset: 0; z-index: 98; display: grid; place-items: center; padding: 24px;
+  background: rgba(32, 38, 52, 0.45); backdrop-filter: blur(4px); overflow-y: auto;
+  animation: qcx-fade 240ms var(--qcx-ease);
+}
+.uts-feedback-overlay .uts-feedback-form { width: min(640px, 100%); max-height: calc(100dvh - 48px); overflow-y: auto; }
+.uts-feedback-form header h2 { margin: 0; font-size: 20px; font-weight: 550; color: var(--qcx-ink); }
+.uts-feedback-form header p { margin: 5px 0 0; font-size: 13px; color: var(--qcx-muted); }
+
+@media (max-width: 720px) {
+  .uts-observer { top: auto; bottom: 12px; left: 12px; right: 12px; width: auto; max-height: 55dvh; }
+}
+
+/* Task criteria in live panel and results */
+.uts-criteria { display: grid; gap: 3px; padding: 8px 10px; border-radius: 8px; background: rgba(255, 255, 255, 0.7); }
+.uts-criteria p { margin: 0; display: flex; align-items: flex-start; gap: 5px; font-size: 11px; line-height: 15px; color: var(--qcx-text); }
+.uts-criteria p strong { font-weight: 600; color: var(--qcx-ink); }
+.uts-criteria .qc-icon { color: #2b62c4; flex: 0 0 auto; margin-top: 1px; }
+.uts-overtime { margin: 0; display: flex; align-items: flex-start; gap: 5px; font-size: 11px; line-height: 15px; color: var(--qcx-red); font-weight: 500; }
+.uts-overtime .qc-icon { flex: 0 0 auto; margin-top: 1px; }
+.uts-task-criteria { display: flex; align-items: flex-start; gap: 5px; font-size: 11px; color: var(--qcx-muted); }
+.uts-task-criteria .qc-icon { flex: 0 0 auto; margin-top: 1px; }
+
+/* --------------------------------------------------------------------------
+   Remote participant experience — fully isolated, no QC Experience chrome
+   -------------------------------------------------------------------------- */
+.uts-participant {
+  position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; padding: 24px;
+  background: linear-gradient(160deg, #f7f9fc 0%, #eef1f7 100%); overflow-y: auto;
+}
+.uts-participant-card {
+  width: min(560px, 100%); display: grid; gap: 16px; padding: 40px 36px;
+  border: 1px solid var(--qcx-line); border-radius: 20px; background: var(--qcx-surface);
+  box-shadow: var(--qcx-shadow-md); text-align: center; animation: qcx-card-in 360ms var(--qcx-ease) both;
+}
+.uts-participant-glyph {
+  justify-self: center; width: 56px; height: 56px; display: grid; place-items: center;
+  border-radius: 16px; background: var(--qcx-blue-soft); color: #2b62c4;
+}
+.uts-participant-glyph.good { background: var(--qcx-green-soft); color: var(--qcx-green); }
+.uts-participant-glyph.muted { background: #edf0f4; color: var(--qcx-muted); }
+.uts-participant-card h1 { margin: 0; font-size: 22px; font-weight: 550; color: var(--qcx-ink); }
+.uts-participant-card > p { margin: 0; font-size: 14px; line-height: 21px; color: var(--qcx-text); }
+.uts-participant-meta { font-size: 12.5px !important; color: var(--qcx-muted) !important; }
+.uts-participant-card .qcx-button.large { justify-self: center; margin-top: 6px; }
+.uts-consent { display: flex; align-items: flex-start; gap: 10px; padding: 14px 16px; border: 1px solid var(--qcx-line); border-radius: 12px; background: var(--qcx-bg); text-align: left; font-size: 13px; color: var(--qcx-ink); }
+.uts-consent input { margin-top: 2px; width: 17px; height: 17px; accent-color: var(--qcx-red); }
+.uts-participant-form { display: grid; gap: 14px; text-align: left; }
+.uts-participant-form label { display: grid; gap: 6px; }
+.uts-participant-form label > span { font-size: 12.5px; font-weight: 500; color: var(--qcx-ink); }
+.uts-participant-form input, .uts-participant-form select, .uts-participant-form textarea {
+  height: 40px; padding: 0 12px; border: 1px solid #dce2ea; border-radius: 10px; background: var(--qcx-surface);
+  font-size: 13.5px; color: var(--qcx-ink); outline: 0; transition: border-color 160ms var(--qcx-ease), box-shadow 160ms var(--qcx-ease);
+}
+.uts-participant-form textarea { height: auto; padding: 10px 12px; resize: vertical; font: inherit; }
+.uts-participant-form input:focus, .uts-participant-form select:focus, .uts-participant-form textarea:focus { border-color: var(--qcx-blue); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12); }
+.uts-participant-tasks { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; text-align: left; }
+.uts-participant-tasks li { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border: 1px solid var(--qcx-line); border-radius: 11px; background: var(--qcx-bg); font-size: 13.5px; color: var(--qcx-ink); }
+.uts-participant-tasks em { font-style: normal; width: 22px; height: 22px; flex: 0 0 22px; display: grid; place-items: center; border-radius: 50%; background: var(--qcx-ink); color: #fff; font-size: 11px; font-weight: 600; }
+.uts-participant-ratings { text-align: left; }
+.uts-participant-foot { margin-top: 4px; font-size: 11px; color: #b7bfcc; }
+
+/* Bottom task bar shown over the live prototype for remote participants */
+.uts-taskbar {
+  position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 96;
+  display: flex; align-items: center; gap: 16px; width: min(680px, calc(100vw - 32px));
+  padding: 12px 18px; border: 1px solid var(--qcx-line); border-radius: 16px; background: rgba(255, 255, 255, 0.96);
+  box-shadow: var(--qcx-shadow-md); backdrop-filter: blur(10px); animation: qcx-toast-in 300ms var(--qcx-ease);
+}
+.uts-taskbar-step { flex: 0 0 auto; padding: 4px 10px; border-radius: 999px; background: var(--qcx-blue-soft); color: #2b62c4; font-size: 11px; font-weight: 600; white-space: nowrap; }
+.uts-taskbar-copy { flex: 1; min-width: 0; text-align: left; }
+.uts-taskbar-copy strong { display: block; font-size: 13.5px; font-weight: 550; color: var(--qcx-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.uts-taskbar-copy small { display: block; font-size: 11.5px; color: var(--qcx-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.uts-taskbar-clock { flex: 0 0 auto; font-variant-numeric: tabular-nums; font-size: 13px; color: var(--qcx-muted); }
+@media (max-width: 720px) {
+  .uts-taskbar { flex-wrap: wrap; bottom: 10px; }
+  .uts-taskbar-clock { order: 3; }
+  .uts-participant-card { padding: 28px 22px; }
+}
+
+/* --------------------------------------------------------------------------
+   Invite / share-link management
+   -------------------------------------------------------------------------- */
+.uts-invite-panel { display: grid; gap: 14px; }
+
+/* Result code (participant completion) and import panel (researcher side). */
+.uts-result-code { display: grid; gap: 10px; padding: 14px 16px; border: 1px solid var(--qcx-line); border-radius: 12px; background: var(--qcx-bg); text-align: left; }
+.uts-result-code p { margin: 0; font-size: 13px; line-height: 20px; color: var(--qcx-text); }
+.uts-result-code textarea, .uts-import-panel textarea {
+  width: 100%; padding: 10px 12px; border: 1px solid #dce2ea; border-radius: 10px; background: var(--qcx-surface);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11.5px; line-height: 16px; color: var(--qcx-ink);
+  resize: none; outline: 0; word-break: break-all;
+}
+.uts-result-code .qcx-button { justify-self: start; }
+.uts-import-panel { display: grid; gap: 12px; }
+.uts-import-panel > p { margin: 0; font-size: 13px; line-height: 20px; }
+.uts-import-panel textarea { resize: vertical; }
+.uts-import-panel textarea:focus { border-color: var(--qcx-blue); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12); }
+.uts-import-panel .uts-live-actions { justify-content: flex-end; }
+.uts-import-error { margin: 0; font-size: 12.5px; color: var(--qcx-red); }
+.uts-invite-empty { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 18px; border: 1px dashed #d5dbe5; border-radius: 12px; }
+.uts-invite-row {
+  display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px;
+  padding: 12px 14px; border: 1px solid var(--qcx-line); border-radius: 12px; background: var(--qcx-surface);
+  animation: qcx-card-in 240ms var(--qcx-ease) both;
+}
+.uts-invite-link { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.uts-invite-link code { font-size: 13px; font-weight: 600; color: var(--qcx-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.uts-invite-link small { font-size: 11px; color: var(--qcx-muted); }
+.uts-invite-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.uts-invite-actions .qcx-icon-button { width: 32px; height: 32px; }
+.uts-invite-state { padding: 3px 9px; border-radius: 6px; font-size: 11px; font-weight: 500; white-space: nowrap; }
+.uts-invite-state.active { background: var(--qcx-green-soft); color: var(--qcx-green); }
+.uts-invite-state.disabled, .uts-invite-state.expired { background: #edf0f4; color: var(--qcx-muted); }
+.uts-invite-state.completed { background: var(--qcx-blue-soft); color: #2b62c4; }
+
+/* --------------------------------------------------------------------------
+   Live research dashboard
+   -------------------------------------------------------------------------- */
+.uts-live-board { display: grid; gap: 12px; }
+.uts-live-participant-row {
+  display: grid; grid-template-columns: auto 1fr auto auto auto; align-items: center; gap: 14px;
+  padding: 13px 16px; border: 1px solid var(--qcx-line); border-radius: 13px; background: var(--qcx-surface);
+  animation: qcx-card-in 240ms var(--qcx-ease) both;
+}
+.uts-live-participant-row .qcx-avatar { position: relative; }
+.uts-conn-dot { position: absolute; right: -2px; bottom: -2px; width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--qcx-surface); background: var(--qcx-green); }
+.uts-conn-dot.stale { background: #d5dbe5; }
+.uts-live-copy { min-width: 0; display: grid; gap: 2px; }
+.uts-live-copy strong { font-size: 13.5px; font-weight: 550; color: var(--qcx-ink); }
+.uts-live-copy small { font-size: 11.5px; color: var(--qcx-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.uts-live-progress { display: grid; gap: 4px; min-width: 130px; }
+.uts-live-progress small { font-size: 10.5px; color: var(--qcx-muted); }
+.uts-live-time { font-size: 12.5px; color: var(--qcx-text); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* --------------------------------------------------------------------------
+   Create-test additions: participant field toggles
+   -------------------------------------------------------------------------- */
+.uts-form-hint { margin: -6px 0 4px; font-size: 12px; color: var(--qcx-muted); }
+.uts-field-toggle-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; }
+.uts-field-toggle { display: flex; align-items: center; gap: 9px; padding: 10px 12px; border: 1px solid var(--qcx-line); border-radius: 10px; background: var(--qcx-bg); font-size: 12.5px; color: var(--qcx-ink); }
+.uts-field-toggle input { width: 16px; height: 16px; accent-color: var(--qcx-red); }
+
+/* Session detail tabs (Replay / Timeline) */
+.uts-detail-tabs { display: flex; gap: 4px; padding: 3px; border-radius: 10px; background: var(--qcx-bg); width: fit-content; }
+.uts-detail-tabs button { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; border: 0; border-radius: 8px; background: transparent; font-size: 12.5px; font-weight: 500; color: var(--qcx-muted); }
+.uts-detail-tabs button.active { background: var(--qcx-surface); color: var(--qcx-ink); box-shadow: var(--qcx-shadow-sm); }
+
+/* Timeline */
+.uts-timeline { margin: 0; padding: 0; list-style: none; display: grid; gap: 2px; max-height: 360px; overflow-y: auto; }
+.uts-timeline li { display: grid; grid-template-columns: 78px 22px 1fr; align-items: center; gap: 10px; padding: 7px 4px; border-bottom: 1px solid #f3f5f9; font-size: 12.5px; color: var(--qcx-ink); }
+.uts-timeline-time { display: flex; flex-direction: column; }
+.uts-timeline-time span { font-variant-numeric: tabular-nums; font-size: 11.5px; color: var(--qcx-text); }
+.uts-timeline-time em { font-style: normal; font-size: 10px; color: var(--qcx-muted); }
+.uts-timeline-dot { width: 22px; height: 22px; display: grid; place-items: center; border-radius: 50%; background: var(--qcx-bg); color: var(--qcx-muted); }
+.uts-timeline li.kind-task_complete .uts-timeline-dot { background: var(--qcx-green-soft); color: var(--qcx-green); }
+.uts-timeline li.kind-task_fail .uts-timeline-dot { background: #fdeaec; color: var(--qcx-red); }
+.uts-timeline li.kind-misclick .uts-timeline-dot { background: #fdeaec; color: var(--qcx-red); }
+.uts-timeline li.kind-screen .uts-timeline-dot { background: var(--qcx-blue-soft); color: #2b62c4; }
+.uts-timeline li.kind-session_start .uts-timeline-dot, .uts-timeline li.kind-session_end .uts-timeline-dot { background: var(--qcx-ink); color: #fff; }
+
+/* Replay extras: speed select, jump-to-event chips, participant info chips, remote pill */
+.uts-speed-select { height: 32px; padding: 0 8px; border: 1px solid var(--qcx-line); border-radius: 8px; background: var(--qcx-bg); font-size: 12px; color: var(--qcx-ink); }
+.uts-replay-jump { display: grid; gap: 6px; }
+.uts-replay-jump > small { font-size: 10.5px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--qcx-muted); font-weight: 600; }
+.uts-replay-jump-row { display: flex; gap: 6px; flex-wrap: wrap; max-height: 84px; overflow-y: auto; }
+.uts-replay-jump-row .qcx-chip { height: 26px; padding: 0 10px; font-size: 11px; }
+.uts-participant-chips { display: flex; flex-wrap: wrap; gap: 6px; padding-top: 10px; border-top: 1px solid #f0f3f7; }
+.uts-participant-chips span { display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; border-radius: 999px; background: var(--qcx-bg); font-size: 11px; color: var(--qcx-text); }
+.uts-remote-pill { margin-left: 6px; padding: 1px 7px; border-radius: 999px; background: var(--qcx-blue-soft); color: #2b62c4; font-size: 9.5px; font-weight: 600; font-style: normal; letter-spacing: 0.03em; text-transform: uppercase; }

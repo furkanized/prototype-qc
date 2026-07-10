@@ -60,6 +60,7 @@ export type PageId =
   | "creator"
   | "freemode"
   | "library"
+  | "testing"
   | "activity"
   | "settings";
 

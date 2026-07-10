@@ -11,6 +11,7 @@ const NAV_ITEMS: Array<{ id: PageId; icon: string; label: string }> = [
   { id: "creator", icon: "add_circle", label: "Scenario Creator" },
   { id: "freemode", icon: "explore", label: "Free Mode" },
   { id: "library", icon: "inventory_2", label: "Prototype Library" },
+  { id: "testing", icon: "science", label: "User Testing Studio" },
   { id: "activity", icon: "history", label: "Recent Activity" },
   { id: "settings", icon: "settings", label: "Settings" },
 ];

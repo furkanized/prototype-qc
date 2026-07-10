@@ -412,12 +412,14 @@ button:focus-visible,input:focus-visible { outline:2px solid #3b82f6; outline-of
   z-index:2;
   height:100%!important;
   min-height:0!important;
+  min-width:0;
   overflow:visible!important;
   align-self:stretch;
 }
 .workspace.flight-info-expanded .flight-info-presence{
   flex:1 1 auto;
   min-height:0;
+  min-width:0;
   max-height:none!important;
   overflow-y:auto!important;
   overflow-x:hidden!important;
@@ -433,6 +435,7 @@ button:focus-visible,input:focus-visible { outline:2px solid #3b82f6; outline-of
   z-index:2;
   height:auto!important;
   min-height:0!important;
+  min-width:0;
   overflow:visible!important;
 }
 .workspace.flight-info-expanded .passenger-panel{
@@ -442,6 +445,7 @@ button:focus-visible,input:focus-visible { outline:2px solid #3b82f6; outline-of
   margin-top:0!important;
   align-self:stretch;
   min-height:0;
+  min-width:0;
   overflow:hidden;
 }
 .workspace.flight-info-expanded .passenger-panel .table-shell{

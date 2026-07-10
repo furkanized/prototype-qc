@@ -3,6 +3,7 @@ import { FlightSearchPage } from "../features/cargo/FlightSearchPage";
 import { CHECKIN_PROTOTYPE, sendPrototypeCommand } from "../services/prototypeRegistry";
 import type { Scenario } from "../types";
 import { Icon } from "../components/Icon";
+import { FamilyCheckinGuide } from "./FamilyCheckinGuide";
 
 interface PrototypeHostProps {
   scenario: Scenario | null;
@@ -21,6 +22,7 @@ export function PrototypeHost({ scenario, freeMode, initialScreen, onExit }: Pro
     return index === -1 ? 0 : index;
   });
   const [dockOpen, setDockOpen] = useState(freeMode);
+  const isFamilyScenario = scenario?.id === "family-checkin";
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => setEntered(true));
@@ -57,6 +59,8 @@ export function PrototypeHost({ scenario, freeMode, initialScreen, onExit }: Pro
         <span>Back to QC Experience</span>
         {scenario ? <em>{scenario.title}</em> : null}
       </button>
+
+      {isFamilyScenario ? <FamilyCheckinGuide /> : null}
 
       {freeMode ? (
         <div className={`qcx-freemode-dock ${dockOpen ? "" : "collapsed"}`} role="toolbar" aria-label="Free Mode controls">

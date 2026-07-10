@@ -78,3 +78,11 @@ export const CHECKIN_PROTOTYPE = PROTOTYPES[0];
 export function sendPrototypeCommand(command: string) {
   window.dispatchEvent(new CustomEvent("qcx-command", { detail: { command } }));
 }
+
+export function selectPrototypeFlight(code: string) {
+  sendPrototypeCommand(`select-flight:${code}`);
+}
+
+export function searchPrototypePassengers(surname: string, preselect = true) {
+  window.dispatchEvent(new CustomEvent("qcx-passenger-search", { detail: { surname, preselect } }));
+}

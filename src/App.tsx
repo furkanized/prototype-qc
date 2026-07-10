@@ -9,11 +9,28 @@ import { ScenarioCreatorPage } from "./pages/ScenarioCreatorPage";
 import { FreeModePage } from "./pages/FreeModePage";
 import { LibraryPage } from "./pages/LibraryPage";
 import { ActivityPage } from "./pages/ActivityPage";
+import { TestingStudioPage } from "./pages/testing/TestingStudioPage";
+import { ParticipantTestPage } from "./pages/testing/ParticipantTestPage";
 import { SettingsPage } from "./pages/SettingsPage";
 import { ToastProvider, useToasts } from "./hooks/useToasts";
 import { useSettings } from "./hooks/useSettings";
 import { createScenario, deleteScenario, getAllScenarios, type ScenarioDraft } from "./services/scenarioService";
 import { getActivity, logActivity } from "./services/activityService";
+import { inviteCodeFromLocation } from "./services/remoteTesting";
+
+function useInviteCode() {
+  const [code, setCode] = useState<string | null>(() => inviteCodeFromLocation());
+  useEffect(() => {
+    const handler = () => setCode(inviteCodeFromLocation());
+    window.addEventListener("hashchange", handler);
+    window.addEventListener("popstate", handler);
+    return () => {
+      window.removeEventListener("hashchange", handler);
+      window.removeEventListener("popstate", handler);
+    };
+  }, []);
+  return code;
+}
 
 type Stage =
   | { kind: "intro" }
@@ -80,6 +97,7 @@ function AppInner() {
     creator: <ScenarioCreatorPage onCreate={handleCreate} />,
     freemode: <FreeModePage onEnter={enterFreeMode} />,
     library: <LibraryPage onLaunch={() => launchScenario(scenarios.find((scenario) => scenario.builtin) ?? scenarios[0])} />,
+    testing: <TestingStudioPage />,
     activity: <ActivityPage activity={activity} />,
     settings: <SettingsPage settings={settings} onUpdate={updateSettings} />,
   };
@@ -108,6 +126,14 @@ function AppInner() {
 }
 
 export function App() {
+  const inviteCode = useInviteCode();
+
+  // Participants land on a completely isolated route — no ToastProvider, no
+  // AppShell, no access to internal navigation, dashboard, or admin controls.
+  if (inviteCode) {
+    return <ParticipantTestPage code={inviteCode} />;
+  }
+
   return (
     <ToastProvider>
       <AppInner />

@@ -3056,8 +3056,34 @@ function PassengerTable({ passengers }: { passengers: Passenger[] }) {
     setFloatingBarMode("selection");
     setQuery("");
   }, [passengers]);
+
+  // Headless bridge for the QC Experience platform (Family Check-in scenario):
+  // types the surname into the existing search box and optionally pre-checks
+  // matching rows so the guided flow lands on a ready-to-check-in family.
+  useEffect(() => {
+    const handleSearch = (event: Event) => {
+      const detail = (event as CustomEvent<{ surname: string; preselect?: boolean }>).detail;
+      if (!detail) return;
+      setQuery(detail.surname);
+      if (detail.preselect) {
+        setSelectedRowsState(passengers.map((passenger) => passenger.surname.toLowerCase() === detail.surname.toLowerCase()));
+      }
+    };
+    window.addEventListener("qcx-passenger-search", handleSearch);
+    return () => window.removeEventListener("qcx-passenger-search", handleSearch);
+  }, [passengers]);
+
   const visible = useMemo(() => passengers.filter((p) => `${p.name} ${p.surname} ${p.pnr}`.toLowerCase().includes(query.toLowerCase())), [passengers, query]);
   const selectedPassengers = useMemo(() => passengers.filter((_, index) => selectedRowsState[index]), [passengers, selectedRowsState]);
+
+  // Headless telemetry: scenario guides watch what the presenter actually
+  // does — typing a surname, selecting passengers — to auto-advance steps.
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent("qcx-passenger-query", { detail: { query } }));
+  }, [query]);
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent("qcx-passenger-selected", { detail: { count: selectedPassengers.length } }));
+  }, [selectedPassengers]);
   const allSelected = selectedRowsState.length > 0 && selectedRowsState.every(Boolean);
   const someSelected = selectedRowsState.some(Boolean) && !allSelected;
   const toggle = (index: number) => {
@@ -3426,7 +3452,14 @@ export function FlightSearchPage() {
   const flightSidebarRef = useRef<HTMLElement | null>(null);
   const contentBodyRef = useRef<HTMLDivElement | null>(null);
   const dateKey = toIsoDateString(selectedDate);
-  const flights = useMemo(() => createRandomizedFlights(dateKey), [dateKey]);
+  // Scenario runs can narrow the board to a fixed set of flights (headless).
+  const [flightCodeFilter, setFlightCodeFilter] = useState<string[] | null>(null);
+  const flights = useMemo(() => {
+    const all = createRandomizedFlights(dateKey);
+    if (!flightCodeFilter) return all;
+    const filtered = all.filter((item) => flightCodeFilter.includes(item.code));
+    return filtered.length > 0 ? filtered : all;
+  }, [dateKey, flightCodeFilter]);
   const passengersByFlight = useMemo(() => flights.reduce<Record<string, PassengerRecord[]>>((allPassengers, item) => {
     allPassengers[item.code] = createPassengersForFlight(item);
     return allPassengers;
@@ -3551,12 +3584,48 @@ export function FlightSearchPage() {
           setFlightInfoExpanded(false);
           break;
         default:
+          if (command?.startsWith("select-flight:")) {
+            const code = command.slice("select-flight:".length);
+            const index = flights.findIndex((flight) => flight.code === code);
+            if (index !== -1) {
+              setSelectedFlight(index);
+              setFlightListCollapsed(true);
+              setFlightInfoExpanded(false);
+              setSeatMapCollapsed(true);
+            }
+          } else if (command?.startsWith("flights-only:")) {
+            // Format: flights-only:CODE,CODE,CODE[|default=CODE]
+            const [codesPart, defaultPart] = command.slice("flights-only:".length).split("|");
+            const codes = codesPart.split(",").map((code) => code.trim()).filter(Boolean);
+            setFlightCodeFilter(codes.length > 0 ? codes : null);
+            const defaultCode = defaultPart?.startsWith("default=") ? defaultPart.slice("default=".length).trim() : null;
+            const defaultIndex = defaultCode ? codes.indexOf(defaultCode) : -1;
+            setSelectedFlight(defaultIndex >= 0 ? defaultIndex : 0);
+          } else if (command === "flights-all") {
+            setFlightCodeFilter(null);
+            setSelectedFlight(0);
+          }
           break;
       }
     };
     window.addEventListener("qcx-command", handleCommand);
     return () => window.removeEventListener("qcx-command", handleCommand);
-  }, []);
+  }, [flights]);
+
+  // Headless screen telemetry for the User Testing Studio: announce which
+  // workspace layout the participant is currently looking at. No UI changes.
+  useEffect(() => {
+    const screen = flightInfoExpanded
+      ? "Flight Info Expanded"
+      : !flightListCollapsed && seatMapCollapsed
+        ? "Flight Board"
+        : !flightListCollapsed
+          ? "Flight Overview"
+          : seatMapCollapsed
+            ? "Passenger List"
+            : "Seat Map Focus";
+    window.dispatchEvent(new CustomEvent("qcx-screen", { detail: { screen } }));
+  }, [flightListCollapsed, flightInfoExpanded, seatMapCollapsed]);
 
   return (
     <div className={`qc-app allow-flightlist-motion ${flightListCollapsed ? "flight-list-collapsed" : ""} ${seatMapCollapsed ? "seatmap-collapsed" : ""}`}>
@@ -3567,7 +3636,11 @@ export function FlightSearchPage() {
           <FlightList
             flights={flights}
             selected={selectedFlight}
-            onSelect={setSelectedFlight}
+            onSelect={(index) => {
+              setSelectedFlight(index);
+              // Headless telemetry: scenario guides listen for board clicks.
+              window.dispatchEvent(new CustomEvent("qcx-flight-selected", { detail: { code: flights[index]?.code } }));
+            }}
             selectedDate={selectedDate}
             onDateChange={setSelectedDate}
             collapsed={flightListCollapsed}
