@@ -1,4 +1,4 @@
-import { Fragment, createElement, useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from "react";
+import { Fragment, createElement, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import { TkDatepicker } from "@takeoff-ui/react";
 import { defineCustomElement as defineTkIcon } from "@takeoff-ui/core/components/tk-icon.js";
@@ -844,7 +844,7 @@ const flightStatusByCode = Object.fromEntries(
   flightStatusDefinitions.map((status) => [status.code, status]),
 ) as Record<FlightStatusCode, FlightStatusDefinition>;
 
-function FlightOverview({ flight, passengers, expanded, onExpandedChange }: { flight: FlightRecord; passengers: Passenger[]; expanded: boolean; onExpandedChange: (expanded: boolean) => void }) {
+function FlightOverview({ flight, passengers, expanded, onExpandedChange, shellRef }: { flight: FlightRecord; passengers: Passenger[]; expanded: boolean; onExpandedChange: (expanded: boolean) => void; shellRef?: RefObject<HTMLDivElement | null> }) {
   const [activeTab, setActiveTab] = useState<FlightInfoTab>("flight");
   const expandedPresence = useAnimatedPresence(expanded, 220);
   const stats = getFlightStats(flight, passengers);
@@ -858,56 +858,58 @@ function FlightOverview({ flight, passengers, expanded, onExpandedChange }: { fl
   }, [expanded]);
 
   return (
-    <section className={`flight-overview ${expandedPresence.isMounted ? "expanded" : ""}`}>
-      <div className="overview-head">
-        <div className="overview-title">
-          <Icon icon="flight" size={25} fill />
-          <strong>{flight.code}</strong>
-          <span>19 FEB <b>{flight.time}</b> /14:45</span>
-          {flight.multiLeg ? <OverviewRouteSelector flight={flight} /> : <FlightRoute route={flight.route} className="overview-route blue" />}
-          <FlightStatusControl flightCode={flight.code} />
+    <div className={`flight-overview-shell ${expandedPresence.isMounted ? "expanded" : ""}`} ref={shellRef}>
+      <section className={`flight-overview ${expandedPresence.isMounted ? "expanded" : ""}`}>
+        <div className="overview-head">
+          <div className="overview-title">
+            <Icon icon="flight" size={25} fill />
+            <strong>{flight.code}</strong>
+            <span>19 FEB <b>{flight.time}</b> /14:45</span>
+            {flight.multiLeg ? <OverviewRouteSelector flight={flight} /> : <FlightRoute route={flight.route} className="overview-route blue" />}
+            <FlightStatusControl flightCode={flight.code} />
+          </div>
+          <button aria-label="Uçuş seçenekleri"><Icon icon="more_horiz" size={23} /></button>
         </div>
-        <button aria-label="Uçuş seçenekleri"><Icon icon="more_horiz" size={23} /></button>
-      </div>
-      <div className="cabin-counts"><span>Economy {stats.economy}</span><span>Business {stats.business}</span><span>Total Passenger {stats.totalPassenger}</span></div>
-      {expanded ? (
-        <ExpandedCabinPassengerProgress
-          key={`${flight.code}-${flight.time}-expanded`}
-          economy={{
-            capacity: cabinCapacities.economy,
-            booked: stats.economy,
-            checked: stats.economyChecked,
-            standby: Math.max(0, stats.economy - stats.economyChecked),
-          }}
-          business={{
-            capacity: cabinCapacities.business,
-            booked: stats.business,
-            checked: stats.businessChecked,
-            standby: Math.max(0, stats.business - stats.businessChecked),
-          }}
-        />
-      ) : (
-        <AnimatedPassengerProgress
-          key={`${flight.code}-${flight.time}`}
-          checkedWidth={checkedWidth}
-          bookedWidth={bookedWidth}
-          checkedCount={stats.checked}
-          bookedCount={stats.booked}
-          remainingSeats={stats.remainingSeats}
-          showPassengersLabel={showPassengersLabel}
-        />
-      )}
-      {!expandedPresence.isMounted && <FlightFacts flight={flight} />}
-      {expandedPresence.isMounted && (
-        <div className="flight-info-presence" data-state={expandedPresence.isVisible ? "open" : "closed"}>
-          <FlightFacts flight={flight} />
-          <FlightInfoExpandedContent flight={flight} passengers={passengers} activeTab={activeTab} onTabChange={setActiveTab} />
-        </div>
-      )}
+        <div className="cabin-counts"><span>Economy {stats.economy}</span><span>Business {stats.business}</span><span>Total Passenger {stats.totalPassenger}</span></div>
+        {expanded ? (
+          <ExpandedCabinPassengerProgress
+            key={`${flight.code}-${flight.time}-expanded`}
+            economy={{
+              capacity: cabinCapacities.economy,
+              booked: stats.economy,
+              checked: stats.economyChecked,
+              standby: Math.max(0, stats.economy - stats.economyChecked),
+            }}
+            business={{
+              capacity: cabinCapacities.business,
+              booked: stats.business,
+              checked: stats.businessChecked,
+              standby: Math.max(0, stats.business - stats.businessChecked),
+            }}
+          />
+        ) : (
+          <AnimatedPassengerProgress
+            key={`${flight.code}-${flight.time}`}
+            checkedWidth={checkedWidth}
+            bookedWidth={bookedWidth}
+            checkedCount={stats.checked}
+            bookedCount={stats.booked}
+            remainingSeats={stats.remainingSeats}
+            showPassengersLabel={showPassengersLabel}
+          />
+        )}
+        {!expandedPresence.isMounted && <FlightFacts flight={flight} />}
+        {expandedPresence.isMounted && (
+          <div className="flight-info-presence" data-state={expandedPresence.isVisible ? "open" : "closed"}>
+            <FlightFacts flight={flight} />
+            <FlightInfoExpandedContent flight={flight} passengers={passengers} activeTab={activeTab} onTabChange={setActiveTab} />
+          </div>
+        )}
+      </section>
       <button type="button" className="more-overview" aria-expanded={expanded} onClick={() => onExpandedChange(!expanded)}>
         {expanded ? "Less" : "More"} <Icon icon="keyboard_arrow_down" size={14} />
       </button>
-    </section>
+    </div>
   );
 }
 
@@ -1573,7 +1575,13 @@ function FiBadge({ children, tone = "neutral" }: { children: ReactNode; tone?: "
 
 function SourceTable({ columns, rows, widths, compact = false }: { columns: string[]; rows: Array<Array<ReactNode>>; widths?: string; compact?: boolean }) {
   return (
-    <div className={`fi-source-table ${compact ? "compact" : ""}`.trim()} style={{ ["--fi-source-cols" as string]: widths ?? columns.map(() => "minmax(88px,1fr)").join(" ") }}>
+    <div
+      className={`fi-source-table ${compact ? "compact" : ""}`.trim()}
+      style={{
+        ["--fi-source-cols" as string]: widths ?? columns.map(() => "minmax(88px,1fr)").join(" "),
+        ["--fi-source-row-count" as string]: String(rows.length),
+      }}
+    >
       <div className="fi-source-row head">
         {columns.map((column) => <span key={column}>{column}</span>)}
       </div>
@@ -3023,7 +3031,7 @@ function CreatePoolOverlay({
   );
 }
 
-function PassengerTable({ passengers }: { passengers: Passenger[] }) {
+function PassengerTable({ passengers, panelRef }: { passengers: Passenger[]; panelRef?: RefObject<HTMLElement | null> }) {
   const [selectedRowsState, setSelectedRowsState] = useState<boolean[]>(passengers.map(() => false));
   const [checkInOverlayOpen, setCheckInOverlayOpen] = useState(false);
   const [poolOverlayOpen, setPoolOverlayOpen] = useState(false);
@@ -3076,7 +3084,7 @@ function PassengerTable({ passengers }: { passengers: Passenger[] }) {
   };
   return (
     <>
-      <section className="passenger-panel">
+      <section className="passenger-panel" ref={panelRef}>
         <header className="passenger-toolbar">
           <h2><Icon icon="groups" size={23} fill />Yolcu Listesi</h2>
           <div className="table-tools">
@@ -3405,6 +3413,12 @@ export function FlightSearchPage() {
   const [flightInfoExpanded, setFlightInfoExpanded] = useState(false);
   const flightSidebarRef = useRef<HTMLElement | null>(null);
   const contentBodyRef = useRef<HTMLDivElement | null>(null);
+  const flightOverviewShellRef = useRef<HTMLDivElement | null>(null);
+  const passengerPanelRef = useRef<HTMLElement | null>(null);
+  const pendingFlightInfoLayoutRef = useRef<{
+    overviewRect: DOMRect | null;
+    passengerRect: DOMRect | null;
+  } | null>(null);
   const dateKey = toIsoDateString(selectedDate);
   const flights = useMemo(() => createRandomizedFlights(dateKey), [dateKey]);
   const passengersByFlight = useMemo(() => flights.reduce<Record<string, PassengerRecord[]>>((allPassengers, item) => {
@@ -3422,6 +3436,93 @@ export function FlightSearchPage() {
     setSelectedFlight(0);
     setFlightInfoExpanded(false);
   }, [dateKey]);
+
+  useLayoutEffect(() => {
+    const pendingLayout = pendingFlightInfoLayoutRef.current;
+    if (!pendingLayout) return;
+
+    pendingFlightInfoLayoutRef.current = null;
+
+    if (typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const animations: Animation[] = [];
+    const overviewShell = flightOverviewShellRef.current;
+    const passengerPanel = passengerPanelRef.current;
+
+    if (overviewShell && pendingLayout.overviewRect) {
+      const nextRect = overviewShell.getBoundingClientRect();
+      const previousOverflow = overviewShell.style.overflow;
+      overviewShell.style.overflow = "hidden";
+
+      const overviewAnimation = overviewShell.animate(
+        [
+          {
+            height: `${pendingLayout.overviewRect.height}px`,
+          },
+          {
+            height: `${nextRect.height}px`,
+          },
+        ],
+        {
+          duration: 220,
+          easing: "ease-out",
+          fill: "both",
+        },
+      );
+
+      overviewAnimation.addEventListener("finish", () => {
+        overviewShell.style.overflow = previousOverflow;
+      }, { once: true });
+
+      overviewAnimation.addEventListener("cancel", () => {
+        overviewShell.style.overflow = previousOverflow;
+      }, { once: true });
+
+      animations.push(overviewAnimation);
+    }
+
+    if (passengerPanel && pendingLayout.passengerRect) {
+      const nextRect = passengerPanel.getBoundingClientRect();
+      const deltaY = pendingLayout.passengerRect.top - nextRect.top;
+
+      animations.push(
+        passengerPanel.animate(
+          [
+            {
+              transform: `translateY(${deltaY}px)`,
+            },
+            {
+              transform: "translateY(0)",
+            },
+          ],
+          {
+            duration: 220,
+            easing: "ease-out",
+            fill: "both",
+          },
+        ),
+      );
+    }
+
+    return () => animations.forEach((animation) => animation.cancel());
+  }, [flightInfoExpanded]);
+
+  const setFlightInfoExpandedWithMotion = useCallback((nextExpanded: boolean) => {
+    if (nextExpanded === flightInfoExpanded) return;
+
+    if (typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      pendingFlightInfoLayoutRef.current = null;
+      setFlightInfoExpanded(nextExpanded);
+      return;
+    }
+
+    pendingFlightInfoLayoutRef.current = {
+      overviewRect: flightOverviewShellRef.current?.getBoundingClientRect() ?? null,
+      passengerRect: passengerPanelRef.current?.getBoundingClientRect() ?? null,
+    };
+
+    setFlightInfoExpanded(nextExpanded);
+  }, [flightInfoExpanded]);
 
   useEffect(() => {
     const sidebar = flightSidebarRef.current;
@@ -3476,19 +3577,19 @@ export function FlightSearchPage() {
 
       if (event.key === "ArrowDown") {
         event.preventDefault();
-        setFlightInfoExpanded(true);
+        setFlightInfoExpandedWithMotion(true);
         return;
       }
 
       if (event.key === "ArrowUp") {
         event.preventDefault();
-        setFlightInfoExpanded(false);
+        setFlightInfoExpandedWithMotion(false);
       }
     };
 
     window.addEventListener("keydown", handleKeyboardShortcut);
     return () => window.removeEventListener("keydown", handleKeyboardShortcut);
-  }, []);
+  }, [setFlightInfoExpandedWithMotion]);
 
   return (
     <div className={`qc-app allow-flightlist-motion ${flightListCollapsed ? "flight-list-collapsed" : ""} ${seatMapCollapsed ? "seatmap-collapsed" : ""}`}>
@@ -3507,8 +3608,14 @@ export function FlightSearchPage() {
           />
           <div ref={contentBodyRef} className="qc-content-body">
             <main className={`workspace ${flightInfoExpanded ? "flight-info-expanded" : ""}`}>
-              <FlightOverview flight={flight} passengers={passengers} expanded={flightInfoExpanded} onExpandedChange={setFlightInfoExpanded} />
-              <PassengerTable passengers={passengers} />
+              <FlightOverview
+                flight={flight}
+                passengers={passengers}
+                expanded={flightInfoExpanded}
+                onExpandedChange={setFlightInfoExpandedWithMotion}
+                shellRef={flightOverviewShellRef}
+              />
+              <PassengerTable passengers={passengers} panelRef={passengerPanelRef} />
             </main>
             <SeatMap collapsed={seatMapCollapsed} onCollapsedChange={setSeatMapCollapsed} />
           </div>
