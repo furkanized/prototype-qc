@@ -1,10 +1,13 @@
-import { useState, type FormEvent } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 import { Icon } from "../../components/Icon";
 import { RippleButton } from "../../components/RippleButton";
 import { PROTOTYPES } from "../../services/prototypeRegistry";
+import { getTargetCatalog } from "../../services/taskConditions";
 import { makeId } from "../../services/testingService";
 import type { ParticipantFieldConfig, ParticipantFieldKey, TestTask, TestType, UsabilityTest } from "../../types/testing";
 import { TEST_TYPE_LABELS } from "../../types/testing";
+import { ConditionBuilder } from "./ConditionBuilder";
+import { TaskSimulator } from "./TaskSimulator";
 
 const PARTICIPANT_FIELD_OPTIONS: Array<{ key: ParticipantFieldKey; label: string }> = [
   { key: "name", label: "Participant Name" },
@@ -27,9 +30,11 @@ interface TaskDraft {
   expectedOutcome: string;
   successCriteria: string;
   timeLimit: string; // seconds, empty = none
+  conditionScript: string;
+  hint: string;
 }
 
-const emptyTask = (): TaskDraft => ({ id: makeId("task"), title: "", description: "", expectedOutcome: "", successCriteria: "", timeLimit: "" });
+const emptyTask = (): TaskDraft => ({ id: makeId("task"), title: "", description: "", expectedOutcome: "", successCriteria: "", timeLimit: "", conditionScript: "", hint: "" });
 
 export function TestCreateView({ onCreate, onCancel }: { onCreate: (test: UsabilityTest) => void; onCancel: () => void }) {
   const [name, setName] = useState("");
@@ -42,6 +47,9 @@ export function TestCreateView({ onCreate, onCancel }: { onCreate: (test: Usabil
   const [type, setType] = useState<TestType>("task_based");
   const [tasks, setTasks] = useState<TaskDraft[]>([emptyTask()]);
   const [participantFields, setParticipantFields] = useState<ParticipantFieldConfig>(DEFAULT_PARTICIPANT_FIELDS);
+  const [simulating, setSimulating] = useState(false);
+
+  const targetCatalog = useMemo(() => getTargetCatalog(prototypeId), [prototypeId]);
 
   const setTask = (id: string, patch: Partial<TaskDraft>) =>
     setTasks((current) => current.map((task) => (task.id === id ? { ...task, ...patch } : task)));
@@ -75,6 +83,8 @@ export function TestCreateView({ onCreate, onCancel }: { onCreate: (test: Usabil
       expectedOutcome: task.expectedOutcome.trim(),
       successCriteria: task.successCriteria.trim(),
       timeLimitSec: task.timeLimit ? Math.max(10, Number(task.timeLimit)) : undefined,
+      conditionScript: task.conditionScript.trim() || undefined,
+      hint: task.hint.trim() || undefined,
     })),
     createdAt: new Date().toISOString(),
     participantFields,
@@ -187,7 +197,16 @@ export function TestCreateView({ onCreate, onCancel }: { onCreate: (test: Usabil
                   <span>Time Limit (seconds, optional)</span>
                   <input type="number" min={10} value={task.timeLimit} onChange={(event) => setTask(task.id, { timeLimit: event.target.value })} placeholder="No limit" />
                 </label>
+                <label>
+                  <span>Hint (optional)</span>
+                  <input value={task.hint} onChange={(event) => setTask(task.id, { hint: event.target.value })} placeholder="Shown when the participant asks for help" />
+                </label>
               </div>
+              <ConditionBuilder
+                script={task.conditionScript}
+                onChange={(script) => setTask(task.id, { conditionScript: script })}
+                catalog={targetCatalog}
+              />
             </fieldset>
           ))}
           <button type="button" className="qcx-button ghost" onClick={() => setTasks((current) => [...current, emptyTask()])}>
@@ -196,6 +215,15 @@ export function TestCreateView({ onCreate, onCancel }: { onCreate: (test: Usabil
         </div>
 
         <footer className="qcx-form-actions uts-create-actions">
+          <button
+            type="button"
+            className="qcx-button ghost"
+            disabled={prototypeId !== "passenger-checkin" || !tasks.some((task) => task.conditionScript.trim())}
+            title={prototypeId !== "passenger-checkin" ? "Simulation is available for the Passenger Check-in prototype" : undefined}
+            onClick={() => setSimulating(true)}
+          >
+            <Icon icon="play_circle" size={17} />Simulate Tasks
+          </button>
           <button type="button" className="qcx-button ghost" disabled={!name.trim()} onClick={() => onCreate(build("draft"))}>
             <Icon icon="save" size={17} />Save as Draft
           </button>
@@ -204,6 +232,21 @@ export function TestCreateView({ onCreate, onCancel }: { onCreate: (test: Usabil
           </RippleButton>
         </footer>
       </form>
+
+      {simulating ? (
+        <TaskSimulator
+          tasks={tasks.map<TestTask>((task) => ({
+            id: task.id,
+            title: task.title.trim(),
+            description: task.description.trim(),
+            expectedOutcome: task.expectedOutcome.trim(),
+            successCriteria: task.successCriteria.trim(),
+            conditionScript: task.conditionScript.trim() || undefined,
+            hint: task.hint.trim() || undefined,
+          }))}
+          onClose={() => setSimulating(false)}
+        />
+      ) : null}
     </>
   );
 }

@@ -4,6 +4,8 @@ import { RippleButton } from "../../components/RippleButton";
 import { FlightSearchPage } from "../../features/cargo/FlightSearchPage";
 import { sendPrototypeCommand } from "../../services/prototypeRegistry";
 import { SessionRecorder } from "../../services/recorder";
+import { attachSemanticBridge, onSemanticEvent, type SemanticEvent } from "../../services/semanticEvents";
+import { commandProgress, evaluateCondition, parseConditionScript, type ParsedScript } from "../../services/taskConditions";
 import { adoptInviteFromLocation, encodeSessionResult, findInviteByCode, inviteState, publishPresence, publishSessionSaved, updateInvite } from "../../services/remoteTesting";
 import { formatClock, getTests, makeId, prototypeName, saveSession } from "../../services/testingService";
 import type { FeedbackAnswers, ParticipantFieldKey, ParticipantInfo, SessionEvent, TaskResult, TestSession, UsabilityTest } from "../../types/testing";
@@ -63,6 +65,9 @@ export function ParticipantTestPage({ code }: { code: string }) {
   const [openAnswers, setOpenAnswers] = useState({ confused: "", workedWell: "", improve: "" });
   const [resultCode, setResultCode] = useState("");
   const [resultCopied, setResultCopied] = useState(false);
+  const [metFlags, setMetFlags] = useState<boolean[]>([]);
+  const [taskFlash, setTaskFlash] = useState(false);
+  const [showHint, setShowHint] = useState(false);
 
   const stageRef = useRef<HTMLDivElement | null>(null);
   const sessionId = useMemo(() => makeId("session"), []);
@@ -71,6 +76,19 @@ export function ParticipantTestPage({ code }: { code: string }) {
   const taskMisclickBaseRef = useRef(0);
   const recorderRef = useRef<SessionRecorder | null>(null);
   const savedRef = useRef(false);
+
+  // Smart Task Builder live validation state. Semantic events observed since
+  // the current task started are buffered and evaluated against the task's
+  // parsed condition tree after every interaction.
+  const parsedTasks = useMemo<ParsedScript[]>(
+    () => (test?.tasks ?? []).map((task) => parseConditionScript(task.conditionScript ?? "")),
+    [test],
+  );
+  const taskIndexRef = useRef(0);
+  taskIndexRef.current = taskIndex;
+  const taskEventsRef = useRef<SemanticEvent[]>([]);
+  const advancingRef = useRef(false);
+  const completeTaskRef = useRef<(success?: boolean) => void>(() => {});
 
   const enabledFields = INFO_FIELDS.filter((field) => test?.participantFields?.[field.key] ?? false);
   const participantName = () => info.name?.trim() || invite?.participantId || "Remote participant";
@@ -178,29 +196,74 @@ export function ParticipantTestPage({ code }: { code: string }) {
     return () => window.clearInterval(interval);
   }, [stage]);
 
-  const completeTask = () => {
+  const completeTask = (success = true) => {
     const recorder = recorderRef.current;
     if (!recorder || !test) return;
-    const task = test.tasks[taskIndex];
+    const currentIndex = taskIndexRef.current;
+    const task = test.tasks[currentIndex];
     const snapshot = recorder.snapshot();
     const result: TaskResult = {
       taskId: task.id,
-      success: true,
+      success,
       timeSec: recorder.now() - taskStartedAtRef.current,
       misclicks: snapshot.misclicks - taskMisclickBaseRef.current,
     };
-    recorder.record({ kind: "task_complete", taskId: task.id, label: task.title });
+    recorder.record({ kind: success ? "task_complete" : "task_fail", taskId: task.id, label: task.title });
     setTaskResults((current) => [...current, result]);
     taskStartedAtRef.current = recorder.now();
     taskMisclickBaseRef.current = snapshot.misclicks;
-    const next = test.tasks[taskIndex + 1];
+    taskEventsRef.current = [];
+    setMetFlags([]);
+    setShowHint(false);
+    const next = test.tasks[currentIndex + 1];
     if (next) {
       recorder.record({ kind: "task_start", taskId: next.id, label: next.title });
-      setTaskIndex(taskIndex + 1);
+      setTaskIndex(currentIndex + 1);
     } else {
       setStage("feedback");
     }
   };
+  completeTaskRef.current = completeTask;
+
+  // Live validation: derive semantic events from the mounted prototype and
+  // evaluate the current task's success conditions after every interaction.
+  // When the condition tree is satisfied, flash "✓ Task Completed" and
+  // auto-advance — no manual confirmation needed.
+  useEffect(() => {
+    if (stage !== "prototype" || !test) return;
+    const stageEl = stageRef.current;
+    const detachBridge = stageEl ? attachSemanticBridge(stageEl) : undefined;
+    const unsubscribe = onSemanticEvent((event) => {
+      taskEventsRef.current.push(event);
+      const parsed = parsedTasks[taskIndexRef.current];
+      if (!parsed?.node || advancingRef.current) return;
+      setMetFlags(commandProgress(parsed.commands, taskEventsRef.current));
+      if (evaluateCondition(parsed.node, taskEventsRef.current)) {
+        advancingRef.current = true;
+        setTaskFlash(true);
+        window.setTimeout(() => {
+          setTaskFlash(false);
+          advancingRef.current = false;
+          completeTaskRef.current(true);
+        }, 950);
+      }
+    });
+    return () => { detachBridge?.(); unsubscribe(); };
+  }, [stage, test, parsedTasks]);
+
+  // Optional per-task time limit: when exceeded, the task is recorded as
+  // failed and the session moves on automatically.
+  useEffect(() => {
+    if (stage !== "prototype" || !test) return;
+    const limit = test.tasks[taskIndex]?.timeLimitSec;
+    if (!limit) return;
+    const interval = window.setInterval(() => {
+      const recorder = recorderRef.current;
+      if (!recorder || advancingRef.current) return;
+      if (recorder.now() - taskStartedAtRef.current >= limit) completeTaskRef.current(false);
+    }, 1000);
+    return () => window.clearInterval(interval);
+  }, [stage, test, taskIndex]);
 
   const submitFeedback = () => {
     persist(true, {
@@ -229,21 +292,44 @@ export function ParticipantTestPage({ code }: { code: string }) {
 
   if (stage === "prototype") {
     const task = test.tasks[taskIndex];
+    const parsed = parsedTasks[taskIndex];
+    const autoTracked = Boolean(parsed?.node);
     return (
       <div className="uts-live-host">
         <div className="uts-live-stage" ref={stageRef} aria-label="Prototype under test">
           <FlightSearchPage />
         </div>
+        {taskFlash ? (
+          <div className="uts-task-flash" role="status">
+            <Icon icon="check_circle" size={22} fill />✓ Task Completed
+          </div>
+        ) : null}
         <div className="uts-taskbar" role="region" aria-label="Current task">
           <span className="uts-taskbar-step">Task {taskIndex + 1} / {test.tasks.length}</span>
           <div className="uts-taskbar-copy">
             <strong>{task.title}</strong>
-            {task.description ? <small>{task.description}</small> : null}
+            {showHint && task.hint ? <small className="uts-taskbar-hint"><Icon icon="lightbulb" size={12} fill /> {task.hint}</small> : task.description ? <small>{task.description}</small> : null}
           </div>
+          {autoTracked && parsed.commands.length > 1 ? (
+            <span className="uts-taskbar-progress" aria-label={`${metFlags.filter(Boolean).length} of ${parsed.commands.length} conditions met`}>
+              {parsed.commands.map((_, index) => (
+                <i key={index} className={metFlags[index] ? "met" : ""} />
+              ))}
+            </span>
+          ) : null}
           <span className="uts-taskbar-clock">{formatClock(elapsed)}</span>
-          <button className="qcx-button primary" onClick={completeTask}>
-            <Icon icon="check" size={16} />Mark Completed
-          </button>
+          {task.hint ? (
+            <button className="qcx-button ghost" onClick={() => setShowHint((current) => !current)}>
+              <Icon icon="lightbulb" size={15} />{showHint ? "Hide Hint" : "Hint"}
+            </button>
+          ) : null}
+          {autoTracked ? (
+            <span className="uts-taskbar-auto"><Icon icon="automation" size={14} />Auto-tracked</span>
+          ) : (
+            <button className="qcx-button primary" onClick={() => completeTask(true)}>
+              <Icon icon="check" size={16} />Mark Completed
+            </button>
+          )}
         </div>
       </div>
     );

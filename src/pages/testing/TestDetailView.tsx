@@ -236,6 +236,11 @@ export function TestDetailView({ test, sessions, onBack, onGoLive, onImport }: {
                         <Icon icon="rule" size={12} /> Evaluated against: {task?.successCriteria || "moderator judgement"}{task?.timeLimitSec ? ` · time limit ${formatClock(task.timeLimitSec)}` : ""}
                       </small>
                     ) : null}
+                    {task?.conditionScript ? (
+                      <small className="uts-task-criteria">
+                        <Icon icon="automation" size={12} /> Auto-tracked: <code className="uts-task-script">{task.conditionScript.split("\n").join(" ")}</code>
+                      </small>
+                    ) : null}
                     <MetricBar label={`${entry.successes}/${entry.attempts} succeeded · avg ${formatClock(entry.avgTimeSec)} · ${entry.avgMisclicks} misclicks`} value={rate} tone={rate >= 70 ? "green" : rate >= 40 ? "amber" : "red"} />
                   </div>
                 );

@@ -1,9 +1,12 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { FlightSearchPage } from "../features/cargo/FlightSearchPage";
 import { CHECKIN_PROTOTYPE, sendPrototypeCommand } from "../services/prototypeRegistry";
 import type { Scenario } from "../types";
 import { Icon } from "../components/Icon";
 import { FamilyCheckinGuide } from "./FamilyCheckinGuide";
+import { ScenarioTaskGuide } from "./ScenarioTaskGuide";
+import { useZoomController } from "./zoom/useZoomController";
+import { ZoomToolbar } from "./zoom/ZoomToolbar";
 
 interface PrototypeHostProps {
   scenario: Scenario | null;
@@ -23,6 +26,30 @@ export function PrototypeHost({ scenario, freeMode, initialScreen, onExit }: Pro
   });
   const [dockOpen, setDockOpen] = useState(freeMode);
   const isFamilyScenario = scenario?.id === "family-checkin";
+  const hostRef = useRef<HTMLDivElement | null>(null);
+  const zoomController = useZoomController();
+  const [presenting, setPresenting] = useState(false);
+
+  const togglePresent = useCallback(() => {
+    setPresenting((wasPresenting) => {
+      if (wasPresenting) {
+        if (document.fullscreenElement) void document.exitFullscreen();
+        return false;
+      }
+      // Fullscreen may be denied (e.g. no user-gesture); presentation chrome
+      // still applies so the presenter keeps the minimal toolbar either way.
+      document.querySelector<HTMLElement>(".qcx-proto-host")?.requestFullscreen?.().catch(() => {});
+      return true;
+    });
+  }, []);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      if (!document.fullscreenElement) setPresenting(false);
+    };
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  }, []);
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => setEntered(true));
@@ -51,8 +78,18 @@ export function PrototypeHost({ scenario, freeMode, initialScreen, onExit }: Pro
   const current = screens[screenIndex];
 
   return (
-    <div className={`qcx-proto-host ${entered ? "entered" : ""}`}>
-      <FlightSearchPage />
+    <div className={`qcx-proto-host ${entered ? "entered" : ""} ${presenting ? "presenting" : ""}`} ref={hostRef}>
+      <div className="qcx-zoom-viewport" ref={zoomController.viewportRef}>
+        <div
+          className="qcx-zoom-canvas"
+          ref={zoomController.canvasRef}
+          style={{ zoom: zoomController.zoom / 100 }}
+        >
+          <FlightSearchPage />
+        </div>
+      </div>
+
+      <ZoomToolbar controller={zoomController} presenting={presenting} onTogglePresent={togglePresent} />
 
       <button className="qcx-back-pill" onClick={onExit}>
         <Icon icon="arrow_back" size={16} />
@@ -61,6 +98,8 @@ export function PrototypeHost({ scenario, freeMode, initialScreen, onExit }: Pro
       </button>
 
       {isFamilyScenario ? <FamilyCheckinGuide /> : null}
+
+      {scenario?.tasks?.length ? <ScenarioTaskGuide tasks={scenario.tasks} hostRef={hostRef} /> : null}
 
       {freeMode ? (
         <div className={`qcx-freemode-dock ${dockOpen ? "" : "collapsed"}`} role="toolbar" aria-label="Free Mode controls">

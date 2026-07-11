@@ -1,5 +1,15 @@
 export type ScenarioStatus = "ready" | "draft" | "archived";
 
+// A guided step inside a scenario. When conditionScript is set, the Smart
+// Task engine tracks completion automatically while the scenario runs.
+export interface ScenarioTask {
+  id: string;
+  title: string;
+  instruction?: string;
+  conditionScript?: string;
+  hint?: string;
+}
+
 export interface Scenario {
   id: string;
   title: string;
@@ -17,6 +27,7 @@ export interface Scenario {
   notes?: string;
   updatedAt: string;
   prototypeId: string;
+  tasks?: ScenarioTask[];
 }
 
 export interface PrototypeScreen {

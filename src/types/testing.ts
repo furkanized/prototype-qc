@@ -17,6 +17,10 @@ export interface TestTask {
   expectedOutcome: string;
   successCriteria: string;
   timeLimitSec?: number;
+  /** Smart Task Builder condition script, e.g. "Click [Flight List]\nAND Select [TK1815]". */
+  conditionScript?: string;
+  /** Optional hint shown to the participant on request. */
+  hint?: string;
 }
 
 // Which optional participant-information fields the remote intake form shows.

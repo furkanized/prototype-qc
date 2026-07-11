@@ -1,9 +1,14 @@
-import { useState, type FormEvent } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 import type { ScenarioDraft } from "../services/scenarioService";
+import type { ScenarioTask } from "../types";
 import { Icon } from "../components/Icon";
 import { RippleButton } from "../components/RippleButton";
+import { ConditionBuilder } from "./testing/ConditionBuilder";
+import { getTargetCatalog } from "../services/taskConditions";
 
 const CABIN_CLASSES = ["Economy", "Comfort", "Business"];
+
+const makeTask = (): ScenarioTask => ({ id: `stask-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`, title: "", instruction: "", conditionScript: "", hint: "" });
 
 const EMPTY_DRAFT: ScenarioDraft = {
   title: "",
@@ -15,6 +20,7 @@ const EMPTY_DRAFT: ScenarioDraft = {
   passengerCount: 1,
   cabinClass: "Economy",
   notes: "",
+  tasks: [],
 };
 
 export function ScenarioCreatorPage({ onCreate }: { onCreate: (draft: ScenarioDraft) => void }) {
@@ -22,6 +28,10 @@ export function ScenarioCreatorPage({ onCreate }: { onCreate: (draft: ScenarioDr
   const [saved, setSaved] = useState(false);
 
   const set = <K extends keyof ScenarioDraft>(key: K, value: ScenarioDraft[K]) => setDraft((current) => ({ ...current, [key]: value }));
+  const setTask = (id: string, patch: Partial<ScenarioTask>) =>
+    set("tasks", draft.tasks.map((task) => (task.id === id ? { ...task, ...patch } : task)));
+
+  const targetCatalog = useMemo(() => getTargetCatalog("passenger-checkin"), []);
 
   const valid = draft.title.trim() && draft.flightNumber.trim() && draft.departure.trim() && draft.arrival.trim();
 
@@ -83,6 +93,45 @@ export function ScenarioCreatorPage({ onCreate }: { onCreate: (draft: ScenarioDr
             <span>Notes</span>
             <textarea value={draft.notes} onChange={(event) => set("notes", event.target.value)} rows={3} placeholder="What should this scenario demonstrate?" />
           </label>
+        </div>
+
+        <div className="qcx-creator-tasks">
+          <div className="qcx-creator-tasks-head">
+            <h2><Icon icon="automation" size={17} />Guided Tasks<em>optional</em></h2>
+            <p>Give the scenario measurable steps. Tasks with success conditions are tracked automatically while the scenario runs — the runner advances as soon as the interaction happens.</p>
+          </div>
+          {draft.tasks.map((task, index) => (
+            <fieldset className="uts-task-editor" key={task.id}>
+              <legend>Task {index + 1}</legend>
+              <div className="uts-task-editor-tools">
+                <button type="button" className="qcx-icon-button" aria-label="Remove task" onClick={() => set("tasks", draft.tasks.filter((candidate) => candidate.id !== task.id))}>
+                  <Icon icon="delete" size={16} />
+                </button>
+              </div>
+              <div className="qcx-form-grid">
+                <label className="span-2">
+                  <span>Title *</span>
+                  <input value={task.title} onChange={(event) => setTask(task.id, { title: event.target.value })} placeholder="e.g. Open the available flights" />
+                </label>
+                <label>
+                  <span>Participant Instruction</span>
+                  <input value={task.instruction ?? ""} onChange={(event) => setTask(task.id, { instruction: event.target.value })} placeholder="What should the person do?" />
+                </label>
+                <label>
+                  <span>Hint (optional)</span>
+                  <input value={task.hint ?? ""} onChange={(event) => setTask(task.id, { hint: event.target.value })} placeholder="Shown on request during the run" />
+                </label>
+              </div>
+              <ConditionBuilder
+                script={task.conditionScript ?? ""}
+                onChange={(script) => setTask(task.id, { conditionScript: script })}
+                catalog={targetCatalog}
+              />
+            </fieldset>
+          ))}
+          <button type="button" className="qcx-button ghost" onClick={() => set("tasks", [...draft.tasks, makeTask()])}>
+            <Icon icon="add" size={17} />Add Guided Task
+          </button>
         </div>
         <footer className="qcx-form-actions">
           <RippleButton type="submit" className={`qcx-button primary ${saved ? "success" : ""}`} disabled={!valid}>

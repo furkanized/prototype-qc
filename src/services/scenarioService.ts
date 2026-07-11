@@ -1,4 +1,4 @@
-import type { Scenario } from "../types";
+import type { Scenario, ScenarioTask } from "../types";
 import { readStore, writeStore } from "./storage";
 
 const CUSTOM_KEY = "scenarios";
@@ -40,6 +40,7 @@ export interface ScenarioDraft {
   passengerCount: number;
   cabinClass: string;
   notes: string;
+  tasks: ScenarioTask[];
 }
 
 export function createScenario(draft: ScenarioDraft): Scenario {
@@ -60,6 +61,13 @@ export function createScenario(draft: ScenarioDraft): Scenario {
     cabinClass: draft.cabinClass,
     notes: draft.notes,
     updatedAt: new Date().toISOString(),
+    tasks: draft.tasks.filter((task) => task.title.trim()).map((task) => ({
+      ...task,
+      title: task.title.trim(),
+      instruction: task.instruction?.trim() || undefined,
+      conditionScript: task.conditionScript?.trim() || undefined,
+      hint: task.hint?.trim() || undefined,
+    })),
   };
   writeStore(CUSTOM_KEY, [scenario, ...getCustomScenarios()]);
   return scenario;
