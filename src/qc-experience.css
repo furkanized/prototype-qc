@@ -437,6 +437,15 @@ html.qcx-reduced-motion *, html.qcx-reduced-motion *::before, html.qcx-reduced-m
   animation: qcx-toast-in 300ms var(--qcx-ease);
 }
 .qcx-zoom-toolbar .qcx-dock-button { width: 32px; height: 32px; }
+/* The prototype's floating selection bar occupies the bottom strip; lift the
+   platform overlays out of its way while it is open so "Check-in all" and
+   "Create Pool" stay clickable. */
+.qcx-proto-host:has(.passenger-selection-bar) .qcx-zoom-toolbar,
+.qcx-proto-host:has(.passenger-selection-bar) .qcx-back-pill { bottom: 100px; }
+.qcx-zoom-toolbar { transition: bottom 200ms var(--qcx-ease), opacity 160ms var(--qcx-ease); }
+/* Platform chrome shouldn't float above the prototype's modal dialogs. */
+.qcx-proto-host:has([role="dialog"][data-state="open"]) .qcx-zoom-toolbar,
+.qcx-proto-host:has([role="dialog"][data-state="open"]) .qcx-back-pill { opacity: 0; pointer-events: none; }
 .qcx-zoom-toolbar .qcx-dock-button:disabled { opacity: 0.35; pointer-events: none; }
 .qcx-zoom-readout, .qcx-zoom-input {
   width: 52px; height: 32px; border: 0; border-radius: 9px; background: transparent;
@@ -462,7 +471,7 @@ html.qcx-reduced-motion *, html.qcx-reduced-motion *::before, html.qcx-reduced-m
   border: 1px solid rgba(32, 38, 52, 0.14); border-radius: 999px;
   background: rgba(32, 38, 52, 0.92); color: #fff; font-size: 13px; font-weight: 450;
   box-shadow: 0 6px 20px rgba(20, 30, 50, 0.25); backdrop-filter: blur(8px);
-  transition: transform 180ms var(--qcx-ease), box-shadow 180ms var(--qcx-ease);
+  transition: transform 180ms var(--qcx-ease), box-shadow 180ms var(--qcx-ease), bottom 200ms var(--qcx-ease);
 }
 .qcx-back-pill:hover { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(20, 30, 50, 0.3); }
 .qcx-back-pill em { margin-left: 4px; padding: 2px 8px; border-radius: 999px; background: rgba(255, 255, 255, 0.14); font-size: 11px; font-style: normal; }
@@ -550,13 +559,20 @@ html.qcx-reduced-motion *, html.qcx-reduced-motion *::before, html.qcx-reduced-m
 }
 @media (max-width: 1000px) {
   .qcx-sidebar { width: 64px; flex-basis: 64px; padding: 14px 8px; }
-  .qcx-nav-item { justify-content: center; padding: 0; }
-  .qcx-nav-item span { display: none; }
+  .qcx-nav-item { justify-content: center; padding: 0; min-width: 44px; }
+  /* Hide only the text label — the icon is also a <span> (.qc-icon). */
+  .qcx-nav-item span:not(.qc-icon) { display: none; }
   .qcx-sidebar-foot { display: none; }
   .qcx-page { padding: 22px 20px 60px; }
 }
 @media (max-width: 720px) {
   .qcx-topbar { gap: 10px; padding: 0 12px; }
+  /* The full wordmark (251px) plus the search's 200px floor overflowed the
+     viewport, which also pushed the fixed bottom nav out of the layout
+     viewport on phones. Let both shrink instead. */
+  .qcx-brand { flex: 0 1 auto; min-width: 0; overflow: hidden; }
+  .qcx-brand img { width: 100%; max-width: 160px; height: auto; }
+  .qcx-search { flex: 1 1 auto; min-width: 0; }
   .qcx-search-result { grid-template-columns: 20px 1fr; }
   .qcx-search-result-detail { display: none; }
   .qcx-env-pill { display: none; }
@@ -842,6 +858,7 @@ html.qcx-reduced-motion *, html.qcx-reduced-motion *::before, html.qcx-reduced-m
 .uts-consent { display: flex; align-items: flex-start; gap: 10px; padding: 14px 16px; border: 1px solid var(--qcx-line); border-radius: 12px; background: var(--qcx-bg); text-align: left; font-size: 13px; color: var(--qcx-ink); }
 .uts-consent input { margin-top: 2px; width: 17px; height: 17px; accent-color: var(--qcx-red); }
 .uts-participant-form { display: grid; gap: 14px; text-align: left; }
+.uts-participant-hint { font-size: 12px; color: var(--qcx-muted); }
 .uts-participant-form label { display: grid; gap: 6px; }
 .uts-participant-form label > span { font-size: 12.5px; font-weight: 500; color: var(--qcx-ink); }
 .uts-participant-form input, .uts-participant-form select, .uts-participant-form textarea {
@@ -862,7 +879,11 @@ html.qcx-reduced-motion *, html.qcx-reduced-motion *::before, html.qcx-reduced-m
   display: flex; align-items: center; gap: 16px; width: min(680px, calc(100vw - 32px));
   padding: 12px 18px; border: 1px solid var(--qcx-line); border-radius: 16px; background: rgba(255, 255, 255, 0.96);
   box-shadow: var(--qcx-shadow-md); backdrop-filter: blur(10px); animation: qcx-toast-in 300ms var(--qcx-ease);
+  transition: bottom 200ms var(--qcx-ease);
 }
+/* Keep the participant task bar clear of the prototype's own floating
+   selection bar, which occupies the same bottom strip. */
+.uts-live-host:has(.passenger-selection-bar) .uts-taskbar { bottom: 100px; }
 .uts-taskbar-step { flex: 0 0 auto; padding: 4px 10px; border-radius: 999px; background: var(--qcx-blue-soft); color: #2b62c4; font-size: 11px; font-weight: 600; white-space: nowrap; }
 .uts-taskbar-copy { flex: 1; min-width: 0; text-align: left; }
 .uts-taskbar-copy strong { display: block; font-size: 13.5px; font-weight: 550; color: var(--qcx-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

@@ -47,6 +47,12 @@ function AppInner() {
   const [lastScenario, setLastScenario] = useState<Scenario | null>(null);
   const [transitioning, setTransitioning] = useState(false);
 
+  // State-based navigation keeps the document scroll position; reset it so a
+  // page switch always starts at the top like a real route change.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [page, stage.kind]);
+
   // The prototype expects a fixed-width canvas; the platform is responsive.
   useEffect(() => {
     const inPrototype = stage.kind === "prototype";

@@ -416,6 +416,9 @@ export function ParticipantTestPage({ code }: { code: string }) {
             <RippleButton className="qcx-button primary large" disabled={RATING_FIELDS.some((field) => ratings[field.key] === 0)} onClick={submitFeedback}>
               <Icon icon="send" size={17} fill />Submit Feedback
             </RippleButton>
+            {RATING_FIELDS.some((field) => ratings[field.key] === 0) ? (
+              <small className="uts-participant-hint">Rate every category above to submit.</small>
+            ) : null}
           </>
         ) : (
           <>

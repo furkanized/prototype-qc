@@ -69,7 +69,12 @@ export function PrototypeHost({ scenario, freeMode, initialScreen, onExit }: Pro
 
   useEffect(() => {
     const handleKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onExit();
+      if (event.key !== "Escape") return;
+      // Escape first serves fullscreen and any open prototype dialog; only
+      // exit the experience when nothing else is consuming it.
+      if (document.fullscreenElement) return;
+      if (document.querySelector('[role="dialog"][data-state="open"]')) return;
+      onExit();
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);

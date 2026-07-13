@@ -66,6 +66,22 @@ function useAnimatedPresence(open: boolean, duration = 220) {
   return { isMounted, isVisible: open };
 }
 
+// Standard modal behaviour: Escape closes the topmost open overlay. Capture
+// phase + stopImmediatePropagation keeps the platform host's Escape handler
+// (exit prototype) from firing on the same keypress.
+function useEscapeToClose(active: boolean, onClose: () => void) {
+  useEffect(() => {
+    if (!active) return;
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      event.stopImmediatePropagation();
+      onClose();
+    };
+    window.addEventListener("keydown", handleKey, true);
+    return () => window.removeEventListener("keydown", handleKey, true);
+  }, [active, onClose]);
+}
+
 function Icon({
   icon,
   size = 20,
@@ -2333,6 +2349,7 @@ function PassengerCheckInOverlay({
 }) {
   const [checkedPassengers, setCheckedPassengers] = useState(() => new Set(selectedPassengers.map((passenger) => passenger.pnr)));
   const { isMounted, isVisible } = useAnimatedPresence(open, 220);
+  useEscapeToClose(open, onClose);
 
   useEffect(() => {
     setCheckedPassengers(new Set(selectedPassengers.map((passenger) => passenger.pnr)));
@@ -2354,8 +2371,8 @@ function PassengerCheckInOverlay({
         <div className="checkin-popup-body">
           <div className="checkin-summary">
             <div><Icon icon="group" size={19} /><strong>{selectedPassengers.length}</strong><span>Passengers</span></div>
-            <div><Icon icon="gpp_good" size={19} /><strong>{selectedPassengers.length}/{selectedPassengers.length}</strong><span>APIS Ready</span></div>
-            <div><Icon icon="luggage" size={19} /><strong>8</strong><span>Total Bags</span></div>
+            <div><Icon icon="gpp_good" size={19} /><strong>{selectedPassengers.filter((passenger) => passenger.apis === "filled").length}/{selectedPassengers.length}</strong><span>APIS Ready</span></div>
+            <div><Icon icon="luggage" size={19} /><strong>{getPoolMetrics(selectedPassengers).pieces}</strong><span>Total Bags</span></div>
           </div>
           <section className="checkin-selected">
             <h3>Selected Passengers</h3>
@@ -2382,7 +2399,7 @@ function PassengerCheckInOverlay({
                   <Avatar type={passenger.avatar} gender={inferPassengerGenderFromName(passenger.name)} state={checked ? "selected" : "active"} size="md" />
                   <div>
                     <strong>{passenger.name} {passenger.surname.charAt(0) + passenger.surname.slice(1).toLowerCase()}</strong>
-                    <span>{passenger.pnr} - Seat: {passenger.seat} - Baggage: 1pc /{index === 0 ? "18" : index === 1 ? "22" : "12"}kg</span>
+                    <span>{passenger.pnr} - Seat: {passenger.seat} - Baggage: {passenger.baggageInfo.pieces}pc /{passenger.baggageInfo.kg}kg</span>
                   </div>
                   <em>Ready</em>
                 </div>
@@ -2427,6 +2444,7 @@ function ExcessBaggagePaymentPopup({
   const [selectedPos, setSelectedPos] = useState("POS-04");
   const [linkCountdown, setLinkCountdown] = useState(10);
   const { isMounted, isVisible } = useAnimatedPresence(open, 200);
+  useEscapeToClose(open, onClose);
 
   useEffect(() => {
     if (cardStep !== "processing") return;
@@ -2738,6 +2756,8 @@ function CreatePoolOverlay({
   const [paymentPopupOpen, setPaymentPopupOpen] = useState(false);
   const [bagCount, setBagCount] = useState(() => getPoolMetrics(selectedPassengers).pieces);
   const { isMounted, isVisible } = useAnimatedPresence(open, 220);
+  // While the payment popup is stacked on top, let it own the Escape key.
+  useEscapeToClose(open && !paymentPopupOpen, onClose);
   const poolMetrics = getPoolMetrics(selectedPassengers);
   const chargeMetrics = getPoolChargeMetrics(selectedPassengers, bagCount, paymentCompleted);
   const headPassenger = selectedPassengers.find((passenger) => passenger.pnr === headPassengerPnr) ?? selectedPassengers[0];
@@ -3164,7 +3184,18 @@ function PassengerTable({ passengers }: { passengers: Passenger[] }) {
                 <span className={`apis ${person.apis}`}><b>A</b></span>
                 <span><em className={`tier ${person.tier.toLowerCase()}`}>{person.tier}</em></span><span>Y/ EC</span>
                 <span className={`message ${person.message ? "active" : ""}`}><CommentNotificationIcon count={person.message} /></span>
-                <span className="quick-actions"><button>Check-in</button><Icon icon="more_vert" size={21} /></span>
+                <span className="quick-actions">
+                  <button
+                    onClick={() => {
+                      setFloatingBarMode("selection");
+                      setSelectedRowsState((rows) => rows.map((item, row) => (row === index ? true : item)));
+                      setCheckInOverlayOpen(true);
+                    }}
+                  >
+                    Check-in
+                  </button>
+                  <Icon icon="more_vert" size={21} />
+                </span>
                 <button className="row-expand" aria-label="Satırı genişlet"><Icon icon="keyboard_arrow_down" size={18} /></button>
               </div>
             );
