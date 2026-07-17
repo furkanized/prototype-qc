@@ -11,6 +11,11 @@ import { defineCustomElement as defineTkTabsItem } from "@takeoff-ui/core/compon
 import { defineCustomElement as defineTkTooltip } from "@takeoff-ui/core/components/tk-tooltip.js";
 import qcMark from "../../assets/qc-mark.svg";
 import qcText from "../../assets/qc-text.svg";
+import {
+  findLinkedInfant,
+  type PassengerInfoBox,
+  type PassengerType,
+} from "./passengerDetailsModel";
 
 defineTkIcon();
 defineTkButton();
@@ -369,27 +374,35 @@ type PassengerRecord = {
   apis: string;
   message: number;
   tier: Tier;
+  passengerType: PassengerType;
+  linkedAdultPnr?: string;
+  birthDate?: string;
+  infoBox?: PassengerInfoBox;
 };
 
-const curatedPassengersByFlight = {
+type PassengerSeedRecord = Omit<PassengerRecord, "passengerType"> & {
+  passengerType?: PassengerType;
+};
+
+const curatedPassengersByFlight: Record<string, PassengerSeedRecord[]> = {
   TK2070: [
-    { name: "Furkan", surname: "AYIN", pnr: "A1B2C3", group: "232", seat: "23A", ci: "checked", avatar: "man", baggage: "normal", baggageInfo: { pieces: 1, kg: 18, allowanceKg: 23, paid: false }, apis: "empty", message: 0, tier: "Elite" },
-    { name: "Nesibe", surname: "AYIN", pnr: "NO REC", group: "438", seat: "11A", ci: "pending", avatar: "woman", baggage: "alert", baggageInfo: { pieces: 1, kg: 31, allowanceKg: 23, paid: false }, apis: "empty", message: 2, tier: "Classic" },
-    { name: "Ayşe", surname: "AYIN", pnr: "G7H8I9", group: "123", seat: "11B", ci: "pending", avatar: "woman dark", baggage: "muted", baggageInfo: { pieces: 2, kg: 34, allowanceKg: 32, paid: true }, apis: "filled", message: 0, tier: "Elite" },
+    { name: "Furkan", surname: "AYIN", pnr: "A1B2C3", group: "232", seat: "23A", ci: "checked", avatar: "man", baggage: "normal", baggageInfo: { pieces: 1, kg: 18, allowanceKg: 23, paid: false }, apis: "empty", message: 0, tier: "Elite", infoBox: { variant: "ai-actions", title: "Passenger Insights", description: "Frequent traveler who prefers an aisle seat and usually completes check-in early.", actions: ["Profili Görüntüle", "Not Ekle"] } },
+    { name: "Nesibe", surname: "AYIN", pnr: "NO REC", group: "438", seat: "11A", ci: "pending", avatar: "woman", baggage: "alert", baggageInfo: { pieces: 1, kg: 31, allowanceKg: 23, paid: false }, apis: "empty", message: 2, tier: "Classic", infoBox: { variant: "warning-actions", title: "Yolcunun Bagaj Ödemesi Yapılmamış!", description: "Yolcunun işlemlerini tamamlamadan önce bagaj ödemesini tamamlayınız.", actions: ["Bagajı Görüntüle", "Ödeme Al"] } },
+    { name: "Ayşe", surname: "AYIN", pnr: "G7H8I9", group: "232", seat: "INF", ci: "pending", avatar: "child-girl", baggage: "muted", baggageInfo: { pieces: 0, kg: 0, allowanceKg: 0, paid: true }, apis: "filled", message: 0, tier: "Classic", passengerType: "infant", linkedAdultPnr: "A1B2C3", birthDate: "04.06.2025" },
     { name: "Canan", surname: "AYIN", pnr: "D4E5F6", group: "441", seat: "22A", ci: "pending", avatar: "woman", baggage: "normal", baggageInfo: { pieces: 1, kg: 22, allowanceKg: 23, paid: false }, apis: "filled", message: 1, tier: "Classic" },
-    { name: "Ozan", surname: "AYIN", pnr: "PQ7R8A", group: "119", seat: "23C", ci: "checked", avatar: "man", baggage: "normal", baggageInfo: { pieces: 1, kg: 12, allowanceKg: 23, paid: false }, apis: "empty", message: 0, tier: "Elite" },
+    { name: "Ozan", surname: "AYIN", pnr: "PQ7R8A", group: "119", seat: "23C", ci: "checked", avatar: "man", baggage: "normal", baggageInfo: { pieces: 1, kg: 12, allowanceKg: 23, paid: false }, apis: "empty", message: 0, tier: "Elite", infoBox: { variant: "ai", title: "Passenger Insights", description: "Passenger regularly travels with checked baggage and prefers early boarding." } },
   ],
   TK0706: [
     { name: "Mert", surname: "Kaya", pnr: "Q4W5E6", group: "118", seat: "18C", ci: "checked", avatar: "man", baggage: "normal", baggageInfo: { pieces: 1, kg: 20, allowanceKg: 23, paid: false }, apis: "filled", message: 1, tier: "Classic" },
     { name: "Elif", surname: "Özkan", pnr: "R7T8Y9", group: "204", seat: "20A", ci: "pending", avatar: "woman", baggage: "normal", baggageInfo: { pieces: 1, kg: 28, allowanceKg: 23, paid: true }, apis: "empty", message: 0, tier: "Elite" },
-    { name: "Bora", surname: "Arslan", pnr: "P0L9K8", group: "311", seat: "14F", ci: "pending", avatar: "man", baggage: "alert", baggageInfo: { pieces: 2, kg: 42, allowanceKg: 32, paid: false }, apis: "empty", message: 3, tier: "Classic" },
+    { name: "Bora", surname: "Arslan", pnr: "P0L9K8", group: "311", seat: "14F", ci: "pending", avatar: "man", baggage: "alert", baggageInfo: { pieces: 2, kg: 42, allowanceKg: 32, paid: false }, apis: "empty", message: 3, tier: "Classic", infoBox: { variant: "warning", title: "Yolcunun Bagaj Ödemesi Yapılmamış!", description: "Yolcunun işlemlerini tamamlamadan önce bagaj ödemesini tamamlayınız." } },
   ],
   TK2911: [
     { name: "Derya", surname: "Taş", pnr: "Z1X2C3", group: "515", seat: "41D", ci: "checked", avatar: "woman dark", baggage: "muted", baggageInfo: { pieces: 2, kg: 36, allowanceKg: 32, paid: true }, apis: "filled", message: 0, tier: "Elite" },
     { name: "Emre", surname: "Kurt", pnr: "V4B5N6", group: "222", seat: "42A", ci: "pending", avatar: "man", baggage: "normal", baggageInfo: { pieces: 1, kg: 19, allowanceKg: 23, paid: false }, apis: "empty", message: 1, tier: "Classic" },
     { name: "Seda", surname: "Acar", pnr: "J7H8J9", group: "907", seat: "39B", ci: "checked", avatar: "woman", baggage: "normal", baggageInfo: { pieces: 1, kg: 21, allowanceKg: 23, paid: false }, apis: "filled", message: 0, tier: "Elite" },
   ],
-} satisfies Record<string, PassengerRecord[]>;
+};
 
 type Passenger = PassengerRecord;
 
@@ -580,13 +593,18 @@ function createGeneratedPassenger(flight: FlightRecord, seed: number, index: num
     apis: index % 5 === 0 ? "empty" : "filled",
     message: index % 13 === 1 ? 1 + (seed % 3) : 0,
     tier: index % 6 === 0 ? "Elite" : "Classic",
+    passengerType: "adult",
   };
 }
 
 function createPassengersForFlight(flight: FlightRecord): PassengerRecord[] {
   const seed = seededNumber(flight.code + flight.route);
   const targetCount = getBookedPassengerTarget(flight);
-  const curated = curatedPassengersByFlight[flight.code as keyof typeof curatedPassengersByFlight] ?? [];
+  const curatedSeeds = curatedPassengersByFlight[flight.code as keyof typeof curatedPassengersByFlight] ?? [];
+  const curated: PassengerRecord[] = curatedSeeds.map((passenger) => ({
+    ...passenger,
+    passengerType: passenger.passengerType ?? "adult",
+  }));
   const usedNames = new Set(curated.map((passenger) => `${passenger.name} ${passenger.surname}`));
   const generated = Array.from({ length: Math.max(0, targetCount - curated.length) }, (_, index) =>
     createGeneratedPassenger(flight, seed, index + curated.length, targetCount, usedNames),
