@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { findLinkedInfant } from "./passengerDetailsModel.ts";
+import { findLinkedInfant, getPassengerInfoAlertKey } from "./passengerDetailsModel.ts";
 
 test("finds the infant linked to the selected adult", () => {
   const passengers = [
@@ -12,4 +12,15 @@ test("finds the infant linked to the selected adult", () => {
   assert.deepEqual(findLinkedInfant(passengers, passengers[0]), passengers[1]);
   assert.equal(findLinkedInfant(passengers, passengers[2]), undefined);
   assert.equal(findLinkedInfant(passengers, passengers[1]), undefined);
+});
+
+test("changes the passenger info alert key for every drawer session", () => {
+  assert.notEqual(
+    getPassengerInfoAlertKey("A1B2C3", false),
+    getPassengerInfoAlertKey("A1B2C3", true),
+  );
+  assert.notEqual(
+    getPassengerInfoAlertKey("A1B2C3", true),
+    getPassengerInfoAlertKey("G7H8I9", true),
+  );
 });

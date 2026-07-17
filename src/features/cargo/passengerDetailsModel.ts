@@ -21,3 +21,7 @@ export function findLinkedInfant<T extends PassengerRelationshipRecord>(passenge
     candidate.passengerType === "infant" && candidate.linkedAdultPnr === passenger.pnr
   );
 }
+
+export function getPassengerInfoAlertKey(passengerPnr: string, open: boolean) {
+  return `${passengerPnr}:${open ? "open" : "closed"}`;
+}

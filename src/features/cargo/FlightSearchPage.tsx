@@ -13,6 +13,7 @@ import qcMark from "../../assets/qc-mark.svg";
 import qcText from "../../assets/qc-text.svg";
 import {
   findLinkedInfant,
+  getPassengerInfoAlertKey,
   type PassengerInfoBox,
   type PassengerType,
 } from "./passengerDetailsModel";
@@ -3234,7 +3235,11 @@ function PassengerDetailsDrawer({ passenger, passengers, open, onClose }: { pass
 
           {linkedInfant && <PassengerInfantNotice infant={linkedInfant} />}
           {passenger.infoBox && !dismissedInfo && (
-            <PassengerInfoAlert infoBox={passenger.infoBox} onDismiss={() => setDismissedInfo(true)} />
+            <PassengerInfoAlert
+              key={getPassengerInfoAlertKey(passenger.pnr, open)}
+              infoBox={passenger.infoBox}
+              onDismiss={() => setDismissedInfo(true)}
+            />
           )}
 
           <section className="passenger-detail-section">
