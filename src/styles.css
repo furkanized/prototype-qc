@@ -169,10 +169,11 @@ button:focus-visible,input:focus-visible { outline:2px solid #3b82f6; outline-of
 .passenger-infant-form input{width:100%;height:32px;box-sizing:border-box;border:1px solid #ff7900;border-radius:8px;background:#fff;color:#222530;font:300 14px/20px "Geologica",system-ui,sans-serif;letter-spacing:0;outline:0}
 .passenger-infant-form input{padding:5px 10px}
 .passenger-infant-form input:focus{border-color:#3b82f6;box-shadow:0 0 0 2px rgba(59,130,246,.14)}
-.passenger-infant-date-field{position:relative;display:flex;align-items:center}
-.passenger-infant-date-field>.qc-icon:first-child{position:absolute;left:9px;z-index:1;color:#525866;pointer-events:none}
-.passenger-infant-date-field>.qc-icon:last-child{position:absolute;right:8px;color:#525866;pointer-events:none}
-.passenger-infant-date-field input{padding-left:34px;padding-right:30px}
+.passenger-infant-takeoff-date{position:relative;min-width:0;border-radius:8px}
+.passenger-infant-takeoff-date::after{content:"";position:absolute;inset:0;z-index:1;border:1px solid #ff7900;border-radius:8px;pointer-events:none}
+.passenger-infant-takeoff-date:focus-within::after{border-color:#3b82f6;box-shadow:0 0 0 2px rgba(59,130,246,.14)}
+.passenger-infant-takeoff-date.invalid::after{border-color:#ef4444}
+.passenger-infant-date-picker{display:block;width:100%}
 .passenger-infant-takeoff-field{position:relative;min-width:0;border-radius:8px}
 .passenger-infant-takeoff-field::after{content:"";position:absolute;inset:0;z-index:1;border:1px solid #ff7900;border-radius:8px;pointer-events:none}
 .passenger-infant-takeoff-field:focus-within::after{border-color:#3b82f6;box-shadow:0 0 0 2px rgba(59,130,246,.14)}
@@ -243,13 +244,13 @@ button:focus-visible,input:focus-visible { outline:2px solid #3b82f6; outline-of
 .passenger-detail-accordion-title strong{font-size:14px;line-height:20px;font-weight:400;white-space:nowrap}
 .passenger-detail-accordion-title em{height:18px;display:inline-flex;align-items:center;gap:3px;border-radius:999px;padding:0 6px;background:#d0e1fd;color:#295bac;font-size:11px;line-height:16px;font-style:normal;white-space:nowrap}
 .passenger-detail-accordion-title em i{width:6px;height:6px;border-radius:50%;background:#3b82f6}
-.passenger-detail-accordion-chevron{color:#525866;transition:transform 220ms var(--motion-out),color 180ms var(--motion-out)}
+.passenger-detail-accordion-chevron{color:#525866;transition:transform 280ms cubic-bezier(.33,1,.68,1),color 180ms var(--motion-out)}
 .passenger-detail-accordion.expanded .passenger-detail-accordion-chevron{transform:rotate(180deg)}
-.passenger-detail-accordion-content{visibility:hidden;display:grid;grid-template-rows:0fr;transition:grid-template-rows 260ms var(--motion-sidebar-content),visibility 0s linear 260ms}
+.passenger-detail-accordion-content{visibility:hidden;display:grid;grid-template-rows:0fr;transition:grid-template-rows 280ms cubic-bezier(.33,1,.68,1),visibility 0s linear 280ms}
 .passenger-detail-accordion-inner{min-height:0;overflow:hidden}
-.passenger-detail-accordion.expanded .passenger-detail-accordion-content{visibility:visible;grid-template-rows:1fr;transition:grid-template-rows 260ms var(--motion-sidebar-content),visibility 0s linear 0s}
-.passenger-accordion-section{display:grid;gap:8px;padding:8px 12px 12px;opacity:0;transform:translateY(-5px);transition:opacity 180ms var(--motion-out),transform 260ms var(--motion-sidebar-content)}
-.passenger-detail-accordion.expanded .passenger-accordion-section{opacity:1;transform:translateY(0)}
+.passenger-detail-accordion.expanded .passenger-detail-accordion-content{visibility:visible;grid-template-rows:1fr;transition:grid-template-rows 280ms cubic-bezier(.33,1,.68,1),visibility 0s linear 0s}
+.passenger-accordion-section{display:grid;gap:8px;padding:8px 12px 12px;opacity:0;transform:translate3d(0,-12px,0);transition:opacity 200ms ease-out,transform 280ms cubic-bezier(.33,1,.68,1);will-change:transform,opacity}
+.passenger-detail-accordion.expanded .passenger-accordion-section{opacity:1;transform:translate3d(0,0,0)}
 .passenger-flight-details{padding-bottom:13px}
 .passenger-baggage-details{padding-bottom:3px}
 .passenger-service-details{padding-bottom:5px}
@@ -445,7 +446,7 @@ button:focus-visible,input:focus-visible { outline:2px solid #3b82f6; outline-of
 .seat-map-content.type1 .type1-block.left.feature::before{justify-self:end}
 .seat-map-content.type1 .type1-block.right.feature::before{justify-self:start}
 
-@media(prefers-reduced-motion:reduce){.qc-app,.flight-sidebar,.flight-sidebar-track,.seat-map,.seat-title,.seat-map-content,.seat{transition:none}.pool-processing-icon .qc-icon{animation:none}}
+@media(prefers-reduced-motion:reduce){.qc-app,.flight-sidebar,.flight-sidebar-track,.seat-map,.seat-title,.seat-map-content,.seat,.passenger-detail-accordion-content,.passenger-accordion-section,.passenger-detail-accordion-chevron{transition:none}.passenger-accordion-section{transform:none}.pool-processing-icon .qc-icon{animation:none}}
 
 .checkbox{position:relative;width:20px;height:20px;display:grid;place-items:center;border:2px solid var(--border-sub-base,#caced8);border-radius:6px;background:var(--static-light,#fff);color:#fff;box-sizing:border-box}.checkbox.checked,.checkbox.mixed{border-color:var(--states-info-light,#c9dcff);background:var(--static-light,#fff)}.checkbox-core{position:absolute;inset:2px;width:auto;height:auto;display:grid;place-items:center;border:0;border-radius:3px;background:var(--states-info-base,#4587ff);color:#fff;box-sizing:border-box;overflow:hidden}.checkbox-core.mixed{background:var(--static-light,#fff);border:0}.checkbox-core.mixed span{width:8px;height:2px;border-radius:99px;background:var(--states-info-base,#4587ff)}.checkbox .qc-icon{display:block;color:#fff;font-size:12px;line-height:1;transform:none}.check-button{width:44px;height:24px;display:grid;place-items:center;border:0;background:transparent;padding:0 0 0 24px}.header-check{width:20px;height:20px;padding:0}.checkin-card-checkbox .checkbox,.pool-card-checkbox .checkbox,.check-button .checkbox{width:20px;height:20px}.pool-card-checkbox,.checkin-card-checkbox{display:grid;place-items:center}.pool-passenger-card.selectable{cursor:pointer}.pool-passenger-card.selectable:focus-visible{outline:2px solid #3d82ef;outline-offset:2px}.pool-passenger-card.review .pool-avatar-button{pointer-events:none}.pool-passenger-card.review .pool-card-checkbox{pointer-events:none}.overview-title .overview-route{font-size:25px;font-weight:500;letter-spacing:-.01em}.overview-title .blue{color:#3178e8}.flight-route{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;color:#222530}.flight-route.blue{color:#222530;font-weight:500}.route-plane{color:#3178e8;transform:rotate(90deg);transform-origin:center}.pool-payment-sign{flex:0 0 auto}.pool-payment-card{padding:16px}.pool-payment-row{gap:10px}.pool-payment-copy{gap:12px}.pool-payment-copy strong{font-size:14px;line-height:20px}.pool-payment-copy span{font-size:12px;line-height:18px}.pool-pay-button{height:32px;padding:0 16px;font-size:13px}.pool-payment-success{padding:16px}.pool-payment-undo{height:32px}.pool-bag-helper .pool-bag-tooltip{left:50%;transform:translateX(-50%) translateY(-4px)}.pool-bag-tooltip{min-width:189px;max-width:189px}.pool-bag-tooltip-icon{width:20px;height:20px;border-radius:6px}.pool-bag-tooltip strong{font-size:14px;line-height:20px}.pool-bag-tooltip span{font-size:12px;line-height:18px}
 
@@ -1392,5 +1393,26 @@ button:where(:not(:disabled)):active,
 
   .passenger-details-overlay.allow-passenger-drawer-motion .passenger-details-drawer{
     transition:transform 260ms cubic-bezier(.32,.72,0,1)!important;
+  }
+
+  .passenger-details-overlay.allow-passenger-drawer-motion .passenger-detail-accordion-content{
+    transition:grid-template-rows 280ms cubic-bezier(.33,1,.68,1),visibility 0s linear 280ms!important;
+  }
+
+  .passenger-details-overlay.allow-passenger-drawer-motion .passenger-detail-accordion.expanded .passenger-detail-accordion-content{
+    transition:grid-template-rows 280ms cubic-bezier(.33,1,.68,1),visibility 0s linear 0s!important;
+  }
+
+  .passenger-details-overlay.allow-passenger-drawer-motion .passenger-accordion-section{
+    transform:translate3d(0,-12px,0);
+    transition:opacity 200ms ease-out,transform 280ms cubic-bezier(.33,1,.68,1)!important;
+  }
+
+  .passenger-details-overlay.allow-passenger-drawer-motion .passenger-detail-accordion.expanded .passenger-accordion-section{
+    transform:translate3d(0,0,0);
+  }
+
+  .passenger-details-overlay.allow-passenger-drawer-motion .passenger-detail-accordion-chevron{
+    transition:transform 280ms cubic-bezier(.33,1,.68,1),color 180ms var(--motion-out)!important;
   }
 }

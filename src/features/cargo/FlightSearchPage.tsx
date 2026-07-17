@@ -3269,6 +3269,12 @@ function infantNoticeDraft(infant: Passenger, responsiblePnr: string): InfantNot
   };
 }
 
+function formatInfantPickerDate(date: Date) {
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  return `${day}/${month}/${date.getFullYear()}`;
+}
+
 function PassengerInfantNotice({
   infant,
   responsibleAdults,
@@ -3288,6 +3294,11 @@ function PassengerInfantNotice({
   const [previousDetails, setPreviousDetails] = useState(initialDraft);
   const [showBirthDateError, setShowBirthDateError] = useState(false);
   const infantFullName = `${details.name} ${details.surname}`;
+  const infantDateLimits = useMemo(() => {
+    const today = new Date();
+    const oldestInfantDate = new Date(today.getFullYear() - 2, today.getMonth(), today.getDate());
+    return { min: formatInfantPickerDate(oldestInfantDate), max: formatInfantPickerDate(today) };
+  }, []);
 
   useEffect(() => {
     setMode("default");
@@ -3368,18 +3379,24 @@ function PassengerInfantNotice({
             </label>
             <label className={showBirthDateError ? "invalid" : ""}>
               <span>Doğum Tarihi<sup>*</sup></span>
-              <div className="passenger-infant-date-field">
-                <Icon icon="calendar_month" size={18} />
-                <input
+              <div className={`passenger-infant-takeoff-date ${showBirthDateError ? "invalid" : ""}`.trim()}>
+                <TkDatepicker
+                  className="passenger-infant-date-picker"
+                  aria-label="Doğum Tarihi"
+                  size="small"
+                  dateFormat="dd/MM/yyyy"
                   value={draft.birthDate}
-                  inputMode="numeric"
-                  aria-invalid={showBirthDateError}
-                  onChange={(event) => {
-                    setDraft((value) => ({ ...value, birthDate: event.target.value }));
+                  minDate={infantDateLimits.min}
+                  maxDate={infantDateLimits.max}
+                  invalid={showBirthDateError}
+                  onTkChange={(event) => {
+                    const detail = event.detail;
+                    const birthDate = typeof detail === "string" ? detail : detail?.start;
+                    if (!birthDate) return;
+                    setDraft((value) => ({ ...value, birthDate }));
                     setShowBirthDateError(false);
                   }}
                 />
-                <Icon icon="keyboard_arrow_down" size={18} />
               </div>
               {showBirthDateError && <em><Icon icon="error" size={14} fill />0-2 yaş aralığında olmalıdır.</em>}
             </label>
@@ -3448,6 +3465,7 @@ function PassengerDetailsDrawer({ passenger, passengers, flight, open, sessionId
   const [expandedSection, setExpandedSection] = useState<PassengerDetailSection | null>(null);
   const [dismissedInfo, setDismissedInfo] = useState(false);
   const panelRef = useRef<HTMLElement | null>(null);
+  const bodyRef = useRef<HTMLDivElement | null>(null);
   const linkedInfant = findLinkedInfant(passengers, passenger);
   const gender = inferPassengerGenderFromName(passenger.name);
   const fullName = passengerFullName(passenger);
@@ -3476,6 +3494,11 @@ function PassengerDetailsDrawer({ passenger, passengers, flight, open, sessionId
     setExpandedSection(null);
   }, [passenger]);
 
+  useLayoutEffect(() => {
+    if (!open) return;
+    bodyRef.current?.scrollTo({ top: 0, behavior: "auto" });
+  }, [open, passenger.pnr, sessionId]);
+
   useEffect(() => {
     if (open) setDismissedInfo(false);
   }, [open, passenger]);
@@ -3496,7 +3519,7 @@ function PassengerDetailsDrawer({ passenger, passengers, flight, open, sessionId
           <button type="button" aria-label="Yolcu bilgilerini kapat" onClick={onClose}><Icon icon="close" size={22} /></button>
         </header>
 
-        <div className="passenger-details-body">
+        <div className="passenger-details-body" ref={bodyRef}>
           <section className="passenger-details-summary">
             <Avatar type={passenger.avatar} gender={gender} state="active" size="lg" />
             <div className="passenger-details-summary-copy">
