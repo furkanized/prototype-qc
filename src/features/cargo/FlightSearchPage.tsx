@@ -3031,16 +3031,200 @@ function CreatePoolOverlay({
   );
 }
 
+type PassengerDetailSection = "baggage" | "flight" | "ancillary" | "extra" | "history";
+
+const passengerDetailSections: Array<{ id: PassengerDetailSection; icon: string; label: string; badge: string }> = [
+  { id: "baggage", icon: "luggage", label: "Baggage Information", badge: "1 Pc / 22 Kg" },
+  { id: "flight", icon: "flight", label: "Flight Details", badge: "1 Flight" },
+  { id: "ancillary", icon: "room_service", label: "Ancillary Services", badge: "1 EMD" },
+  { id: "extra", icon: "confirmation_number", label: "Extra Services", badge: "1 Service" },
+  { id: "history", icon: "history", label: "Passenger History", badge: "1 Activities" },
+];
+
+function getPassengerDetailValue(passenger: Passenger, salt: number, digits: number) {
+  const seed = seededNumber(`${passenger.pnr}-${passenger.group}-${salt}`);
+  return String(seed).padStart(digits, "0").slice(-digits);
+}
+
+function PassengerDetailAccordion({
+  passenger,
+  section,
+  expanded,
+  onToggle,
+}: {
+  passenger: Passenger;
+  section: (typeof passengerDetailSections)[number];
+  expanded: boolean;
+  onToggle: () => void;
+}) {
+  const sectionCopy: Record<PassengerDetailSection, string> = {
+    baggage: `${passenger.baggageInfo.pieces} pc / ${passenger.baggageInfo.kg} kg checked baggage, ${passenger.baggageInfo.allowanceKg} kg allowance`,
+    flight: `Seat ${passenger.seat}, Economy cabin, boarding status ${passenger.ci === "checked" ? "checked-in" : "pending"}`,
+    ancillary: passenger.baggage === "alert" ? "Wheelchair assistance and baggage review" : "Meal preference confirmed",
+    extra: passenger.tier === "Elite" ? "Business upgrade eligibility available" : "No extra service request",
+    history: passenger.message ? `${passenger.message} passenger note updates recorded` : "Passenger information reviewed",
+  };
+
+  return (
+    <section className={`passenger-detail-accordion ${expanded ? "expanded" : ""}`.trim()}>
+      <button type="button" aria-expanded={expanded} onClick={onToggle}>
+        <span className="passenger-detail-accordion-title">
+          <Icon icon={section.icon} size={16} />
+          <strong>{section.label}</strong>
+          <em><i />{section.id === "baggage" ? `${passenger.baggageInfo.pieces} Pc / ${passenger.baggageInfo.kg} Kg` : section.badge}</em>
+        </span>
+        <Icon icon="keyboard_arrow_down" size={18} className="passenger-detail-accordion-chevron" />
+      </button>
+      <div className="passenger-detail-accordion-content" aria-hidden={!expanded}>
+        <p>{sectionCopy[section.id]}</p>
+      </div>
+    </section>
+  );
+}
+
+function PassengerDetailsDrawer({ passenger, open, onClose }: { passenger: Passenger; open: boolean; onClose: () => void }) {
+  const [expandedSection, setExpandedSection] = useState<PassengerDetailSection | null>(null);
+  const panelRef = useRef<HTMLElement | null>(null);
+  const gender = inferPassengerGenderFromName(passenger.name);
+  const fullName = passengerFullName(passenger);
+  const emailName = `${normalizePassengerName(passenger.name)}.${normalizePassengerName(passenger.surname)}`;
+  const nationalId = `28${getPassengerDetailValue(passenger, 17, 9)}`;
+  const ticketNumber = `1234${getPassengerDetailValue(passenger, 29, 8)}`;
+  const securityNumber = getPassengerDetailValue(passenger, 41, 3);
+  const phone = `+90 5${getPassengerDetailValue(passenger, 53, 2)} ${getPassengerDetailValue(passenger, 59, 3)} ${getPassengerDetailValue(passenger, 61, 2)} ${getPassengerDetailValue(passenger, 67, 2)}`;
+
+  useEffect(() => {
+    if (!open) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    panelRef.current?.focus();
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [onClose, open]);
+
+  useEffect(() => {
+    setExpandedSection(null);
+  }, [passenger]);
+
+  return createPortal(
+    <div className={`passenger-details-overlay allow-passenger-drawer-motion ${open ? "is-visible" : ""}`.trim()} aria-hidden={!open}>
+      <button type="button" className="passenger-details-scrim" aria-label="Yolcu bilgilerini kapat" onClick={onClose} />
+      <aside
+        className="passenger-details-drawer"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="passenger-details-title"
+        tabIndex={-1}
+        ref={panelRef}
+      >
+        <header className="passenger-details-header">
+          <h2 id="passenger-details-title">Yolcu Bilgileri</h2>
+          <button type="button" aria-label="Yolcu bilgilerini kapat" onClick={onClose}><Icon icon="close" size={22} /></button>
+        </header>
+
+        <div className="passenger-details-body">
+          <section className="passenger-details-summary">
+            <Avatar type={passenger.avatar} gender={gender} state="active" size="lg" />
+            <div className="passenger-details-summary-copy">
+              <div className="passenger-details-status-line">
+                <span><Icon icon="airplane_ticket" size={13} />{passenger.pnr}</span>
+                <em className={passenger.ci === "checked" ? "checked" : "pending"}>
+                  <Icon icon={passenger.ci === "checked" ? "check_circle" : "schedule"} size={12} fill />
+                  {passenger.ci === "checked" ? "Checked-in" : "Pending"}
+                </em>
+              </div>
+              <div className="passenger-details-name-line">
+                <h3>{fullName}</h3>
+                <span><Icon icon="airplane_ticket" size={13} />Economy</span>
+              </div>
+              <div className="passenger-details-service-tags">
+                <span><Icon icon="pets" size={12} fill />Pet</span>
+                <span><Icon icon="accessible" size={12} fill />Wheelchair</span>
+              </div>
+            </div>
+            <div className="passenger-details-summary-actions">
+              <button type="button" className="passenger-upgrade-button">Business Upgrade <Icon icon="upgrade" size={17} /></button>
+              <button type="button" className="passenger-summary-more" aria-label={`${fullName} için diğer işlemler`}><Icon icon="more_vert" size={20} /></button>
+            </div>
+          </section>
+
+          <section className="passenger-detail-section">
+            <h3>Identity <Icon icon="edit" size={16} /></h3>
+            <div className="passenger-detail-grid identity-grid">
+              <div><small>Gender</small><span>{gender === "female" ? "Mrs" : "Mr"}</span></div>
+              <div><small>TC Kimlik</small><span>{nationalId}</span></div>
+              <div><small>Passenger Type</small><span>Ticari</span></div>
+              <div><small>Koltuk</small><span>{passenger.seat}</span></div>
+              <div><small>Group Code</small><span>{passenger.group}</span></div>
+              <div><small>E Ticket</small><span>{ticketNumber}</span></div>
+              <div><small>Security No</small><span>{securityNumber}</span></div>
+              <div><small>Kayıtlı Bagaj</small><span>{passenger.baggageInfo.pieces} pc / {passenger.baggageInfo.kg} kg</span></div>
+            </div>
+          </section>
+
+          <section className="passenger-detail-section passenger-contact-section">
+            <h3>Contact <Icon icon="edit" size={16} /></h3>
+            <div className="passenger-detail-grid contact-grid">
+              <div><small>Telefon</small><span>{phone}</span></div>
+              <div><small>E-Mail</small><span>{emailName}@thy.com.tr</span></div>
+            </div>
+          </section>
+
+          <section className="passenger-detail-section passenger-comment-section">
+            <h3>Comment</h3>
+            <div className="passenger-detail-comment">
+              <small>Serkan Sönmez - 12 Mar 24, 10:38</small>
+              <p>{passenger.message ? `Yolcu için ${passenger.message} aktif not bulunmaktadır, kontrol edilmeli.` : "Yolcu bilgileri kontrol edilmiş, ek işlem gerekmemektedir."}</p>
+            </div>
+          </section>
+
+          <section className="passenger-detail-section passenger-validation-section">
+            <h3>Validations</h3>
+            <div className="passenger-validations">
+              <div><small>APIS</small><span className={passenger.apis === "filled" ? "valid" : "invalid"}><Icon icon={passenger.apis === "filled" ? "check_circle" : "remove_circle_outline"} size={12} />{passenger.apis === "filled" ? "Verified" : "Pending"}</span></div>
+              <div><small>Interactive APIS</small><p><span className="valid"><Icon icon="check_circle" size={12} />EQQ</span><span className="invalid"><Icon icon="remove_circle_outline" size={12} />GQQ</span><span className="valid"><Icon icon="check_circle" size={12} />AQQ</span><span className="invalid"><Icon icon="remove_circle_outline" size={12} />APP</span></p></div>
+              <div><small>Timatic</small><span className="valid"><Icon icon="check_circle" size={12} />Ok</span></div>
+            </div>
+          </section>
+
+          <div className="passenger-detail-accordions">
+            {passengerDetailSections.map((section) => (
+              <PassengerDetailAccordion
+                key={section.id}
+                passenger={passenger}
+                section={section}
+                expanded={expandedSection === section.id}
+                onToggle={() => setExpandedSection((current) => current === section.id ? null : section.id)}
+              />
+            ))}
+          </div>
+        </div>
+      </aside>
+    </div>,
+    document.body,
+  );
+}
+
 function PassengerTable({ passengers, panelRef }: { passengers: Passenger[]; panelRef?: RefObject<HTMLElement | null> }) {
   const [selectedRowsState, setSelectedRowsState] = useState<boolean[]>(passengers.map(() => false));
   const [checkInOverlayOpen, setCheckInOverlayOpen] = useState(false);
   const [poolOverlayOpen, setPoolOverlayOpen] = useState(false);
+  const [detailsPassenger, setDetailsPassenger] = useState<Passenger | null>(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const [floatingBarMode, setFloatingBarMode] = useState<"selection" | "checkin-completed" | "pool-success" | "pool-error">("selection");
   const [query, setQuery] = useState("");
   useEffect(() => {
     setSelectedRowsState(passengers.map(() => false));
     setCheckInOverlayOpen(false);
     setPoolOverlayOpen(false);
+    setDetailsPassenger(null);
+    setDetailsOpen(false);
     setFloatingBarMode("selection");
     setQuery("");
   }, [passengers]);
@@ -3081,6 +3265,13 @@ function PassengerTable({ passengers, panelRef }: { passengers: Passenger[]; pan
   const completePool = () => {
     setPoolOverlayOpen(false);
     setFloatingBarMode("pool-success");
+  };
+  const openPassengerDetails = (passenger: Passenger) => {
+    setDetailsOpen(false);
+    setDetailsPassenger(passenger);
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => setDetailsOpen(true));
+    });
   };
   return (
     <>
@@ -3126,7 +3317,18 @@ function PassengerTable({ passengers, panelRef }: { passengers: Passenger[]; pan
                 <span className={`apis ${person.apis}`}><b>A</b></span>
                 <span><em className={`tier ${person.tier.toLowerCase()}`}>{person.tier}</em></span><span>Y/ EC</span>
                 <span className={`message ${person.message ? "active" : ""}`}><CommentNotificationIcon count={person.message} /></span>
-                <span className="quick-actions"><button>Check-in</button><Icon icon="more_vert" size={21} /></span>
+                <span className="quick-actions">
+                  <button type="button">Check-in</button>
+                  <button
+                    type="button"
+                    className="passenger-more-button"
+                    aria-label={`${person.name} ${person.surname} yolcu bilgilerini aç`}
+                    aria-haspopup="dialog"
+                    onClick={() => openPassengerDetails(person)}
+                  >
+                    <Icon icon="more_vert" size={21} />
+                  </button>
+                </span>
                 <button className="row-expand" aria-label="Satırı genişlet"><Icon icon="keyboard_arrow_down" size={18} /></button>
               </div>
             );
@@ -3139,6 +3341,13 @@ function PassengerTable({ passengers, panelRef }: { passengers: Passenger[]; pan
       }} />
       <PassengerCheckInOverlay open={checkInOverlayOpen} selectedPassengers={selectedPassengers} onClose={() => setCheckInOverlayOpen(false)} onConfirm={completeCheckIn} />
       <CreatePoolOverlay open={poolOverlayOpen} selectedPassengers={selectedPassengers} onClose={() => setPoolOverlayOpen(false)} onSuccess={completePool} />
+      {detailsPassenger && (
+        <PassengerDetailsDrawer
+          passenger={detailsPassenger}
+          open={detailsOpen}
+          onClose={() => setDetailsOpen(false)}
+        />
+      )}
     </>
   );
 }
