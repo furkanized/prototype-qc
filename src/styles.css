@@ -233,21 +233,95 @@ button:focus-visible,input:focus-visible { outline:2px solid #3b82f6; outline-of
 .passenger-validations span{width:max-content;height:18px;display:inline-flex;align-items:center;gap:2px;border-radius:4px;padding:0 4px;font-size:11px;line-height:16px}
 .passenger-validations .valid{background:#caf1d8;color:#168343}
 .passenger-validations .invalid{background:#ffd1d1;color:#c52a2a}
-.passenger-detail-accordions{display:grid;gap:8px}
-.passenger-detail-accordion{border:1px solid #f2f3f5;border-radius:8px;background:#fff;overflow:hidden}
-.passenger-detail-accordion>button{width:100%;height:44px;display:flex;align-items:center;justify-content:space-between;gap:12px;border:0;background:#fff;padding:0 12px;color:#222530;text-align:left}
-.passenger-detail-accordion>button:hover{background:#fbfcfe}
+.passenger-detail-accordions{container-type:inline-size;display:grid;gap:8px}
+.passenger-detail-accordion{border:1px solid #e9ebf0;border-radius:8px;background:#fff;overflow:hidden;transition:border-color 180ms var(--motion-out),box-shadow 180ms var(--motion-out)}
+.passenger-detail-accordion.expanded{border-color:#e1e4ea;box-shadow:0 2px 5px rgba(34,37,48,.04)}
+.passenger-detail-accordion>button{width:100%;height:46px;display:flex;align-items:center;justify-content:space-between;gap:12px;border:0;background:#fff;padding:0 12px;color:#222530;text-align:left;transition:background-color 180ms var(--motion-out)}
+.passenger-detail-accordion>button:hover{background:#f9fafc}
 .passenger-detail-accordion-title{min-width:0;display:flex;align-items:center;gap:8px}
 .passenger-detail-accordion-title>.qc-icon{color:#525866}
 .passenger-detail-accordion-title strong{font-size:14px;line-height:20px;font-weight:400;white-space:nowrap}
 .passenger-detail-accordion-title em{height:18px;display:inline-flex;align-items:center;gap:3px;border-radius:999px;padding:0 6px;background:#d0e1fd;color:#295bac;font-size:11px;line-height:16px;font-style:normal;white-space:nowrap}
 .passenger-detail-accordion-title em i{width:6px;height:6px;border-radius:50%;background:#3b82f6}
-.passenger-detail-accordion-chevron{color:#525866;transition:transform 180ms var(--motion-out)}
+.passenger-detail-accordion-chevron{color:#525866;transition:transform 220ms var(--motion-out),color 180ms var(--motion-out)}
 .passenger-detail-accordion.expanded .passenger-detail-accordion-chevron{transform:rotate(180deg)}
-.passenger-detail-accordion-content{display:grid;grid-template-rows:0fr;transition:grid-template-rows 220ms var(--motion-out)}
-.passenger-detail-accordion-content>p{min-height:0;overflow:hidden;margin:0;padding:0 36px;color:#525866;font-size:12px;line-height:18px;transition:padding 220ms var(--motion-out)}
-.passenger-detail-accordion.expanded .passenger-detail-accordion-content{grid-template-rows:1fr}
-.passenger-detail-accordion.expanded .passenger-detail-accordion-content>p{padding-top:4px;padding-bottom:12px}
+.passenger-detail-accordion-content{visibility:hidden;display:grid;grid-template-rows:0fr;transition:grid-template-rows 260ms var(--motion-sidebar-content),visibility 0s linear 260ms}
+.passenger-detail-accordion-inner{min-height:0;overflow:hidden}
+.passenger-detail-accordion.expanded .passenger-detail-accordion-content{visibility:visible;grid-template-rows:1fr;transition:grid-template-rows 260ms var(--motion-sidebar-content),visibility 0s linear 0s}
+.passenger-accordion-section{display:grid;gap:8px;padding:8px 12px 12px;opacity:0;transform:translateY(-5px);transition:opacity 180ms var(--motion-out),transform 260ms var(--motion-sidebar-content)}
+.passenger-detail-accordion.expanded .passenger-accordion-section{opacity:1;transform:translateY(0)}
+.passenger-flight-details{padding-bottom:13px}
+.passenger-baggage-details{padding-bottom:3px}
+.passenger-service-details{padding-bottom:5px}
+.passenger-accordion-actions,.passenger-accordion-summary-row{min-height:32px;display:flex;align-items:center;justify-content:flex-end;gap:8px}
+.passenger-accordion-summary-row{justify-content:space-between}
+.passenger-accordion-summary-row p{margin:0;color:#7d8493;font-size:11px;line-height:16px}
+.passenger-accordion-summary-row p i{display:inline-block;width:1px;height:12px;margin:0 5px;background:#d9dde5;vertical-align:-2px}
+.passenger-detail-outline-button,.passenger-detail-icon-button{height:28px;display:inline-flex;align-items:center;justify-content:center;gap:4px;border:1px solid #b8c2d0;border-radius:8px;background:#fff;color:#364152;font:400 11px/16px "Geologica",system-ui,sans-serif;white-space:nowrap;transition:background-color 160ms var(--motion-out),border-color 160ms var(--motion-out)}
+.passenger-detail-outline-button{padding:0 8px}
+.passenger-detail-icon-button{width:28px;padding:0}
+.passenger-detail-outline-button:hover,.passenger-detail-icon-button:hover{border-color:#8e9aad;background:#f7f9fc}
+.passenger-detail-record{display:grid;gap:12px;border:1px solid #e9ebf0;border-radius:8px;background:#f9fafc;padding:14px 16px}
+.passenger-detail-record-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding-bottom:12px;border-bottom:1px solid #eceef2}
+.passenger-detail-record-heading.compact{padding-bottom:10px}
+.passenger-detail-record-heading>div:first-child{min-width:0;display:grid;gap:4px}
+.passenger-detail-record-heading p{min-width:0;margin:0;display:flex;align-items:center;gap:5px;color:#525866;font-size:14px;line-height:20px;white-space:nowrap}
+.passenger-detail-record-heading p i,.passenger-flight-route i{width:1px;height:16px;background:#d9dde5}
+.passenger-detail-record-heading small{color:#7d8493;font-size:11px;line-height:16px}
+.passenger-detail-record-controls{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+.passenger-flight-route .qc-icon{color:#3b82f6;transform:rotate(45deg)}
+.passenger-flight-mark{color:#d0021b;font-size:14px;line-height:1}
+.passenger-detail-status{height:18px;display:inline-flex;align-items:center;gap:2px;border-radius:4px;padding:0 5px;font-size:11px;line-height:16px;white-space:nowrap}
+.passenger-detail-status.success{background:#caf1d8;color:#168343}
+.passenger-detail-status.warning{background:#fbe8aa;color:#8a6800}
+.passenger-detail-status.info{background:#d0e1fd;color:#295bac}
+.passenger-detail-link{border:0;background:transparent;color:#276ef1;padding:2px;font:400 11px/16px "Geologica",system-ui,sans-serif;text-decoration:underline;text-underline-offset:2px;white-space:nowrap}
+.passenger-detail-facts{display:grid;gap:16px 24px}
+.passenger-detail-facts.five{grid-template-columns:repeat(5,minmax(0,1fr))}
+.passenger-detail-facts.service{grid-template-columns:170px 170px}
+.passenger-detail-facts>div{min-width:0;display:grid;gap:1px}
+.passenger-detail-facts small{color:#99a0ae;font-size:11px;line-height:16px}
+.passenger-detail-facts span{color:#525866;font-size:12px;line-height:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.passenger-flight-price{min-height:72px;box-sizing:border-box;display:grid;align-content:center;gap:6px;border-left:4px solid #3b82f6;border-radius:4px;background:#f5f6f8;padding:8px 12px}
+.passenger-flight-price strong{color:#525866;font-size:12px;line-height:18px;font-weight:400}
+.passenger-flight-price>div{display:flex;align-items:center;gap:18px;color:#8d94a3;font-size:11px;line-height:16px;flex-wrap:wrap}
+.passenger-flight-price b{color:#525866;font-weight:400}
+.passenger-flight-price b.danger{color:#ef4444}
+.passenger-flight-price .total{border-left:1px solid #dfe3e9;padding-left:18px;color:#3b82f6}
+.passenger-baggage-records{display:grid;gap:12px}
+.passenger-baggage-record.payment-required{border-color:#ffb5b5;background:#fff7f7}
+.passenger-baggage-record .passenger-detail-record-heading p>.qc-icon{color:#525866}
+.passenger-baggage-facts-row{display:flex;align-items:end;gap:16px}
+.passenger-baggage-facts-row .passenger-detail-facts{flex:1}
+.passenger-detail-payment-button{height:32px;flex:0 0 auto;border:0;border-radius:8px;background:#d0021b;color:#fff;padding:0 12px;font:400 12px/18px "Geologica",system-ui,sans-serif}
+.passenger-baggage-damage{display:flex;align-items:center;justify-content:space-between;gap:16px;border-left:4px solid #ef4444;border-radius:4px;background:#fff;padding:8px 12px}
+.passenger-baggage-damage>div:first-child{display:grid;gap:3px}
+.passenger-baggage-damage strong{color:#525866;font-size:12px;line-height:18px;font-weight:400}
+.passenger-baggage-damage p{margin:0;display:flex;gap:16px;color:#99a0ae;font-size:11px;line-height:16px}
+.passenger-baggage-damage b{color:#525866;font-weight:400}
+.passenger-baggage-damage>div:last-child{display:flex;gap:4px}
+.passenger-baggage-damage button{width:32px;height:32px;display:grid;place-items:center;border:0;border-radius:8px;background:#e4e7ec;color:#525866}
+.passenger-service-details .passenger-accordion-actions{padding-bottom:0}
+.passenger-service-details .passenger-detail-record-heading>button{margin-left:auto}
+.passenger-history-details{padding-top:0}
+.passenger-history-table{overflow:hidden;border:1px solid #e9ebf0;border-radius:8px;background:#fff}
+.passenger-history-row{min-height:52px;display:grid;grid-template-columns:1.45fr 1fr 1fr;align-items:center;background:#fff;color:#525866;font-size:12px;line-height:18px}
+.passenger-history-row:nth-child(odd):not(.header){background:#f7f8fa}
+.passenger-history-row.header{min-height:42px;color:#222530}
+.passenger-history-row>span{min-width:0;height:100%;display:flex;align-items:center;gap:10px;padding:0 12px;border-right:1px solid #eceef2}
+.passenger-history-row>span:last-child{justify-content:space-between;border-right:0}
+.passenger-history-row i{width:12px;height:12px;flex:0 0 auto;border-radius:50%;background:#d2d7e0}
+.passenger-history-row i.active{background:#3b82f6}
+
+@container (max-width:560px){
+  .passenger-detail-facts.five{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .passenger-accordion-summary-row{align-items:flex-start;flex-direction:column}
+  .passenger-detail-record-heading{align-items:flex-start;flex-direction:column}
+  .passenger-detail-record-controls{width:100%;justify-content:flex-end}
+  .passenger-history-row{grid-template-columns:1.3fr 1fr}
+  .passenger-history-row>span:nth-child(2){border-right:0}
+  .passenger-history-row>span:nth-child(3){display:none}
+}
 
 @media (max-width:900px){
   .passenger-details-drawer{right:12px;top:12px;bottom:12px;width:calc(100vw - 24px);border-radius:12px}

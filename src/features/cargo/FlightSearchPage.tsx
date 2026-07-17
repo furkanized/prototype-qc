@@ -3068,21 +3068,176 @@ function getPassengerDetailValue(passenger: Passenger, salt: number, digits: num
 
 function PassengerDetailAccordion({
   passenger,
+  flight,
   section,
   expanded,
   onToggle,
 }: {
   passenger: Passenger;
+  flight: FlightRecord;
   section: (typeof passengerDetailSections)[number];
   expanded: boolean;
   onToggle: () => void;
 }) {
-  const sectionCopy: Record<PassengerDetailSection, string> = {
-    baggage: `${passenger.baggageInfo.pieces} pc / ${passenger.baggageInfo.kg} kg checked baggage, ${passenger.baggageInfo.allowanceKg} kg allowance`,
-    flight: `Seat ${passenger.seat}, Economy cabin, boarding status ${passenger.ci === "checked" ? "checked-in" : "pending"}`,
-    ancillary: passenger.baggage === "alert" ? "Wheelchair assistance and baggage review" : "Meal preference confirmed",
-    extra: passenger.tier === "Elite" ? "Business upgrade eligibility available" : "No extra service request",
-    history: passenger.message ? `${passenger.message} passenger note updates recorded` : "Passenger information reviewed",
+  const [showPrice, setShowPrice] = useState(false);
+  const [showDamage, setShowDamage] = useState(false);
+
+  useEffect(() => {
+    setShowPrice(false);
+    setShowDamage(false);
+  }, [passenger.pnr]);
+
+  const route = flight.route.split("›").map((value) => value.trim());
+  const flightTime = flight.time.split("/")[0];
+  const baggagePieces = Math.max(1, passenger.baggageInfo.pieces);
+  const isOverweight = passenger.baggageInfo.kg > passenger.baggageInfo.allowanceKg && !passenger.baggageInfo.paid;
+  const baggageWeight = Math.max(1, Math.round(passenger.baggageInfo.kg / baggagePieces));
+  const baggageTag = `TK${getPassengerDetailValue(passenger, 73, 6)}`;
+  const orderNumber = `235${getPassengerDetailValue(passenger, 79, 8)}`;
+
+  const moreButton = (label: string) => (
+    <button type="button" className="passenger-detail-icon-button" aria-label={label}>
+      <Icon icon="more_vert" size={18} />
+    </button>
+  );
+
+  const statusPill = (label: string, tone: "success" | "warning" | "info" = "success") => (
+    <span className={`passenger-detail-status ${tone}`.trim()}>
+      <Icon icon={tone === "warning" ? "schedule" : "check_circle"} size={12} />{label}
+    </span>
+  );
+
+  const renderFlightDetails = () => (
+    <div className="passenger-accordion-section passenger-flight-details">
+      <div className="passenger-accordion-actions">
+        <button type="button" className="passenger-detail-outline-button">Klasik Görünüm <Icon icon="view_list" size={16} /></button>
+      </div>
+      <article className="passenger-detail-record">
+        <div className="passenger-detail-record-heading">
+          <div>
+            <p className="passenger-flight-route"><span className="passenger-flight-mark">●</span>{flight.code} <i /> 19 FEB <i /> {flightTime} <i /> {route[0]} <Icon icon="flight" size={19} /> {route[1]}</p>
+            <small>Direkt Uçuş</small>
+          </div>
+          <div className="passenger-detail-record-controls">
+            {statusPill(showPrice ? "Waiting" : "Active", showPrice ? "warning" : "success")}
+            <button type="button" className="passenger-detail-link" onClick={() => setShowPrice((value) => !value)}>{showPrice ? "Hide Price" : "Show Price"}</button>
+            {moreButton("Uçuş işlemleri")}
+          </div>
+        </div>
+        <div className="passenger-detail-facts five">
+          <div><small>Uçuş No</small><span>{flight.code}</span></div>
+          <div><small>Tarih</small><span>06.02.26</span></div>
+          <div><small>Saat</small><span>{flightTime}</span></div>
+          <div><small>Bagaj</small><span>{passenger.baggageInfo.kg}/{passenger.baggageInfo.allowanceKg}kg</span></div>
+          <div><small>Gate</small><span>{flight.gate}</span></div>
+        </div>
+        {showPrice && (
+          <div className="passenger-flight-price">
+            <strong>Price</strong>
+            <div><span>Fares: <b>1000 Eur</b></span><span>Taxes: <b>200 Eur</b></span><span>Student Discount (%20): <b className="danger">-200 Eur</b></span><span className="total">Total: <b>1000 Eur</b></span></div>
+          </div>
+        )}
+      </article>
+    </div>
+  );
+
+  const renderBaggageDetails = () => (
+    <div className="passenger-accordion-section passenger-baggage-details">
+      <div className="passenger-accordion-summary-row">
+        <p>Toplam Bagaj Hakkı: {passenger.baggageInfo.allowanceKg}kg <i /> EMD Bagaj Hakkı: 12kg <i /> TK Waive Hakkı: 8kg</p>
+        <button type="button" className="passenger-detail-outline-button">Add Luggage <Icon icon="add" size={16} /></button>
+      </div>
+      <div className="passenger-baggage-records">
+        {Array.from({ length: baggagePieces }, (_, index) => {
+          const paymentRequired = isOverweight && index === baggagePieces - 1;
+          return (
+            <article key={`${baggageTag}-${index}`} className={`passenger-detail-record passenger-baggage-record ${paymentRequired ? "payment-required" : ""}`.trim()}>
+              <div className="passenger-detail-record-heading compact">
+                <div>
+                  <p><Icon icon="luggage" size={15} /> {baggageTag} {statusPill("Active")}{index === 0 && statusPill("Manuel", "info")}</p>
+                  <small>{index + 1}. Parça</small>
+                </div>
+                <div className="passenger-detail-record-controls">
+                  {(index === 0 || paymentRequired) && <button type="button" className="passenger-detail-link" onClick={() => setShowDamage((value) => !value)}>{showDamage ? "Hide Damage" : "Show Damage (1)"}</button>}
+                  {moreButton("Bagaj işlemleri")}
+                </div>
+              </div>
+              <div className="passenger-baggage-facts-row">
+                <div className="passenger-detail-facts five">
+                  <div><small>Nitelik</small><span>Standard</span></div>
+                  <div><small>Kilo</small><span>{baggageWeight} Kg</span></div>
+                  <div><small>Tür</small><span>Kiosk</span></div>
+                  <div><small>Kalkış</small><span>{route[0]}</span></div>
+                  <div><small>Varış</small><span>{route.join(" - ")}</span></div>
+                </div>
+                {paymentRequired && <button type="button" className="passenger-detail-payment-button">Ödeme Yap</button>}
+              </div>
+              {showDamage && index === 0 && (
+                <div className="passenger-baggage-damage">
+                  <div><strong>Hasarlı Bagaj</strong><p><span>Konum: <b>Tekerlek</b></span><span>Miktar: <b>Çok Hasarlı</b></span></p></div>
+                  <div><button type="button" aria-label="Hasar kaydını sil"><Icon icon="delete" size={17} /></button><button type="button" aria-label="Hasar kaydını düzenle"><Icon icon="edit" size={17} /></button></div>
+                </div>
+              )}
+            </article>
+          );
+        })}
+      </div>
+    </div>
+  );
+
+  const renderServiceDetails = (kind: "ancillary" | "extra") => {
+    const ancillary = kind === "ancillary";
+    return (
+      <div className="passenger-accordion-section passenger-service-details">
+        <div className="passenger-accordion-actions">
+          <button type="button" className="passenger-detail-outline-button">{ancillary ? "Sell Ancillary Service" : "Sell Extra Service"} <Icon icon="add" size={16} /></button>
+          {moreButton(ancillary ? "Ancillary servis işlemleri" : "Ek servis işlemleri")}
+        </div>
+        <article className="passenger-detail-record">
+          <div className="passenger-detail-record-heading compact">
+            <div>
+              <p><Icon icon={ancillary ? "room_service" : "confirmation_number"} size={15} /> {ancillary ? "SPEQ" : "Event Ticket : Motosport - Formula 1 2026 Turkiye Grand Prix"} {statusPill("Waiting", "warning")}</p>
+              <small>Event date: 26 Oct 2026</small>
+            </div>
+            {moreButton(ancillary ? "Ancillary servis kaydı" : "Ek servis kaydı")}
+          </div>
+          <div className="passenger-detail-facts service">
+            <div><small>{ancillary ? "EMD / Order No" : "EMD No"}</small><span>{orderNumber}</span></div>
+            <div><small>{ancillary ? "EMD / Order Type" : "EMD Type"}</small><span>PETC</span></div>
+          </div>
+        </article>
+      </div>
+    );
+  };
+
+  const renderPassengerHistory = () => {
+    const historyRows = [
+      ["Boarding Note Added", "Haşmet Bülbül", "12 Mar 24, 10:38"],
+      ["Passenger Information Updated", "Berceste Kamalıoğlu", "12 Mar 24, 10:23"],
+      ["Check-in Completed", "Nihat Kestaneci", "12 Mar 24, 10:03"],
+      ["Luggage Added", "Zihni Sancaktutan", "12 Mar 24, 09:32"],
+      ["Text here", "Halit Ökkeş", "12 Mar 24, 09:13"],
+      ["Text here", "Hilmiye Katır", "12 Mar 24, 08:23"],
+    ];
+    return (
+      <div className="passenger-accordion-section passenger-history-details">
+        <div className="passenger-history-table" role="table" aria-label={`${passengerFullName(passenger)} yolcu geçmişi`}>
+          <div className="passenger-history-row header" role="row"><span>İşlem</span><span>Uygulayıcı</span><span>Tarih - Saat <Icon icon="swap_vert" size={16} /></span></div>
+          {historyRows.map(([operation, user, date], index) => (
+            <div className="passenger-history-row" role="row" key={`${operation}-${date}`}>
+              <span><i className={index === 0 ? "active" : ""} />{operation}</span><span>{user}</span><span>{date}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const renderContent = () => {
+    if (section.id === "flight") return renderFlightDetails();
+    if (section.id === "baggage") return renderBaggageDetails();
+    if (section.id === "ancillary" || section.id === "extra") return renderServiceDetails(section.id);
+    return renderPassengerHistory();
   };
 
   return (
@@ -3096,7 +3251,7 @@ function PassengerDetailAccordion({
         <Icon icon="keyboard_arrow_down" size={18} className="passenger-detail-accordion-chevron" />
       </button>
       <div className="passenger-detail-accordion-content" aria-hidden={!expanded}>
-        <p>{sectionCopy[section.id]}</p>
+        <div className="passenger-detail-accordion-inner">{renderContent()}</div>
       </div>
     </section>
   );
@@ -3289,7 +3444,7 @@ function PassengerInfoAlert({ infoBox, onDismiss }: { infoBox: PassengerInfoBox;
   );
 }
 
-function PassengerDetailsDrawer({ passenger, passengers, open, sessionId, onClose }: { passenger: Passenger; passengers: Passenger[]; open: boolean; sessionId: number; onClose: () => void }) {
+function PassengerDetailsDrawer({ passenger, passengers, flight, open, sessionId, onClose }: { passenger: Passenger; passengers: Passenger[]; flight: FlightRecord; open: boolean; sessionId: number; onClose: () => void }) {
   const [expandedSection, setExpandedSection] = useState<PassengerDetailSection | null>(null);
   const [dismissedInfo, setDismissedInfo] = useState(false);
   const panelRef = useRef<HTMLElement | null>(null);
@@ -3430,6 +3585,7 @@ function PassengerDetailsDrawer({ passenger, passengers, open, sessionId, onClos
               <PassengerDetailAccordion
                 key={section.id}
                 passenger={passenger}
+                flight={flight}
                 section={section}
                 expanded={expandedSection === section.id}
                 onToggle={() => setExpandedSection((current) => current === section.id ? null : section.id)}
@@ -3443,7 +3599,7 @@ function PassengerDetailsDrawer({ passenger, passengers, open, sessionId, onClos
   );
 }
 
-function PassengerTable({ passengers, panelRef }: { passengers: Passenger[]; panelRef?: RefObject<HTMLElement | null> }) {
+function PassengerTable({ passengers, flight, panelRef }: { passengers: Passenger[]; flight: FlightRecord; panelRef?: RefObject<HTMLElement | null> }) {
   const [selectedRowsState, setSelectedRowsState] = useState<boolean[]>(passengers.map(() => false));
   const [checkInOverlayOpen, setCheckInOverlayOpen] = useState(false);
   const [poolOverlayOpen, setPoolOverlayOpen] = useState(false);
@@ -3582,6 +3738,7 @@ function PassengerTable({ passengers, panelRef }: { passengers: Passenger[]; pan
         <PassengerDetailsDrawer
           passenger={detailsPassenger}
           passengers={passengers}
+          flight={flight}
           open={detailsOpen}
           sessionId={detailsSession}
           onClose={() => setDetailsOpen(false)}
@@ -4063,7 +4220,7 @@ export function FlightSearchPage() {
                 onExpandedChange={setFlightInfoExpandedWithMotion}
                 shellRef={flightOverviewShellRef}
               />
-              <PassengerTable passengers={passengers} panelRef={passengerPanelRef} />
+              <PassengerTable passengers={passengers} flight={flight} panelRef={passengerPanelRef} />
             </main>
             <SeatMap collapsed={seatMapCollapsed} onCollapsedChange={setSeatMapCollapsed} />
           </div>
