@@ -16,11 +16,11 @@ test("finds the infant linked to the selected adult", () => {
 
 test("changes the passenger info alert key for every drawer session", () => {
   assert.notEqual(
-    getPassengerInfoAlertKey("A1B2C3", false),
-    getPassengerInfoAlertKey("A1B2C3", true),
+    getPassengerInfoAlertKey("A1B2C3", 1),
+    getPassengerInfoAlertKey("A1B2C3", 2),
   );
   assert.notEqual(
-    getPassengerInfoAlertKey("A1B2C3", true),
-    getPassengerInfoAlertKey("G7H8I9", true),
+    getPassengerInfoAlertKey("A1B2C3", 2),
+    getPassengerInfoAlertKey("G7H8I9", 2),
   );
 });

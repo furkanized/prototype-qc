@@ -22,6 +22,6 @@ export function findLinkedInfant<T extends PassengerRelationshipRecord>(passenge
   );
 }
 
-export function getPassengerInfoAlertKey(passengerPnr: string, open: boolean) {
-  return `${passengerPnr}:${open ? "open" : "closed"}`;
+export function getPassengerInfoAlertKey(passengerPnr: string, sessionId: number) {
+  return `${passengerPnr}:${sessionId}`;
 }

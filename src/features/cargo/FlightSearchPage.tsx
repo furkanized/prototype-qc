@@ -3155,7 +3155,7 @@ function PassengerInfoAlert({ infoBox, onDismiss }: { infoBox: PassengerInfoBox;
   );
 }
 
-function PassengerDetailsDrawer({ passenger, passengers, open, onClose }: { passenger: Passenger; passengers: Passenger[]; open: boolean; onClose: () => void }) {
+function PassengerDetailsDrawer({ passenger, passengers, open, sessionId, onClose }: { passenger: Passenger; passengers: Passenger[]; open: boolean; sessionId: number; onClose: () => void }) {
   const [expandedSection, setExpandedSection] = useState<PassengerDetailSection | null>(null);
   const [dismissedInfo, setDismissedInfo] = useState(false);
   const panelRef = useRef<HTMLElement | null>(null);
@@ -3236,7 +3236,7 @@ function PassengerDetailsDrawer({ passenger, passengers, open, onClose }: { pass
           {linkedInfant && <PassengerInfantNotice infant={linkedInfant} />}
           {passenger.infoBox && !dismissedInfo && (
             <PassengerInfoAlert
-              key={getPassengerInfoAlertKey(passenger.pnr, open)}
+              key={getPassengerInfoAlertKey(passenger.pnr, sessionId)}
               infoBox={passenger.infoBox}
               onDismiss={() => setDismissedInfo(true)}
             />
@@ -3305,6 +3305,7 @@ function PassengerTable({ passengers, panelRef }: { passengers: Passenger[]; pan
   const [poolOverlayOpen, setPoolOverlayOpen] = useState(false);
   const [detailsPassenger, setDetailsPassenger] = useState<Passenger | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [detailsSession, setDetailsSession] = useState(0);
   const [floatingBarMode, setFloatingBarMode] = useState<"selection" | "checkin-completed" | "pool-success" | "pool-error">("selection");
   const [query, setQuery] = useState("");
   useEffect(() => {
@@ -3313,6 +3314,7 @@ function PassengerTable({ passengers, panelRef }: { passengers: Passenger[]; pan
     setPoolOverlayOpen(false);
     setDetailsPassenger(null);
     setDetailsOpen(false);
+    setDetailsSession(0);
     setFloatingBarMode("selection");
     setQuery("");
   }, [passengers]);
@@ -3358,7 +3360,10 @@ function PassengerTable({ passengers, panelRef }: { passengers: Passenger[]; pan
     setDetailsOpen(false);
     setDetailsPassenger(passenger);
     window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(() => setDetailsOpen(true));
+      window.requestAnimationFrame(() => {
+        setDetailsSession((session) => session + 1);
+        setDetailsOpen(true);
+      });
     });
   };
   return (
@@ -3434,6 +3439,7 @@ function PassengerTable({ passengers, panelRef }: { passengers: Passenger[]; pan
           passenger={detailsPassenger}
           passengers={passengers}
           open={detailsOpen}
+          sessionId={detailsSession}
           onClose={() => setDetailsOpen(false)}
         />
       )}
