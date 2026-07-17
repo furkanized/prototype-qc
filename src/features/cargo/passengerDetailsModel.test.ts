@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { findLinkedInfant, getPassengerInfoAlertKey } from "./passengerDetailsModel.ts";
+import { findLinkedInfant, getPassengerInfoAlertKey, isInfantBirthDateValid } from "./passengerDetailsModel.ts";
 
 test("finds the infant linked to the selected adult", () => {
   const passengers = [
@@ -23,4 +23,14 @@ test("changes the passenger info alert key for every drawer session", () => {
     getPassengerInfoAlertKey("A1B2C3", 2),
     getPassengerInfoAlertKey("G7H8I9", 2),
   );
+});
+
+test("accepts only valid birth dates within the infant age range", () => {
+  const today = new Date(2026, 6, 17);
+
+  assert.equal(isInfantBirthDateValid("04.06.2025", today), true);
+  assert.equal(isInfantBirthDateValid("17/07/2024", today), true);
+  assert.equal(isInfantBirthDateValid("16/07/2024", today), false);
+  assert.equal(isInfantBirthDateValid("18/07/2026", today), false);
+  assert.equal(isInfantBirthDateValid("31/02/2026", today), false);
 });

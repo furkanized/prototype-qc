@@ -1,6 +1,6 @@
 import { Fragment, createElement, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from "react";
 import { createPortal } from "react-dom";
-import { TkDatepicker } from "@takeoff-ui/react";
+import { TkDatepicker, TkSelect } from "@takeoff-ui/react";
 import { defineCustomElement as defineTkIcon } from "@takeoff-ui/core/components/tk-icon.js";
 import { defineCustomElement as defineTkButton } from "@takeoff-ui/core/components/tk-button.js";
 import { defineCustomElement as defineTkInput } from "@takeoff-ui/core/components/tk-input.js";
@@ -14,6 +14,7 @@ import qcText from "../../assets/qc-text.svg";
 import {
   findLinkedInfant,
   getPassengerInfoAlertKey,
+  isInfantBirthDateValid,
   type PassengerInfoBox,
   type PassengerType,
 } from "./passengerDetailsModel";
@@ -3101,19 +3102,152 @@ function PassengerDetailAccordion({
   );
 }
 
-function PassengerInfantNotice({ infant }: { infant: Passenger }) {
-  const infantFullName = `${infant.name} ${infant.surname}`;
+type InfantNoticeMode = "default" | "edit" | "saved";
+type InfantNoticeDraft = { name: string; surname: string; birthDate: string; responsiblePnr: string };
+
+function infantNoticeDraft(infant: Passenger, responsiblePnr: string): InfantNoticeDraft {
+  return {
+    name: infant.name,
+    surname: infant.surname,
+    birthDate: (infant.birthDate ?? "").replaceAll(".", "/"),
+    responsiblePnr,
+  };
+}
+
+function PassengerInfantNotice({
+  infant,
+  responsibleAdults,
+  responsiblePnr,
+}: {
+  infant: Passenger;
+  responsibleAdults: Passenger[];
+  responsiblePnr: string;
+}) {
+  const initialDraft = useMemo(
+    () => infantNoticeDraft(infant, responsiblePnr),
+    [infant.birthDate, infant.name, infant.surname, responsiblePnr],
+  );
+  const [mode, setMode] = useState<InfantNoticeMode>("default");
+  const [details, setDetails] = useState(initialDraft);
+  const [draft, setDraft] = useState(initialDraft);
+  const [previousDetails, setPreviousDetails] = useState(initialDraft);
+  const [showBirthDateError, setShowBirthDateError] = useState(false);
+  const infantFullName = `${details.name} ${details.surname}`;
+
+  useEffect(() => {
+    setMode("default");
+    setDetails(initialDraft);
+    setDraft(initialDraft);
+    setPreviousDetails(initialDraft);
+    setShowBirthDateError(false);
+  }, [initialDraft]);
+
+  const startEditing = () => {
+    setDraft(details);
+    setShowBirthDateError(false);
+    setMode("edit");
+  };
+
+  const cancelEditing = () => {
+    setDraft(details);
+    setShowBirthDateError(false);
+    setMode("default");
+  };
+
+  const saveDetails = () => {
+    const birthDateValid = isInfantBirthDateValid(draft.birthDate);
+    setShowBirthDateError(!birthDateValid);
+    if (!birthDateValid || !draft.name.trim() || !draft.surname.trim() || !draft.responsiblePnr) return;
+
+    setPreviousDetails(details);
+    setDetails({
+      ...draft,
+      name: draft.name.trim(),
+      surname: draft.surname.trim(),
+    });
+    setMode("saved");
+  };
+
+  const undoSave = () => {
+    setDetails(previousDetails);
+    setDraft(previousDetails);
+    setShowBirthDateError(false);
+    setMode("default");
+  };
 
   return (
-    <section className="passenger-infant-notice" aria-label={`Bağlı bebek ${infantFullName}`}>
+    <section className={`passenger-infant-notice ${mode}`.trim()} aria-label={`Bağlı bebek ${infantFullName}`}>
       <span className="passenger-infant-sign"><Icon icon="child_friendly" size={20} /></span>
-      <div>
+      <div className="passenger-infant-summary">
         <p><strong>Bebek,</strong> {infantFullName}</p>
-        <small>Doğum Tarihi: {infant.birthDate}</small>
+        <small>Doğum Tarihi: {details.birthDate.replaceAll("/", ".")}</small>
       </div>
-      <button type="button" aria-label={`${infantFullName} bebek bilgisini düzenle`}>
-        <Icon icon="edit" size={20} />
-      </button>
+
+      {mode === "saved" && (
+        <div className="passenger-infant-saved-message" role="status">
+          <span>Yapılan değişiklik başarıyla kaydedildi <Icon icon="check_circle" size={18} /></span>
+          <button type="button" onClick={undoSave}>Geri Al <Icon icon="undo" size={16} /></button>
+        </div>
+      )}
+
+      {mode !== "edit" && (
+        <button type="button" className="passenger-infant-edit" aria-label={`${infantFullName} bebek bilgisini düzenle`} onClick={startEditing}>
+          <Icon icon="edit" size={20} />
+        </button>
+      )}
+
+      {mode === "edit" && (
+        <>
+          <div className="passenger-infant-edit-actions">
+            <Icon icon="edit" size={20} />
+            <button type="button" aria-label="Bebek bilgisi düzenlemesini iptal et" onClick={cancelEditing}><Icon icon="close" size={20} /></button>
+          </div>
+          <form className="passenger-infant-form" onSubmit={(event) => { event.preventDefault(); saveDetails(); }}>
+            <label>
+              <span>İsim<sup>*</sup> <Icon icon="info" size={12} /></span>
+              <input value={draft.name} onChange={(event) => setDraft((value) => ({ ...value, name: event.target.value }))} />
+            </label>
+            <label>
+              <span>Soy İsim<sup>*</sup> <Icon icon="info" size={12} /></span>
+              <input value={draft.surname} onChange={(event) => setDraft((value) => ({ ...value, surname: event.target.value }))} />
+            </label>
+            <label className={showBirthDateError ? "invalid" : ""}>
+              <span>Doğum Tarihi<sup>*</sup></span>
+              <div className="passenger-infant-date-field">
+                <Icon icon="calendar_month" size={18} />
+                <input
+                  value={draft.birthDate}
+                  inputMode="numeric"
+                  aria-invalid={showBirthDateError}
+                  onChange={(event) => {
+                    setDraft((value) => ({ ...value, birthDate: event.target.value }));
+                    setShowBirthDateError(false);
+                  }}
+                />
+                <Icon icon="keyboard_arrow_down" size={18} />
+              </div>
+              {showBirthDateError && <em><Icon icon="error" size={14} fill />0-2 yaş aralığında olmalıdır.</em>}
+            </label>
+            <label>
+              <span>Sorumlu<sup>*</sup></span>
+              <div className="passenger-infant-takeoff-field">
+                <TkSelect
+                  className="passenger-infant-takeoff-select"
+                  aria-label="Sorumlu"
+                  size="small"
+                  value={draft.responsiblePnr}
+                  options={responsibleAdults.map((adult) => ({ label: passengerFullName(adult), value: adult.pnr }))}
+                  optionLabelKey="label"
+                  optionValueKey="value"
+                  dropdownWidthMode="match-parent"
+                  onTkChange={(event) => setDraft((value) => ({ ...value, responsiblePnr: String(event.detail ?? "") }))}
+                />
+              </div>
+            </label>
+            <button type="submit" className="passenger-infant-save">Kaydet</button>
+          </form>
+        </>
+      )}
     </section>
   );
 }
@@ -3233,7 +3367,17 @@ function PassengerDetailsDrawer({ passenger, passengers, open, sessionId, onClos
             </div>
           </section>
 
-          {linkedInfant && <PassengerInfantNotice infant={linkedInfant} />}
+          {linkedInfant && (
+            <PassengerInfantNotice
+              key={`${passenger.pnr}-${linkedInfant.pnr}`}
+              infant={linkedInfant}
+              responsibleAdults={passengers.filter((candidate) =>
+                candidate.passengerType === "adult" &&
+                (candidate.pnr === passenger.pnr || candidate.surname === linkedInfant.surname)
+              )}
+              responsiblePnr={passenger.pnr}
+            />
+          )}
           {passenger.infoBox && !dismissedInfo && (
             <PassengerInfoAlert
               key={getPassengerInfoAlertKey(passenger.pnr, sessionId)}

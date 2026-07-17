@@ -151,12 +151,48 @@ button:focus-visible,input:focus-visible { outline:2px solid #3b82f6; outline-of
 .passenger-details-summary-actions button{height:32px;display:flex;align-items:center;justify-content:center;border:1px solid #a9b3be;border-radius:8px;background:#fff;color:#343f4f}
 .passenger-upgrade-button{gap:8px;padding:0 10px;font-size:12px;line-height:18px}
 .passenger-summary-more{width:36px;padding:0}
-.passenger-infant-notice{min-height:64px;display:grid;grid-template-columns:32px minmax(0,1fr) 32px;align-items:center;gap:8px;padding:12px;border:1px solid #ffb366;border-radius:8px;background:#fff1e3;color:#994d00}
+.passenger-infant-notice{min-height:64px;flex:0 0 auto;container-type:inline-size;display:grid;grid-template-columns:32px minmax(0,1fr) 32px;align-items:center;gap:8px;padding:12px;border:1px solid #ff7900;border-radius:8px;background:#fff1e3;color:#994d00;transition:min-height 220ms var(--motion-out),padding 220ms var(--motion-out)}
 .passenger-infant-sign{width:32px;height:32px;display:grid;place-items:center;border:1px solid #ffb366;border-radius:8px;background:#f9fafc;color:#f97316}
-.passenger-infant-notice>div{min-width:0;display:grid;gap:0}
+.passenger-infant-summary{min-width:0;display:grid;gap:0}
 .passenger-infant-notice p,.passenger-infant-notice small{margin:0;font-size:14px;line-height:20px;font-weight:300}
 .passenger-infant-notice p strong{color:#f97316;font-weight:400}
-.passenger-infant-notice>button{width:32px;height:32px;display:grid;place-items:center;border:0;border-radius:8px;background:transparent;color:#c35f00;padding:0}
+.passenger-infant-edit{width:32px;height:32px;display:grid;place-items:center;border:0;border-radius:8px;background:transparent;color:#c35f00;padding:0}
+.passenger-infant-edit:hover,.passenger-infant-edit:focus-visible,.passenger-infant-edit-actions button:hover,.passenger-infant-edit-actions button:focus-visible{background:#ffe2c4;outline:0}
+.passenger-infant-notice.edit{grid-template-columns:32px minmax(0,1fr) auto;align-items:start}
+.passenger-infant-edit-actions{display:flex;align-items:center;gap:12px;color:#c35f00}
+.passenger-infant-edit-actions button{width:32px;height:32px;display:grid;place-items:center;border:0;border-radius:8px;background:transparent;color:#c35f00;padding:0}
+.passenger-infant-form{grid-column:2/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr)) repeat(2,minmax(0,1.35fr)) 130px;align-items:start;gap:8px;margin-top:0;animation:passenger-infant-form-in 180ms var(--motion-out) both}
+.passenger-infant-form label{min-width:0;display:grid;gap:2px;color:#222530;font-size:12px;line-height:18px;font-weight:400}
+.passenger-infant-form label>span{height:18px;display:flex;align-items:center;gap:3px;white-space:nowrap}
+.passenger-infant-form label sup{color:#e4002b;font-size:12px;line-height:1;top:0}
+.passenger-infant-form label>span .qc-icon{color:#3b82f6}
+.passenger-infant-form input{width:100%;height:32px;box-sizing:border-box;border:1px solid #ff7900;border-radius:8px;background:#fff;color:#222530;font:300 14px/20px "Geologica",system-ui,sans-serif;letter-spacing:0;outline:0}
+.passenger-infant-form input{padding:5px 10px}
+.passenger-infant-form input:focus{border-color:#3b82f6;box-shadow:0 0 0 2px rgba(59,130,246,.14)}
+.passenger-infant-date-field{position:relative;display:flex;align-items:center}
+.passenger-infant-date-field>.qc-icon:first-child{position:absolute;left:9px;z-index:1;color:#525866;pointer-events:none}
+.passenger-infant-date-field>.qc-icon:last-child{position:absolute;right:8px;color:#525866;pointer-events:none}
+.passenger-infant-date-field input{padding-left:34px;padding-right:30px}
+.passenger-infant-takeoff-field{position:relative;min-width:0;border-radius:8px}
+.passenger-infant-takeoff-field::after{content:"";position:absolute;inset:0;z-index:1;border:1px solid #ff7900;border-radius:8px;pointer-events:none}
+.passenger-infant-takeoff-field:focus-within::after{border-color:#3b82f6;box-shadow:0 0 0 2px rgba(59,130,246,.14)}
+.passenger-infant-takeoff-select{display:block;width:100%}
+.passenger-infant-form label.invalid input{border-color:#ef4444}
+.passenger-infant-form label>em{display:flex;align-items:center;gap:4px;margin-top:2px;color:#ef4444;font-size:11px;line-height:16px;font-style:normal;white-space:nowrap}
+.passenger-infant-save{align-self:end;height:32px;border:0;border-radius:8px;background:#ff7900;color:#fff;font:400 14px/20px "Geologica",system-ui,sans-serif;padding:0 18px}
+.passenger-infant-save:hover{background:#e66d00}
+.passenger-infant-notice.saved{grid-template-columns:32px minmax(220px,1fr) auto 32px}
+.passenger-infant-saved-message{display:flex;align-items:center;justify-content:flex-end;gap:12px;color:#a64b00;font-size:14px;line-height:20px;animation:passenger-infant-form-in 180ms var(--motion-out) both}
+.passenger-infant-saved-message>span{display:flex;align-items:center;gap:5px;white-space:nowrap}
+.passenger-infant-saved-message>button{height:28px;display:flex;align-items:center;gap:4px;border:1px solid #ff7900;border-radius:8px;background:#fff7ed;color:#a64b00;padding:0 9px;font:400 12px/18px "Geologica",system-ui,sans-serif}
+@keyframes passenger-infant-form-in{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+@container (max-width:760px){
+  .passenger-infant-form{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .passenger-infant-save{width:130px}
+  .passenger-infant-notice.saved{grid-template-columns:32px minmax(0,1fr) 32px}
+  .passenger-infant-saved-message{grid-column:2/3;grid-row:2;justify-content:flex-start;flex-wrap:wrap}
+  .passenger-infant-notice.saved .passenger-infant-edit{grid-column:3;grid-row:1}
+}
 .passenger-info-alert{display:grid;grid-template-columns:32px minmax(0,1fr) auto;align-items:start;gap:8px;padding:12px;border:1px solid;border-radius:8px}
 .passenger-info-alert.warning{border-color:#f6de95;background:#fefbf3}
 .passenger-info-alert.ai{border-color:#dab6fc;background:#fbf7ff}
@@ -217,6 +253,11 @@ button:focus-visible,input:focus-visible { outline:2px solid #3b82f6; outline-of
   .passenger-details-drawer{right:12px;top:12px;bottom:12px;width:calc(100vw - 24px);border-radius:12px}
   .passenger-details-summary{grid-template-columns:64px minmax(0,1fr)}
   .passenger-details-summary-actions{grid-column:1/-1;justify-content:flex-end}
+  .passenger-infant-form{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .passenger-infant-save{width:130px}
+  .passenger-infant-notice.saved{grid-template-columns:32px minmax(0,1fr) 32px}
+  .passenger-infant-saved-message{grid-column:2/3;grid-row:2;justify-content:flex-start;flex-wrap:wrap}
+  .passenger-infant-notice.saved .passenger-infant-edit{grid-column:3;grid-row:1}
   .passenger-detail-grid.identity-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 
@@ -227,12 +268,20 @@ button:focus-visible,input:focus-visible { outline:2px solid #3b82f6; outline-of
   .passenger-details-name-line{align-items:flex-start;flex-direction:column;gap:4px}
   .passenger-details-name-line h3{white-space:normal}
   .passenger-infant-notice,.passenger-info-alert{grid-template-columns:32px minmax(0,1fr)}
-  .passenger-infant-notice>button,.passenger-info-close{grid-column:2;justify-self:end}
+  .passenger-infant-edit,.passenger-info-close{grid-column:2;justify-self:end}
+  .passenger-infant-notice.edit .passenger-infant-edit-actions{grid-column:2;grid-row:1;justify-self:end}
+  .passenger-infant-form{grid-column:1/-1;grid-template-columns:1fr}
+  .passenger-infant-save{width:100%}
+  .passenger-infant-notice.saved{grid-template-columns:32px minmax(0,1fr)}
+  .passenger-infant-notice.saved .passenger-infant-edit{grid-column:2;grid-row:1;justify-self:end}
+  .passenger-infant-saved-message{grid-column:1/-1}
   .passenger-info-alert-title{align-items:flex-start;flex-wrap:wrap}
   .passenger-info-actions{align-items:flex-start;flex-direction:column;gap:6px}
   .passenger-detail-grid.identity-grid,.passenger-detail-grid.contact-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .passenger-validations{grid-template-columns:1fr}
 }
+
+@media (prefers-reduced-motion:reduce){.passenger-infant-form,.passenger-infant-saved-message{animation:none}.passenger-infant-notice{transition:none}}
 
 .checkin-overlay{position:fixed;inset:0;z-index:60;pointer-events:auto}.checkin-overlay-scrim{position:absolute;inset:0;background:rgba(0,0,0,.16);backdrop-filter:blur(4px)}.checkin-popup{position:absolute;right:32px;bottom:32px;width:518px;height:885px;display:flex;flex-direction:column;border:1px solid #f2f3f5;border-radius:16px;background:#fff;box-shadow:0 8px 20px rgba(82,88,102,.12),0 6px 12px -2px rgba(82,88,102,.12),0 2px 2px -1px rgba(82,88,102,.12);overflow:hidden}.checkin-popup-header{height:80px;display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid #f2f3f5}.checkin-popup-header>div{width:446px;padding-block:4px}.checkin-popup-header h2{margin:0;color:#222530;font-size:24px;line-height:30px;font-weight:400}.checkin-popup-header p{margin:4px 0 0;color:#717784;font-size:11px;line-height:18px}.checkin-popup-header button{width:32px;height:32px;display:grid;place-items:center;border:1px solid #caced8;border-radius:8px;background:#fff;color:#717784}.checkin-popup-body{flex:1;padding:16px;display:grid;align-content:start;gap:24px}.checkin-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.checkin-summary div{height:96px;display:grid;align-content:center;gap:2px;padding:8px;border:1px solid #e1e4ea;border-radius:8px;background:#fff;color:#525866}.checkin-summary .qc-icon{align-self:start}.checkin-summary strong{display:block;color:#222530;font-size:24px;line-height:36px;font-weight:400}.checkin-summary span{color:#717784;font-size:14px;line-height:20px}.checkin-selected h3{margin:0;color:#000;font-size:18px;line-height:27px;font-weight:400}.checkin-selected>p{margin:6px 0 16px;color:#525866;font-size:11px;line-height:18px}.checkin-passenger-list{display:grid;gap:8px}.checkin-passenger-card{position:relative;height:80px;display:grid;grid-template-columns:24px 40px 1fr auto;align-items:center;gap:8px;padding:12px;border:1px solid #e1e4ea;border-radius:8px;background:#fff}.checkin-passenger-card.active{border-color:#3b82f6;background:#f5faff}.checkin-passenger-card>.checkbox{width:20px;height:20px}.checkin-passenger-card .avatar{width:40px;height:40px}.checkin-passenger-card .avatar-head{left:12px;top:7px;width:12px;height:12px}.checkin-passenger-card .avatar-body{left:8px;width:22px;height:17px}.checkin-passenger-card strong{display:block;color:#222530;font-size:14px;line-height:20px;font-weight:500}.checkin-passenger-card span{display:block;color:#222530;font-size:13px;line-height:20px}.checkin-passenger-card em{position:absolute;right:12px;top:12px;padding:2px 6px;border-radius:4px;background:#bfeecf;color:#168343;font-size:10px;line-height:12px;font-style:normal}.checkin-popup-footer{height:72px;margin-top:auto;display:grid;grid-template-columns:118px 1fr;gap:8px;padding:16px}.checkin-popup-footer button{height:40px;border-radius:8px;font-size:13px}.checkin-cancel{border:1px solid #a9b3be;background:#fff;color:#343f4f}.checkin-confirm{border:0;background:#c90019;color:#fff}
 .checkin-card-checkbox{width:24px;height:24px;display:grid;place-items:center;border:0;background:transparent;padding:0}.checkin-card-checkbox .checkbox{width:20px;height:20px}
