@@ -3117,8 +3117,46 @@ function PassengerInfantNotice({ infant }: { infant: Passenger }) {
   );
 }
 
+function PassengerInfoAlert({ infoBox, onDismiss }: { infoBox: PassengerInfoBox; onDismiss: () => void }) {
+  const [expanded, setExpanded] = useState(false);
+  const isAi = infoBox.variant.startsWith("ai");
+  const hasActions = infoBox.variant.endsWith("actions");
+
+  return (
+    <section className={`passenger-info-alert ${isAi ? "ai" : "warning"} ${hasActions ? "with-actions" : ""}`.trim()}>
+      <span className="passenger-info-alert-sign">
+        <Icon icon={isAi ? "auto_awesome" : "warning"} size={20} />
+      </span>
+      <div className="passenger-info-alert-content">
+        <div className="passenger-info-alert-title">
+          <strong>{infoBox.title}</strong>
+          {isAi && <em>AI Summary</em>}
+        </div>
+        <p className={expanded ? "expanded" : ""}>{infoBox.description}</p>
+        {isAi && (
+          <button type="button" className="passenger-info-disclosure" aria-expanded={expanded} onClick={() => setExpanded((value) => !value)}>
+            {expanded ? "Show less" : "Show more"}
+            <Icon icon="expand_more" size={18} />
+          </button>
+        )}
+        {hasActions && infoBox.actions?.length ? (
+          <div className="passenger-info-actions">
+            {infoBox.actions.map((action) => <button type="button" key={action}>{action}</button>)}
+          </div>
+        ) : null}
+      </div>
+      {isAi && (
+        <button type="button" className="passenger-info-close" aria-label="Bilgi kutusunu kapat" onClick={onDismiss}>
+          <Icon icon="close" size={20} />
+        </button>
+      )}
+    </section>
+  );
+}
+
 function PassengerDetailsDrawer({ passenger, passengers, open, onClose }: { passenger: Passenger; passengers: Passenger[]; open: boolean; onClose: () => void }) {
   const [expandedSection, setExpandedSection] = useState<PassengerDetailSection | null>(null);
+  const [dismissedInfo, setDismissedInfo] = useState(false);
   const panelRef = useRef<HTMLElement | null>(null);
   const linkedInfant = findLinkedInfant(passengers, passenger);
   const gender = inferPassengerGenderFromName(passenger.name);
@@ -3147,6 +3185,10 @@ function PassengerDetailsDrawer({ passenger, passengers, open, onClose }: { pass
   useEffect(() => {
     setExpandedSection(null);
   }, [passenger]);
+
+  useEffect(() => {
+    if (open) setDismissedInfo(false);
+  }, [open, passenger]);
 
   return createPortal(
     <div className={`passenger-details-overlay allow-passenger-drawer-motion ${open ? "is-visible" : ""}`.trim()} aria-hidden={!open}>
@@ -3191,6 +3233,9 @@ function PassengerDetailsDrawer({ passenger, passengers, open, onClose }: { pass
           </section>
 
           {linkedInfant && <PassengerInfantNotice infant={linkedInfant} />}
+          {passenger.infoBox && !dismissedInfo && (
+            <PassengerInfoAlert infoBox={passenger.infoBox} onDismiss={() => setDismissedInfo(true)} />
+          )}
 
           <section className="passenger-detail-section">
             <h3>Identity <Icon icon="edit" size={16} /></h3>

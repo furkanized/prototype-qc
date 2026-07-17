@@ -157,6 +157,25 @@ button:focus-visible,input:focus-visible { outline:2px solid #3b82f6; outline-of
 .passenger-infant-notice p,.passenger-infant-notice small{margin:0;font-size:14px;line-height:20px;font-weight:300}
 .passenger-infant-notice p strong{color:#f97316;font-weight:400}
 .passenger-infant-notice>button{width:32px;height:32px;display:grid;place-items:center;border:0;border-radius:8px;background:transparent;color:#c35f00;padding:0}
+.passenger-info-alert{display:grid;grid-template-columns:32px minmax(0,1fr) auto;align-items:start;gap:8px;padding:12px;border:1px solid;border-radius:8px}
+.passenger-info-alert.warning{border-color:#f6de95;background:#fefbf3}
+.passenger-info-alert.ai{border-color:#dab6fc;background:#fbf7ff}
+.passenger-info-alert-sign{width:32px;height:32px;display:grid;place-items:center;border:1px solid;border-radius:8px;background:#f9fafc}
+.passenger-info-alert.warning .passenger-info-alert-sign{border-color:#f6de95;color:#a47d06}
+.passenger-info-alert.ai .passenger-info-alert-sign{border-color:#dab6fc;color:#763cad}
+.passenger-info-alert-content{min-width:0;display:grid;gap:8px}
+.passenger-info-alert-title{display:flex;align-items:center;gap:8px}
+.passenger-info-alert-title strong{color:#222530;font-size:14px;line-height:20px;font-weight:400}
+.passenger-info-alert-title em{height:16px;padding:0 6px;border-radius:999px;background:#ead6fd;color:#5c2f88;font-size:11px;line-height:16px;font-style:normal}
+.passenger-info-alert-content p{margin:0;color:#525866;font-size:14px;line-height:20px;font-weight:300}
+.passenger-info-alert.ai .passenger-info-alert-content p:not(.expanded){display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:1;overflow:hidden}
+.passenger-info-disclosure,.passenger-info-actions button,.passenger-info-close{border:0;background:transparent;padding:0}
+.passenger-info-disclosure{width:max-content;display:flex;align-items:center;gap:4px;color:#295bac;font-size:12px;line-height:18px}
+.passenger-info-disclosure[aria-expanded="true"] .qc-icon{transform:rotate(180deg)}
+.passenger-info-actions{display:flex;align-items:center;gap:12px}
+.passenger-info-actions button{color:#a47d06;font-size:14px;line-height:20px}
+.passenger-info-alert.ai .passenger-info-actions button{color:#763cad}
+.passenger-info-close{width:32px;height:32px;display:grid;place-items:center;border-radius:8px;color:#525866}
 .passenger-detail-section{display:grid;gap:14px;padding:0 8px}
 .passenger-detail-section h3{margin:0;display:flex;align-items:center;gap:8px;color:#222530;font-size:18px;line-height:27px;font-weight:400}
 .passenger-detail-section h3 .qc-icon{color:#caced8}
