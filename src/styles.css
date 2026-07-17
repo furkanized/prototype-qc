@@ -226,6 +226,10 @@ button:focus-visible,input:focus-visible { outline:2px solid #3b82f6; outline-of
   .passenger-details-summary>.avatar{--avatar-frame:52px;--avatar-inner:38px;--avatar-offset:7px;--avatar-ring-inner:3px;--avatar-ring-outer:5px}
   .passenger-details-name-line{align-items:flex-start;flex-direction:column;gap:4px}
   .passenger-details-name-line h3{white-space:normal}
+  .passenger-infant-notice,.passenger-info-alert{grid-template-columns:32px minmax(0,1fr)}
+  .passenger-infant-notice>button,.passenger-info-close{grid-column:2;justify-self:end}
+  .passenger-info-alert-title{align-items:flex-start;flex-wrap:wrap}
+  .passenger-info-actions{align-items:flex-start;flex-direction:column;gap:6px}
   .passenger-detail-grid.identity-grid,.passenger-detail-grid.contact-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .passenger-validations{grid-template-columns:1fr}
 }
