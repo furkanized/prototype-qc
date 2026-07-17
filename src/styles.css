@@ -151,6 +151,12 @@ button:focus-visible,input:focus-visible { outline:2px solid #3b82f6; outline-of
 .passenger-details-summary-actions button{height:32px;display:flex;align-items:center;justify-content:center;border:1px solid #a9b3be;border-radius:8px;background:#fff;color:#343f4f}
 .passenger-upgrade-button{gap:8px;padding:0 10px;font-size:12px;line-height:18px}
 .passenger-summary-more{width:36px;padding:0}
+.passenger-infant-notice{min-height:64px;display:grid;grid-template-columns:32px minmax(0,1fr) 32px;align-items:center;gap:8px;padding:12px;border:1px solid #ffb366;border-radius:8px;background:#fff1e3;color:#994d00}
+.passenger-infant-sign{width:32px;height:32px;display:grid;place-items:center;border:1px solid #ffb366;border-radius:8px;background:#f9fafc;color:#f97316}
+.passenger-infant-notice>div{min-width:0;display:grid;gap:0}
+.passenger-infant-notice p,.passenger-infant-notice small{margin:0;font-size:14px;line-height:20px;font-weight:300}
+.passenger-infant-notice p strong{color:#f97316;font-weight:400}
+.passenger-infant-notice>button{width:32px;height:32px;display:grid;place-items:center;border:0;border-radius:8px;background:transparent;color:#c35f00;padding:0}
 .passenger-detail-section{display:grid;gap:14px;padding:0 8px}
 .passenger-detail-section h3{margin:0;display:flex;align-items:center;gap:8px;color:#222530;font-size:18px;line-height:27px;font-weight:400}
 .passenger-detail-section h3 .qc-icon{color:#caced8}

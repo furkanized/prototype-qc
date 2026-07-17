@@ -3100,9 +3100,27 @@ function PassengerDetailAccordion({
   );
 }
 
-function PassengerDetailsDrawer({ passenger, open, onClose }: { passenger: Passenger; open: boolean; onClose: () => void }) {
+function PassengerInfantNotice({ infant }: { infant: Passenger }) {
+  const infantFullName = `${infant.name} ${infant.surname}`;
+
+  return (
+    <section className="passenger-infant-notice" aria-label={`Bağlı bebek ${infantFullName}`}>
+      <span className="passenger-infant-sign"><Icon icon="child_friendly" size={20} /></span>
+      <div>
+        <p><strong>Bebek,</strong> {infantFullName}</p>
+        <small>Doğum Tarihi: {infant.birthDate}</small>
+      </div>
+      <button type="button" aria-label={`${infantFullName} bebek bilgisini düzenle`}>
+        <Icon icon="edit" size={20} />
+      </button>
+    </section>
+  );
+}
+
+function PassengerDetailsDrawer({ passenger, passengers, open, onClose }: { passenger: Passenger; passengers: Passenger[]; open: boolean; onClose: () => void }) {
   const [expandedSection, setExpandedSection] = useState<PassengerDetailSection | null>(null);
   const panelRef = useRef<HTMLElement | null>(null);
+  const linkedInfant = findLinkedInfant(passengers, passenger);
   const gender = inferPassengerGenderFromName(passenger.name);
   const fullName = passengerFullName(passenger);
   const emailName = `${normalizePassengerName(passenger.name)}.${normalizePassengerName(passenger.surname)}`;
@@ -3172,12 +3190,14 @@ function PassengerDetailsDrawer({ passenger, open, onClose }: { passenger: Passe
             </div>
           </section>
 
+          {linkedInfant && <PassengerInfantNotice infant={linkedInfant} />}
+
           <section className="passenger-detail-section">
             <h3>Identity <Icon icon="edit" size={16} /></h3>
             <div className="passenger-detail-grid identity-grid">
               <div><small>Gender</small><span>{gender === "female" ? "Mrs" : "Mr"}</span></div>
               <div><small>TC Kimlik</small><span>{nationalId}</span></div>
-              <div><small>Passenger Type</small><span>Ticari</span></div>
+              <div><small>Passenger Type</small><span>{passenger.passengerType === "infant" ? "Infant" : "Ticari"}</span></div>
               <div><small>Koltuk</small><span>{passenger.seat}</span></div>
               <div><small>Group Code</small><span>{passenger.group}</span></div>
               <div><small>E Ticket</small><span>{ticketNumber}</span></div>
@@ -3362,6 +3382,7 @@ function PassengerTable({ passengers, panelRef }: { passengers: Passenger[]; pan
       {detailsPassenger && (
         <PassengerDetailsDrawer
           passenger={detailsPassenger}
+          passengers={passengers}
           open={detailsOpen}
           onClose={() => setDetailsOpen(false)}
         />
