@@ -3622,6 +3622,169 @@ function PassengerDetailsDrawer({ passenger, passengers, flight, open, sessionId
   );
 }
 
+function getRelatedPnrPassengers(passenger: Passenger, passengers: Passenger[]) {
+  const related = passengers.filter((candidate) =>
+    candidate.pnr === passenger.pnr ||
+    candidate.group === passenger.group ||
+    candidate.surname === passenger.surname
+  );
+  const fallback = passengers.filter((candidate) => !related.includes(candidate));
+  const uniquePassengers = new Map<string, Passenger>();
+  [passenger, ...related, ...fallback].forEach((candidate) => {
+    uniquePassengers.set(`${candidate.pnr}-${candidate.name}-${candidate.surname}`, candidate);
+  });
+  return Array.from(uniquePassengers.values()).slice(0, 3);
+}
+
+function getReturnFlightCode(code: string) {
+  const match = code.match(/^(\D+)(\d+)$/);
+  if (!match) return code;
+  const nextNumber = Math.max(1, Number.parseInt(match[2], 10) - 1);
+  return `${match[1]}${String(nextNumber).padStart(match[2].length, "0")}`;
+}
+
+function PnrFlightCard({
+  code,
+  from,
+  to,
+  departure,
+  arrival,
+  duration,
+  gate,
+  delayed = false,
+}: {
+  code: string;
+  from: string;
+  to: string;
+  departure: string;
+  arrival: string;
+  duration: string;
+  gate: string;
+  delayed?: boolean;
+}) {
+  return (
+    <article className="pnr-flight-card">
+      <div className="pnr-flight-card-head">
+        <span><i aria-hidden="true">●</i>{code}</span>
+        <em>Flight Open <Icon icon="check_circle" size={12} /></em>
+      </div>
+      <div className="pnr-flight-route">
+        <div><strong>{from}</strong><span>{departure}</span></div>
+        <div className="pnr-flight-route-line">
+          <i />
+          <Icon icon="flight" size={21} fill />
+          <i />
+          <small>{duration}</small>
+        </div>
+        <div className="destination"><strong>{to}</strong><span className={delayed ? "revised" : ""}>{delayed && <del>{adjustClock(arrival, -45)}</del>}{arrival}</span></div>
+      </div>
+      <div className="pnr-flight-meta">
+        <span>Arrival Time {arrival}</span>
+        <small>Terminal 8 - Gate {gate}</small>
+      </div>
+    </article>
+  );
+}
+
+function PnrFlightsDrawer({ passenger, passengers, flight, open, sessionId, onClose, onConfirm }: { passenger: Passenger; passengers: Passenger[]; flight: FlightRecord; open: boolean; sessionId: number; onClose: () => void; onConfirm: (selectedPnrs: Set<string>) => void }) {
+  const panelRef = useRef<HTMLElement | null>(null);
+  const bodyRef = useRef<HTMLDivElement | null>(null);
+  const relatedPassengers = useMemo(() => getRelatedPnrPassengers(passenger, passengers), [passenger, passengers]);
+  const [selectedPnrs, setSelectedPnrs] = useState<Set<string>>(() => new Set([passenger.pnr]));
+  const [from = "IST", to = "AMS"] = routeAirportCodes(flight.route);
+  const firstDeparture = flight.time.split("/")[0];
+  const secondDeparture = adjustClock(flight.arrivalTime, 110);
+  const secondArrival = adjustClock(secondDeparture, 190);
+
+  useEffect(() => {
+    setSelectedPnrs(new Set([passenger.pnr]));
+  }, [passenger.pnr, sessionId]);
+
+  useEffect(() => {
+    if (!open) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    panelRef.current?.focus();
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [onClose, open]);
+
+  useLayoutEffect(() => {
+    if (!open) return;
+    bodyRef.current?.scrollTo({ top: 0, behavior: "auto" });
+  }, [open, passenger.pnr, sessionId]);
+
+  const togglePassenger = (pnr: string) => {
+    setSelectedPnrs((current) => {
+      const next = new Set(current);
+      if (next.has(pnr)) next.delete(pnr);
+      else next.add(pnr);
+      return next;
+    });
+  };
+
+  return createPortal(
+    <div className={`pnr-flights-overlay allow-pnr-drawer-motion ${open ? "is-visible" : ""}`.trim()} aria-hidden={!open}>
+      <button type="button" className="pnr-flights-scrim" aria-label="PNR uçuşlarını kapat" onClick={onClose} />
+      <aside className="pnr-flights-drawer" role="dialog" aria-modal="true" aria-labelledby="pnr-flights-title" tabIndex={-1} ref={panelRef}>
+        <header className="pnr-flights-header">
+          <div>
+            <h2 id="pnr-flights-title">Other Flights in This PNR</h2>
+            <p>The following flights are linked to the same PNR.</p>
+          </div>
+          <button type="button" aria-label="PNR uçuşlarını kapat" onClick={onClose}><Icon icon="close" size={20} /></button>
+        </header>
+
+        <div className="pnr-flights-body" ref={bodyRef}>
+          <section className="pnr-flights-section">
+            <h3>Flights</h3>
+            <div className="pnr-flight-list">
+              <PnrFlightCard code={flight.code} from={from} to={to} departure={firstDeparture} arrival={flight.arrivalTime} duration="3h 20m" gate={flight.gate} />
+              <PnrFlightCard code={getReturnFlightCode(flight.code)} from={to} to="IST" departure={secondDeparture} arrival={secondArrival} duration="3h 10m" gate={String((Number.parseInt(flight.gate, 10) || 11) + 2)} delayed />
+            </div>
+          </section>
+
+          <section className="pnr-flights-section pnr-passengers-section">
+            <h3>Passengers</h3>
+            <p>{relatedPassengers.filter((candidate) => candidate.ci === "checked").length} Passenger already Checked-in</p>
+            <div className="pnr-passenger-list">
+              {relatedPassengers.map((candidate, index) => {
+                const selected = selectedPnrs.has(candidate.pnr);
+                return (
+                  <button type="button" className={`pnr-passenger-card ${selected ? "selected" : ""}`.trim()} key={`${candidate.pnr}-${candidate.name}`} onClick={() => togglePassenger(candidate.pnr)} aria-pressed={selected}>
+                    <CheckboxMark checked={selected} />
+                    <span className="pnr-passenger-avatar">
+                      <Avatar type={candidate.avatar} gender={inferPassengerGenderFromName(candidate.name)} state={selected ? "selected" : "active"} size="md" />
+                      {index === 1 && <i>{candidate.name.slice(0, 1)}{candidate.surname.slice(0, 1)}</i>}
+                    </span>
+                    <span className="pnr-passenger-copy">
+                      <strong>{passengerFullName(candidate)}</strong>
+                      <small>{candidate.pnr} - Seat: {candidate.seat} - Baggage: {candidate.baggageInfo.pieces}pc /{candidate.baggageInfo.kg}kg</small>
+                    </span>
+                    <em className={candidate.ci === "checked" ? "checked" : "ready"}>{candidate.ci === "checked" ? "Checked-in" : "Ready"}{candidate.ci === "checked" && <Icon icon="check_circle" size={12} />}</em>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        </div>
+
+        <footer className="pnr-flights-footer">
+          <button type="button" className="pnr-flights-cancel" onClick={onClose}>Cancel</button>
+          <button type="button" className="pnr-flights-confirm" disabled={selectedPnrs.size === 0} onClick={() => onConfirm(selectedPnrs)}>Check-in ({selectedPnrs.size})</button>
+        </footer>
+      </aside>
+    </div>,
+    document.body,
+  );
+}
+
 function PassengerTable({ passengers, flight, panelRef }: { passengers: Passenger[]; flight: FlightRecord; panelRef?: RefObject<HTMLElement | null> }) {
   const [selectedRowsState, setSelectedRowsState] = useState<boolean[]>(passengers.map(() => false));
   const [checkInOverlayOpen, setCheckInOverlayOpen] = useState(false);
@@ -3629,6 +3792,9 @@ function PassengerTable({ passengers, flight, panelRef }: { passengers: Passenge
   const [detailsPassenger, setDetailsPassenger] = useState<Passenger | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [detailsSession, setDetailsSession] = useState(0);
+  const [pnrPassenger, setPnrPassenger] = useState<Passenger | null>(null);
+  const [pnrOpen, setPnrOpen] = useState(false);
+  const [pnrSession, setPnrSession] = useState(0);
   const [floatingBarMode, setFloatingBarMode] = useState<"selection" | "checkin-completed" | "pool-success" | "pool-error">("selection");
   const [query, setQuery] = useState("");
   useEffect(() => {
@@ -3638,6 +3804,9 @@ function PassengerTable({ passengers, flight, panelRef }: { passengers: Passenge
     setDetailsPassenger(null);
     setDetailsOpen(false);
     setDetailsSession(0);
+    setPnrPassenger(null);
+    setPnrOpen(false);
+    setPnrSession(0);
     setFloatingBarMode("selection");
     setQuery("");
   }, [passengers]);
@@ -3679,6 +3848,11 @@ function PassengerTable({ passengers, flight, panelRef }: { passengers: Passenge
     setPoolOverlayOpen(false);
     setFloatingBarMode("pool-success");
   };
+  const completePnrCheckIn = (selectedPnrs: Set<string>) => {
+    setSelectedRowsState(passengers.map((candidate) => selectedPnrs.has(candidate.pnr)));
+    setPnrOpen(false);
+    setFloatingBarMode("checkin-completed");
+  };
   const openPassengerDetails = (passenger: Passenger) => {
     setDetailsOpen(false);
     setDetailsPassenger(passenger);
@@ -3686,6 +3860,17 @@ function PassengerTable({ passengers, flight, panelRef }: { passengers: Passenge
       window.requestAnimationFrame(() => {
         setDetailsSession((session) => session + 1);
         setDetailsOpen(true);
+      });
+    });
+  };
+  const openPnrFlights = (passenger: Passenger) => {
+    setDetailsOpen(false);
+    setPnrOpen(false);
+    setPnrPassenger(passenger);
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        setPnrSession((session) => session + 1);
+        setPnrOpen(true);
       });
     });
   };
@@ -3718,7 +3903,7 @@ function PassengerTable({ passengers, flight, panelRef }: { passengers: Passenge
               <div className="table-row passenger-row" key={person.pnr + person.name}>
                 <button className="check-button" aria-label={`${person.name} seç`} onClick={() => toggle(index)}><CheckboxMark checked={selectedRowsState[index]} /></button>
                 <span className={`ci-state ${person.ci}`}><Icon icon={person.ci === "checked" ? "touch_app" : "refresh"} size={25} /></span>
-                <span>{person.pnr}</span>
+                <span><button type="button" className="passenger-pnr-button" aria-label={`${person.pnr} PNR uçuşlarını aç`} aria-haspopup="dialog" onClick={() => openPnrFlights(person)}>{person.pnr}</button></span>
                 <span className="passenger-name">
                   <Avatar
                     type={person.avatar}
@@ -3765,6 +3950,17 @@ function PassengerTable({ passengers, flight, panelRef }: { passengers: Passenge
           open={detailsOpen}
           sessionId={detailsSession}
           onClose={() => setDetailsOpen(false)}
+        />
+      )}
+      {pnrPassenger && (
+        <PnrFlightsDrawer
+          passenger={pnrPassenger}
+          passengers={passengers}
+          flight={flight}
+          open={pnrOpen}
+          sessionId={pnrSession}
+          onClose={() => setPnrOpen(false)}
+          onConfirm={completePnrCheckIn}
         />
       )}
     </>
